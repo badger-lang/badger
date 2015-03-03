@@ -1,0 +1,8 @@
+using feature "one based index"
+
+func greet(name) {
+  return "Hello \(name)"
+}
+
+result = greet("Alex")
+print(result)
