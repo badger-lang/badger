@@ -2,9 +2,14 @@ part of badger.parser;
 
 class BadgerGrammarDefinition extends GrammarDefinition {
   @override
-  start() => ref(declarations).optional() & whitespace().star() & ref(statement).separatedBy(whitespace().star());
+  start() => ref(declarations).optional() &
+    whitespace().star() &
+    ref(statement).separatedBy(whitespace().star());
 
-  statement() => ref(methodCall) | ref(assignment) | ref(functionDefinition) | ref(returnStatement);
+  statement() => ref(methodCall) |
+    ref(assignment) |
+    ref(functionDefinition) |
+    ref(returnStatement);
 
   methodCall() => ref(identifier) &
     char("(") &
@@ -34,7 +39,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   declarations() => ref(declaration).separatedBy(char("\n"));
   declaration() => ref(featureDeclaration);
 
-  featureDeclaration() => string("using feature ") & ref(stringLiteral);
+  featureDeclaration() => string("using feature ")
+    & ref(stringLiteral);
 
   bracketAccess() => ref(variableReference) &
     char("[") &
@@ -87,7 +93,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ).star() &
     char('"');
 
-  interpolation() => string("\\(") &
+  interpolation() => string("\$(") &
     ref(expression) &
     char(")");
 

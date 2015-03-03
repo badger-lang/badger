@@ -1,7 +1,7 @@
 using feature "one based index"
 
 func greet(name) {
-  return "Hello \(name)"
+  return "Hello $(name)"
 }
 
 result = greet("Alex")

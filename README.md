@@ -6,7 +6,7 @@ Badger is an experimental programming language.
 
 ```badger
 func greet(name) {
-  return "Hello \(name)"
+  return "Hello $(name)"
 }
  
 result = greet("Alex")
