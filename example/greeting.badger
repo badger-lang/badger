@@ -1,0 +1,9 @@
+func greet(name) {
+  return "Hello $(name)"
+}
+
+let names = ["Kenneth", "Logan", "Sam"]
+
+for name in names {
+  print(greet(name))
+}

@@ -8,8 +8,12 @@ Badger is an experimental programming language.
 func greet(name) {
   return "Hello $(name)"
 }
- 
-print(greet("Alex"))
+
+let names = ["Kenneth", "Logan", "Sam"]
+
+for name in names {
+  print(greet(name))
+}
 ```
 
 ## Features
