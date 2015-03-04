@@ -72,6 +72,16 @@ class Context {
     define(name, function);
   }
 
+  void merge(Context ctx) {
+    ctx.variables.keys.where((it) => !it.startsWith("_")).forEach((x) {
+      variables[x] = ctx.variables[x];
+    });
+
+    ctx.functions.keys.where((it) => !it.startsWith("_")).forEach((x) {
+      functions[x] = ctx.functions[x];
+    });
+  }
+
   Context fork() {
     return new Context(this);
   }

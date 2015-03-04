@@ -6,7 +6,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(declarations).optional() &
     whitespace().star() &
     ref(statement).separatedBy(whitespace().star()) & whitespace().star()
-  ).end();
+  );
 
   statement() => (
     (

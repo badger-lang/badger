@@ -1,3 +1,7 @@
 func greet(user) {
   return "Hello $(user)"
 }
+
+func _sayHi() {
+  print("Hello")
+}

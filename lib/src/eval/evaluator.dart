@@ -59,7 +59,7 @@ class Evaluator {
 
   _evalProgram(Program program, Context ctx) async {
     return ctx.run(() async {
-      await _processDeclarations(program.declarations, Context.current);
+      await _processDeclarations(program.declarations, ctx);
       return await _evaluateBlock(program.statements);
     });
   }
@@ -87,8 +87,13 @@ class Evaluator {
   }
 
   _import(String location, Context ctx) async {
-    var tp = await environment.import(location);
-    await _evalProgram(tp, ctx);
+    var c = await ctx.createContext(() async {
+      var tp = await environment.import(location);
+      await _evalProgram(tp, ctx);
+      return Context.current;
+    });
+
+    ctx.merge(c);
   }
 
   _evaluateBlock(List<Statement> statements) async {
