@@ -1,0 +1,13 @@
+var x = 0
+
+let timer = createPeriodicTimer(1000, () -> {
+  x = x + 1
+
+  if x == 5 {
+    cancelPeriodicTimer(timer)
+  }
+
+  print(x)
+})
+
+print("This is still going to run before the timer.")

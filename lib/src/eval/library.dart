@@ -38,6 +38,18 @@ class StandardLibrary {
       return JSON.decode(x);
     });
 
+    context.define("createPeriodicTimer", (args) async {
+      var timer = new Timer.periodic(new Duration(milliseconds: args[0]), (t) {
+        args[1]([]);
+      });
+
+      return timer;
+    });
+
+    context.define("cancelPeriodicTimer", (args) async {
+      return args[0].cancel();
+    });
+
     context.define("encodeJSON", (args) {
       args = [args[0], args.length == 2 ? args[1] : false];
       var input = args[0];
