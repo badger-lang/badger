@@ -1,0 +1,3 @@
+let deadBeef = 0xDEADBEEF
+
+testEqual(deadBeef, 3735928559)

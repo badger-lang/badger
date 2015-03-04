@@ -3,25 +3,68 @@ part of badger.eval;
 final Object VOID = new Object();
 final Object _BREAK_NOW = new Object();
 
+abstract class Environment {
+  Future<Program> import(String location);
+}
+
+class FileEnvironment extends Environment {
+  final File file;
+
+  FileEnvironment(this.file);
+
+  eval(Context context) async {
+    var program =_parse(await file.readAsString());
+    return await new Evaluator(program, this).eval(context);
+  }
+
+  Program _parse(String content) {
+    return new BadgerParser().parse(content).value;
+  }
+
+  @override
+  Future<Program> import(String location) async {
+    try {
+      var uri = Uri.parse(location);
+
+      if (uri.scheme == "file") {
+        var file = new File(uri.toFilePath());
+        return _parse(await file.readAsString());
+      }
+    } catch (e) {
+    }
+
+    var dir = file.parent;
+
+    if (pathlib.isRelative(location)) {
+      var f = new File("${dir.path}/${location}");
+      return _parse(await f.readAsString());
+    } else {
+      return _parse(await new File(location).readAsString());
+    }
+  }
+}
+
 class Evaluator {
-  static const List<String> SUPPORTED_FEATURES = const [
-    "one based index"
-  ];
+  static const List<String> SUPPORTED_FEATURES = const [];
 
   final Program program;
+  final Environment environment;
   final Set<String> features = new Set<String>();
 
-  Evaluator(this.program);
+  Evaluator(this.program, this.environment);
 
   eval(Context ctx) async {
-    await _processDeclarations(program.declarations);
+    return await _evalProgram(program, ctx);
+  }
 
-    return ctx.createContext(() async {
+  _evalProgram(Program program, Context ctx) async {
+    return ctx.run(() async {
+      await _processDeclarations(program.declarations, Context.current);
       return await _evaluateBlock(program.statements);
     });
   }
 
-  _processDeclarations(List<Declaration> declarations) async {
+  _processDeclarations(List<Declaration> declarations, Context ctx) async {
     for (var decl in declarations) {
       if (decl is FeatureDeclaration) {
         if (decl.feature.components.any((it) => it is! String)) {
@@ -35,10 +78,17 @@ class Evaluator {
         }
 
         features.add(f);
+      } else if (decl is ImportDeclaration) {
+        await _import(decl.location.components.join(), ctx);
       } else {
         throw new Exception("Unable to Process Declaration");
       }
     }
+  }
+
+  _import(String location, Context ctx) async {
+    var tp = await environment.import(location);
+    await _evalProgram(tp, ctx);
   }
 
   _evaluateBlock(List<Statement> statements) async {
@@ -174,6 +224,8 @@ class Evaluator {
       return expr.value;
     } else if (expr is DoubleLiteral) {
       return expr.value;
+    } else if (expr is HexadecimalLiteral) {
+      return expr.value;
     } else if (expr is VariableReference) {
       return Context.current.getVariable(expr.identifier);
     } else if (expr is AnonymousFunction) {
@@ -228,10 +280,6 @@ class Evaluator {
       return expr.value;
     } else if (expr is BracketAccess) {
       var index = await _resolveValue(expr.index);
-
-      if (features.contains("one based index") && index is int) {
-        index = index - 1;
-      }
 
       return (await _resolveValue(expr.reference))[index];
     } else if (expr is Operator) {

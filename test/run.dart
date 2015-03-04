@@ -8,21 +8,18 @@ void main() {
   for (File file in dir.listSync(recursive: true).where((it) => it is File && it.path.endsWith(".badger"))) {
     var content = file.readAsStringSync();
     var name = file.path.replaceAll(dir.path + "/", "");
-    print("== Script ${name} ==");
-    var parser = new BadgerParser();
-    var result = parser.parse(content);
 
-    if (result.isFailure) {
-      print("FAILED TO PARSE: ${result}");
-      exit(1);
+    if (name.startsWith("imports/")) {
+      continue;
     }
 
-    var program = result.value;
-    var evaluator = new Evaluator(program);
+    print("== Script ${name} ==");
+
+    var env = new FileEnvironment(file);
     var context = new Context();
     StandardLibrary.import(context);
     IOLibrary.import(context);
     TestingLibrary.import(context);
-    evaluator.eval(context);
+    env.eval(context);
   }
 }

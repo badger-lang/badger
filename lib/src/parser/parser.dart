@@ -55,6 +55,16 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  importDeclaration() => super.importDeclaration().map((it) {
+    return new ImportDeclaration(it[1]);
+  });
+
+  @override
+  hexadecimalLiteral() => super.hexadecimalLiteral().map((it) {
+    return new HexadecimalLiteral(int.parse(it[1], radix: 16));
+  });
+
+  @override
   ternaryOperator() => super.ternaryOperator().map((it) {
     return new TernaryOperator(it[0], it[4], it[8]);
   });

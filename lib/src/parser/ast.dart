@@ -125,6 +125,12 @@ class DoubleLiteral extends Expression {
   String toString() => "DoubleLiteral(${value})";
 }
 
+class HexadecimalLiteral extends Expression {
+  final int value;
+
+  HexadecimalLiteral(this.value);
+}
+
 class VariableReference extends Expression {
   final String identifier;
 
@@ -171,6 +177,15 @@ class FeatureDeclaration extends Declaration {
 
   @override
   String toString() => "FeatureDeclaration(${feature})";
+}
+
+class ImportDeclaration extends Declaration {
+  final StringLiteral location;
+
+  ImportDeclaration(this.location);
+
+  @override
+  String toString() => "ImportDeclaration(${location})";
 }
 
 class PlusOperator extends Expression {

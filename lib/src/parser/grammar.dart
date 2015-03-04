@@ -91,10 +91,14 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   comment() => char("#") & any() & char("\n");
   declarations() => ref(declaration).separatedBy(char("\n"));
-  declaration() => ref(featureDeclaration);
+  declaration() => ref(featureDeclaration) |
+    ref(importDeclaration);
 
   featureDeclaration() => string("using feature ")
     & ref(stringLiteral);
+
+  importDeclaration() => string("import ") &
+    ref(stringLiteral);
 
   bracketAccess() => ref(variableReference) &
     char("[") &
@@ -154,6 +158,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(hexadecimalLiteral) |
       ref(doubleLiteral) |
       ref(integerLiteral) |
       ref(anonymousFunction) |
@@ -196,6 +201,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     anyIn(["-", "+"]).optional() &
     digit().plus()
   ).flatten();
+
+  hexadecimalLiteral() => (
+    string("0x") &
+    (
+      pattern("0-9A-Fa-f").plus().flatten()
+    )
+  );
 
   doubleLiteral() => (
     anyIn(["-", "+"]).optional() &
