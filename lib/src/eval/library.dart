@@ -3,36 +3,6 @@ part of badger.eval;
 class StandardLibrary {
   static void import(Context context) {
     context.define("print", (args) => print(args.join("\n")));
-    context.define("+", (args) {
-      return args.reduce((a, b) {
-        if (a is List && b is List) {
-          return []..addAll(a)..addAll(b);
-        } else {
-          return a + b;
-        }
-      });
-    });
-
-    context.define("*", (args) {
-      return args[0] * args[1];
-    });
-
-    context.define("/", (args) {
-      return args[0] / args[1];
-    });
-
-    context.define("~/", (args) {
-      return args[0] ~/ args[1];
-    });
-
-    context.define("-", (args) {
-      return args[0] - args[1];
-    });
-
-    context.define(">", (args) {
-      return args[0] > args[1];
-    });
-
     context.define("withContext", (args) {
       var func = args[0];
       var ctx = args[1];
@@ -50,14 +20,6 @@ class StandardLibrary {
       return new Context();
     });
 
-    context.define("<", (args) {
-      return args[0] < args[1];
-    });
-
-    context.define("<=", (args) {
-      return args[0] <= args[1];
-    });
-
     context.define("keys", (args) {
       var x = args[0];
 
@@ -68,14 +30,6 @@ class StandardLibrary {
       } else if (x is Context) {
         return x.variables.keys.toList();
       }
-    });
-
-    context.define(">=", (args) {
-      return args[0] >= args[1];
-    });
-
-    context.define("==", (args) {
-      return args[0] == args[1];
     });
 
     context.define("parseJSON", (args) {
@@ -96,10 +50,6 @@ class StandardLibrary {
 
     context.define("run", (args) {
       return args[0]([]);
-    });
-
-    context.define("&&", (args) {
-      return args.every((x) => BadgerUtils.asBoolean(x));
     });
   }
 }

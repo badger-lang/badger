@@ -66,6 +66,14 @@ class TernaryOperator extends Expression {
   TernaryOperator(this.condition, this.whenTrue, this.whenFalse);
 }
 
+class Operator extends Expression {
+  final Expression left;
+  final Expression right;
+  final String op;
+
+  Operator(this.left, this.right, this.op);
+}
+
 class ForInStatement extends Statement {
   final String identifier;
   final Expression value;

@@ -35,7 +35,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
-  arguments([bool allowAnd = false]) => super.arguments(allowAnd).map((it) {
+  arguments() => super.arguments().map((it) {
     return it.where((it) => it is Expression).toList();
   });
 
@@ -45,8 +45,13 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  OPERATOR(String n) => super.OPERATOR(n).map((it) {
+    return new Operator(it[0], it[4], it[2]);
+  });
+
+  @override
   ternaryOperator() => super.ternaryOperator().map((it) {
-    return new TernaryOperator(it[0], it[2], it[4]);
+    return new TernaryOperator(it[0], it[4], it[8]);
   });
 
   @override

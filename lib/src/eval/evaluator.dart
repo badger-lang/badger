@@ -232,8 +232,50 @@ class Evaluator {
       }
 
       return (await _resolveValue(expr.reference))[index];
+    } else if (expr is Operator) {
+      var op = expr.op;
+
+      return await _handleOperation(expr.left, expr.right, op);
     } else {
       throw new Exception("Unable to Resolve Value: ${expr}");
+    }
+  }
+
+  _handleOperation(Expression left, Expression right, String op) async {
+    var a = await _resolveValue(left);
+    var b = await _resolveValue(right);
+
+    switch (op) {
+      case "+":
+        return a + b;
+      case "-":
+        return a - b;
+      case "*":
+        return a * b;
+      case "/":
+        return a / b;
+      case "~/":
+        return a ~/ b;
+      case "<":
+        return a < b;
+      case ">":
+        return a > b;
+      case "<=":
+        return a <= b;
+      case ">=":
+        return a >= b;
+      case "==":
+        return a == b;
+      case "&":
+        return a & b;
+      case "|":
+        return a | b;
+      case "||":
+        return BadgerUtils.asBoolean(a) || BadgerUtils.asBoolean(b);
+      case "&&":
+        return BadgerUtils.asBoolean(a) && BadgerUtils.asBoolean(b);
+      default:
+        throw new Exception("Unsupported Operator");
     }
   }
 }

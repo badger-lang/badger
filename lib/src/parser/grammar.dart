@@ -24,12 +24,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   methodCall() => ref(identifier) &
     char("(") &
-    ref(arguments, false).optional() &
+    ref(arguments).optional() &
     char(")");
 
-  arguments([bool allowAnd = false]) => ref(expression).separatedBy(
+  arguments() => ref(expression).separatedBy(
     whitespace().star() &
-    (allowAnd ? char(",") | string("and") : char(",")) &
+    char(",") &
     whitespace().star()
   );
 
@@ -53,7 +53,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   );
 
   listDefinition() => char("[") &
-    ref(arguments, false) &
+    ref(arguments) &
     char("]");
 
   ternaryOperator() => ref(expressionItem) &
@@ -63,6 +63,27 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression) &
     whitespace().star() &
     char(":") &
+    whitespace().star() &
+    ref(expression);
+
+  plusOperator() => ref(OPERATOR, "+");
+  minusOperator() => ref(OPERATOR, "-");
+  divideOperator() => ref(OPERATOR, "/");
+  divideIntOperator() => ref(OPERATOR, "~/");
+  multiplyOperator() => ref(OPERATOR, "*");
+  andOperator() => ref(OPERATOR, "&&");
+  orOperator() => ref(OPERATOR, "||");
+  bitwiseAndOperator() => ref(OPERATOR, "&");
+  bitwiseOrOperator() => ref(OPERATOR, "|");
+  lessThanOperator() => ref(OPERATOR, "<");
+  greaterThanOperator() => ref(OPERATOR, ">");
+  lessThanOrEqualOperator() => ref(OPERATOR, "<=");
+  greaterThanOrEqualOperator() => ref(OPERATOR, ">=");
+  equalOperator() => ref(OPERATOR, "==");
+
+  OPERATOR(String x) => ref(expressionItem) &
+    whitespace().star() &
+    string(x) &
     whitespace().star() &
     ref(expression);
 
@@ -112,7 +133,23 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression);
 
   variableReference() => ref(identifier);
-  expression() => ref(ternaryOperator) | ref(expressionItem);
+  expression() => ref(ternaryOperator) |
+    ref(plusOperator) |
+    ref(minusOperator) |
+    ref(multiplyOperator) |
+    ref(divideIntOperator) |
+    ref(divideOperator) |
+    ref(andOperator) |
+    ref(orOperator) |
+    ref(bitwiseAndOperator) |
+    ref(bitwiseOrOperator) |
+    ref(lessThanOperator) |
+    ref(greaterThanOperator) |
+    ref(greaterThanOrEqualOperator) |
+    ref(lessThanOrEqualOperator) |
+    ref(equalOperator) |
+    ref(expressionItem);
+
   expressionItem() => (
     (
       ref(integerLiteral) |
