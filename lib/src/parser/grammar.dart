@@ -56,9 +56,11 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(arguments, false) &
     char("]");
 
-  ternaryOperator() => ref(expression) &
+  ternaryOperator() => ref(expressionItem) &
     whitespace().star() &
     char("?") &
+    whitespace().star() &
+    ref(expression) &
     whitespace().star() &
     char(":") &
     whitespace().star() &
@@ -104,7 +106,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression);
 
   variableReference() => ref(identifier);
-  expression() => (
+  expression() => ref(ternaryOperator) | ref(expressionItem);
+  expressionItem() => (
     (
       ref(anonymousFunction) |
       ref(emptyListDefinition) |
