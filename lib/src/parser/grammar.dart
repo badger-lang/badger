@@ -102,7 +102,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   bracketAccess() => ref(variableReference) &
     char("[") &
-    ref(integerLiteral) &
+    ref(expressionItem) &
     char("]");
 
   block() => whitespace().star() &
@@ -158,6 +158,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(mapDefinition) |
       ref(hexadecimalLiteral) |
       ref(doubleLiteral) |
       ref(integerLiteral) |
@@ -223,9 +224,38 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ).star() &
     char('"');
 
+  mapDefinition() => char("{") &
+    whitespace().star() &
+    ref(mapEntry).separatedBy(char(",").trim()).optional() &
+    whitespace().star() &
+    char("}");
+
+  mapEntry() => ref(expressionItem) &
+    whitespace().star() &
+    char(":") &
+    whitespace().star() &
+    ref(expression);
+
   interpolation() => string("\$(") &
     ref(expression) &
     char(")");
+
+  record() => string("record") &
+    whitespace().star() &
+    ref(identifier) &
+    ref(recordBlock);
+
+  recordBlock() => whitespace().star() &
+    char("{") &
+    whitespace().star() &
+    ref(recordEntry) &
+    whitespace().star() &
+    char("}");
+
+  recordEntry() => (ref(identifier) &
+    whitespace().plus()).optional() &
+    ref(identifier) &
+    char(";").optional();
 
   character() => pattern("A-Za-z0-9{}[] ") | anyIn([".", "/", ":"]);
   identifier() => (

@@ -30,6 +30,16 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  mapDefinition() => super.mapDefinition().map((it) {
+    return new MapDefinition(it[2] == null ? [] : it[2]);
+  });
+
+  @override
+  mapEntry() => super.mapEntry().map((it) {
+    return new MapEntry(it[0], it[4]);
+  });
+
+  @override
   statement() => super.statement().map((it) {
     return it;
   });

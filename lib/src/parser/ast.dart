@@ -188,6 +188,33 @@ class ImportDeclaration extends Declaration {
   String toString() => "ImportDeclaration(${location})";
 }
 
+class RecordDefinition extends Statement {
+  final String name;
+  final List<RecordEntry> entries;
+
+  RecordDefinition(this.name, this.entries);
+}
+
+class MapDefinition extends Expression {
+  final List<MapEntry> entries;
+
+  MapDefinition(this.entries);
+}
+
+class MapEntry {
+  final Expression key;
+  final Expression value;
+
+  MapEntry(this.key, this.value);
+}
+
+class RecordEntry {
+  final String type;
+  final String name;
+
+  RecordEntry(this.type, this.name);
+}
+
 class PlusOperator extends Expression {
   final Expression left;
   final Expression right;

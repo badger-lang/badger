@@ -9,7 +9,7 @@ void main() {
     var content = file.readAsStringSync();
     var name = file.path.replaceAll(dir.path + "/", "");
 
-    if (name.startsWith("imports/")) {
+    if (name.startsWith("imports/") || name.startsWith("prototype/")) {
       continue;
     }
 

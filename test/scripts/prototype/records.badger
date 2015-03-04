@@ -1,0 +1,6 @@
+record User {
+  name
+}
+
+user = User()
+user.name = "Alex"

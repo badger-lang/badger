@@ -1,0 +1,8 @@
+let map = {
+  "Hello": "World"
+}
+
+let world = map["Hello"]
+
+print(map)
+print(world)
