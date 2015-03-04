@@ -21,12 +21,41 @@ class StandardLibrary {
       return args[0] > args[1];
     });
 
+    context.define("withContext", (args) {
+      var func = args[0];
+      var ctx = args[1];
+
+      return ctx.run(() {
+        return func([]);
+      });
+    });
+
+    context.define("newContext", (args) {
+      return new Context();
+    });
+
     context.define("<", (args) {
       return args[0] < args[1];
     });
 
     context.define("<=", (args) {
       return args[0] <= args[1];
+    });
+
+    context.define("keys", (args) {
+      var x = args[0];
+
+      if (x is Map) {
+        return x.keys.toList();
+      } else if (x is List) {
+        return new List<int>.generate(x.length, (i) => i);
+      } else if (x is Context) {
+        return x.variables.keys.toList();
+      }
+    });
+
+    context.define("currentContext", (args) {
+      return Context.current;
     });
 
     context.define(">=", (args) {
@@ -37,13 +66,13 @@ class StandardLibrary {
       return args[0] == args[1];
     });
 
-    context.define("parseJson", (args) {
+    context.define("parseJSON", (args) {
       var x = args.join();
 
       return JSON.decode(x);
     });
 
-    context.define("encodeJson", (args) {
+    context.define("encodeJSON", (args) {
       args = [args[0], args.length == 2 ? args[1] : false];
       var input = args[0];
       if (args[1] == true) {
@@ -59,6 +88,22 @@ class StandardLibrary {
 
     context.define("&&", (args) {
       return args.every((x) => BadgerUtils.asBoolean(x));
+    });
+  }
+}
+
+class IOLibrary {
+  static void import(Context context) {
+    context.define("getUrl", (args) async {
+      var url = args[0];
+      var client = new HttpClient();
+      var request = await client.getUrl(Uri.parse(url));
+      var response = await request.close();
+      var text = await response.transform(UTF8.decoder).join();
+
+      client.close();
+
+      return text;
     });
   }
 }

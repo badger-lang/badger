@@ -9,14 +9,16 @@ class Evaluator {
   ];
 
   final Program program;
-  final Context globalContext;
   final Set<String> features = new Set<String>();
 
-  Evaluator(this.program, this.globalContext);
+  Evaluator(this.program);
 
-  eval() async {
+  eval(Context ctx) async {
     await _processDeclarations(program.declarations);
-    await _evaluateBlock(program.statements);
+
+    return ctx.createContext(() async {
+      return await _evaluateBlock(program.statements);
+    });
   }
 
   _processDeclarations(List<Declaration> declarations) async {
@@ -39,13 +41,9 @@ class Evaluator {
     }
   }
 
-  _evaluateBlock(List<Statement> statements, {Context context}) async {
-    if (context == null) {
-      context = globalContext;
-    }
-
+  _evaluateBlock(List<Statement> statements) async {
     for (var statement in statements) {
-      var value = await _evaluateStatement(statement, context: context);
+      var value = await _evaluateStatement(statement);
 
       if (value != null) {
         if (value is ReturnValue) {
@@ -59,48 +57,45 @@ class Evaluator {
     return VOID;
   }
 
-  _evaluateStatement(Statement statement, {Context context}) async {
-    if (context == null) {
-      context = globalContext;
-    }
-
+  _evaluateStatement(Statement statement) async {
+    var ctx = Context.current;
     if (statement is MethodCall) {
       var args = [];
       for (var s in statement.args) {
-        args.add(await _resolveValue(s, context: context));
+        args.add(await _resolveValue(s));
       }
 
-      return await context.invoke(statement.identifier, args);
+      return await ctx.invoke(statement.identifier, args);
     } else if (statement is Assignment) {
-      var value = await _resolveValue(statement.value, context: context);
+      var value = await _resolveValue(statement.value);
       if (statement.immutable) {
         value = new Immutable(value);
       }
-      context.setVariable(statement.identifier, value);
+      ctx.setVariable(statement.identifier, value);
       return value;
     } else if (statement is ReturnStatement) {
       var value = null;
 
       if (statement.expression != null) {
-        value = await _resolveValue(statement.expression, context: context);
+        value = await _resolveValue(statement.expression);
       }
 
       return new ReturnValue(value);
     } else if (statement is IfStatement) {
-      var value = await _resolveValue(statement.condition, context: context);
+      var value = await _resolveValue(statement.condition);
       var c = BadgerUtils.asBoolean(value);
-      var ctx = context.fork();
-
-      if (c) {
-        return await _evaluateBlock(statement.block.statements, context: ctx);
-      } else {
-        if (statement.elseBlock != null) {
-          return await _evaluateBlock(statement.elseBlock.statements, context: ctx);
+      return ctx.createContext(() async {
+        if (c) {
+          return await _evaluateBlock(statement.block.statements);
+        } else {
+          if (statement.elseBlock != null) {
+            return await _evaluateBlock(statement.elseBlock.statements);
+          }
         }
-      }
+      });
     } else if (statement is WhileStatement) {
-      while (BadgerUtils.asBoolean(await _resolveValue(statement.condition, context: context))) {
-        var value = await _evaluateBlock(statement.block.statements, context: context);
+      while (BadgerUtils.asBoolean(await _resolveValue(statement.condition))) {
+        var value = await _evaluateBlock(statement.block.statements);
 
         if (value == _BREAK_NOW) {
           return value;
@@ -108,12 +103,15 @@ class Evaluator {
       }
     } else if (statement is ForInStatement) {
       var i = statement.identifier;
-      var n = await _resolveValue(statement.value, context: context);
+      var n = await _resolveValue(statement.value);
+
       call(value) async {
-        var c = context.fork();
-        c.setVariable(i, value);
-        return await _evaluateBlock(statement.block.statements, context: c);
+        return ctx.createContext(() async {
+          Context.current.setVariable(i, value);
+          return await _evaluateBlock(statement.block.statements);
+        });
       }
+
       if (n is Stream) {
         await for (var x in n) {
           var result = await call(x);
@@ -132,10 +130,10 @@ class Evaluator {
       var argnames = statement.args;
       var block = statement.block;
 
-      context.define(name, (args) async {
+      ctx.define(name, (args) async {
         var i = 0;
-        var inputs = {
-        };
+        var inputs = {};
+
         for (var n in args) {
           if (i >= argnames.length) {
             break;
@@ -143,13 +141,15 @@ class Evaluator {
           inputs[argnames[i]] = n;
           i++;
         }
-        var c = context.fork();
 
-        for (var n in inputs.keys) {
-          c.setVariable(n, inputs[n]);
-        }
+        return ctx.createContext(() async {
+          var cmt = Context.current;
+          for (var n in inputs.keys) {
+            cmt.setVariable(n, inputs[n]);
+          }
 
-        return await _evaluateBlock(block.statements, context: c);
+          return await _evaluateBlock(block.statements);
+        });
       });
     } else if (statement is BreakStatement) {
       return _BREAK_NOW;
@@ -160,16 +160,14 @@ class Evaluator {
     return null;
   }
 
-  _resolveValue(Expression expr, {Context context}) async {
-    if (context == null) {
-      context = globalContext;
-    }
+  _resolveValue(Expression expr) async {
+    var ctx = Context.current;
 
     if (expr is StringLiteral) {
       var components = [];
       for (var it in expr.components) {
         if (it is Expression) {
-          components.add(await _resolveValue(it, context: context));
+          components.add(await _resolveValue(it));
         } else {
           components.add(it);
         }
@@ -178,7 +176,7 @@ class Evaluator {
     } else if (expr is IntegerLiteral) {
       return expr.value;
     } else if (expr is VariableReference) {
-      return context.getVariable(expr.identifier);
+      return ctx.getVariable(expr.identifier);
     } else if (expr is AnonymousFunction) {
       var argnames = expr.args;
       var block = expr.block;
@@ -193,35 +191,38 @@ class Evaluator {
           inputs[argnames[i]] = n;
           i++;
         }
-        var c = context.fork();
 
-        for (var n in inputs.keys) {
-          c.setVariable(n, inputs[n]);
-        }
+        return ctx.createContext(() async {
+          var c = Context.current;
 
-        return await _evaluateBlock(block.statements, context: c);
+          for (var n in inputs.keys) {
+            c.setVariable(n, inputs[n]);
+          }
+
+          return await _evaluateBlock(block.statements);
+        });
       };
 
       return func;
     } else if (expr is MethodCall) {
       var x = [];
       for (var e in expr.args) {
-        x.add(await _resolveValue(e, context: context));
+        x.add(await _resolveValue(e));
       }
-      return await context.invoke(expr.identifier, x);
+      return await ctx.invoke(expr.identifier, x);
     } else if (expr is TernaryOperator) {
-      var value = await _resolveValue(expr.condition, context: context);
+      var value = await _resolveValue(expr.condition);
       var c = BadgerUtils.asBoolean(value);
 
       if (c) {
-        return await _resolveValue(expr.whenTrue, context: context);
+        return await _resolveValue(expr.whenTrue);
       } else {
-        return await _resolveValue(expr.whenFalse, context: context);
+        return await _resolveValue(expr.whenFalse);
       }
     } else if (expr is ListDefinition) {
       var x = [];
       for (var e in expr.elements) {
-        x.add(await _resolveValue(e, context: context));
+        x.add(await _resolveValue(e));
       }
       return x;
     } else if (expr is BooleanLiteral) {
@@ -233,7 +234,7 @@ class Evaluator {
         index = index - 1;
       }
 
-      return (await _resolveValue(expr.reference, context: context))[index];
+      return (await _resolveValue(expr.reference))[index];
     } else {
       throw new Exception("Unable to Resolve Value: ${expr}");
     }

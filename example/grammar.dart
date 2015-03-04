@@ -1,7 +1,5 @@
 import "dart:io";
 import "package:badger/parser.dart";
-import "package:badger/eval.dart";
-import "package:badger/io.dart";
 
 main() {
   var file = new File("example/test.badger");

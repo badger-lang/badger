@@ -51,7 +51,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   assignment() => super.assignment().map((it) {
-    return new Assignment(it[1], it[5], it[0] == "let");
+    return new Assignment(it[1], it[5], it[0] != null ? it[0][0] == "let" : false);
   });
 
   @override

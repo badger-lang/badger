@@ -96,7 +96,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   emptyListDefinition() => string("[]");
 
-  assignment() => ((string("let") | string("var")).flatten().optional() & whitespace().plus()).optional() &
+  assignment() =>
+  (
+    (
+      string("let") | string("var")
+    ).flatten().optional() &
+    whitespace().plus()
+  ).optional() &
     ref(identifier) &
     whitespace().star() &
     string("=") &

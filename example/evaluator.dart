@@ -1,7 +1,6 @@
 import "dart:io";
 import "package:badger/parser.dart";
 import "package:badger/eval.dart";
-import "package:badger/io.dart";
 
 main() {
   var file = new File("example/test.badger");
@@ -19,7 +18,7 @@ main() {
   StandardLibrary.import(context);
   IOLibrary.import(context);
 
-  var evaluator = new Evaluator(program, context);
+  var evaluator = new Evaluator(program);
 
-  evaluator.eval();
+  evaluator.eval(context);
 }

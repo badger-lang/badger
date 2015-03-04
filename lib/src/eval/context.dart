@@ -116,11 +116,29 @@ class Context {
     }
   }
 
+   dynamic run(void c()) {
+    return Zone.current.fork(zoneValues: {
+      "context": this
+    }).run(c);
+  }
+
   @override
   String toString() {
-    var buff = new StringBuffer("Context(\nvariables: [\n");
+    var buff = new StringBuffer("Context(\n  variables: [\n");
     for (var v in variables.keys) {
-      buff.writeln("    ${v}: ${variables[v]}");
+      var value = variables[v];
+
+      if (value is Immutable) {
+        value = value.value;
+      } else if (value is BadgerObject) {
+        value = value.getValue();
+      }
+
+      if (value == this) {
+        buff.writeln("    ${v}: (self)");
+      } else {
+        buff.writeln("    ${v}: ${value}");
+      }
     }
     buff.write("  ],\n  functions: [\n");
     for (var m in functions.keys) {
@@ -129,5 +147,16 @@ class Context {
     buff.write("  ]");
     buff.write("\n)");
     return buff.toString();
+  }
+
+  static Context get current => Zone.current["context"];
+
+  dynamic createContext(void handler()) {
+    var ctx = fork();
+    return Zone.current.fork(zoneValues: {
+      "context": ctx
+    }).run(() {
+      return handler();
+    });
   }
 }
