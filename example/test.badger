@@ -1,3 +1,5 @@
+using feature "test"
+
 let x = 0
 
 print(x)

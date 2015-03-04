@@ -22,7 +22,8 @@ const String JS_FOOTER = """
 )();
 """;
 
-class JsTarget extends Target {
+class JsTarget extends Target<String> {
+  @override
   String compile(Program program) {
     var buff = new StringBuffer(JS_HEADER);
 

@@ -1,5 +1,5 @@
 part of badger.compiler;
 
-abstract class Target {
-  String compile(Program program);
+abstract class Target<T> {
+  T compile(Program program);
 }

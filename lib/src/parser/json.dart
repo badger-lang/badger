@@ -70,7 +70,8 @@ class BadgerJsonBuilder {
       return {
         "type": "if",
         "condition": _generateExpression(statement.condition),
-        "block": _generateStatements(statement.block.statements)
+        "block": _generateStatements(statement.block.statements),
+        "else": statement.elseBlock != null ? _generateStatements(statement.elseBlock.statements) : null
       };
     } else if (statement is ForInStatement) {
       return {
@@ -83,6 +84,10 @@ class BadgerJsonBuilder {
       return {
         "type": "return",
         "value": statement.expression != null ? _generateExpression(statement.expression) : null
+      };
+    } else if (statement is BreakStatement) {
+      return {
+        "type": "break"
       };
     } else {
       throw new Exception("Failed to generate statement.");
@@ -139,5 +144,101 @@ class BadgerJsonBuilder {
       }
     }
     return cm;
+  }
+}
+
+class BadgerJsonParser {
+  final Map<String, dynamic> input;
+
+  BadgerJsonParser(this.input);
+
+  Program build() {
+    var declarations = input["declarations"].map(_buildDeclaration).toList();
+    var statements = input["statements"].map(_buildStatement).toList();
+
+    return new Program(declarations, statements);
+  }
+
+  Declaration _buildDeclaration(Map it) {
+    var type = it["type"];
+
+    if (type == "feature declaration") {
+      return new FeatureDeclaration(_buildStringLiteral(it["feature"]));
+    } else {
+      throw new Exception("Invalid Declaration");
+    }
+  }
+
+  Statement _buildStatement(Map it) {
+    var type = it["type"];
+
+    if (type == "method call") {
+      return _buildMethodCall(it);
+    } else if (type == "assignment") {
+      return new Assignment(it["identifier"], _buildExpression(it["value"]), it["immutable"]);
+    } else if (type == "function definition") {
+      return new FunctionDefinition(it["identifier"], it["args"], it["block"].map(_buildStatement).toList());
+    } else if (type == "while") {
+      return new WhileStatement(_buildExpression(it["condition"]), it["block"].map(_buildStatement).toList());
+    } else if (type == "if") {
+      return new IfStatement(
+        _buildExpression(it["condition"]),
+        it["block"].map(_buildStatement).toList(),
+        it["elseBlock"] == null ? null : it["elseBlok"].map(_buildStatement).toList()
+      );
+    } else if (type == "for in") {
+      return new ForInStatement(
+        it["identifier"],
+        _buildExpression(it["value"]),
+        it["block"].map(_buildStatement).toList()
+      );
+    } else if (type == "return") {
+      return new ReturnStatement(
+        it["value"] == null ? null : _buildExpression(it["value"])
+      );
+    } else if (type == "break") {
+      return new BreakStatement();
+    } else {
+      throw new Exception("Failed to build statement.");
+    }
+  }
+
+  Expression _buildExpression(Map it) {
+    var type = it["type"];
+
+    if (type == "string literal") {
+      return _buildStringLiteral(it["components"]);
+    } else if (type == "variable reference") {
+      return new VariableReference(it["identifier"]);
+    } else if (type == "method call") {
+      return _buildMethodCall(it);
+    } else if (type == "integer literal") {
+      return new IntegerLiteral(it["value"]);
+    } else if (type == "list definition") {
+      return new ListDefinition(it["elements"].map(_buildExpression).toList());
+    } else if (type == "bracket access") {
+      return new BracketAccess(_buildExpression(it["reference"]), _buildExpression(it["index"]));
+    } else {
+      throw new Exception("Failed to build expression.");
+    }
+  }
+
+  MethodCall _buildMethodCall(Map it) {
+    var id = it["identifier"];
+    var args = it["args"].map(_buildExpression).toList();
+
+    return new MethodCall(id, args);
+  }
+
+  StringLiteral _buildStringLiteral(List components) {
+    var c = [];
+    for (var m in components) {
+      if (m is String) {
+        c.add(m);
+      } else {
+        c.add(_buildExpression(m));
+      }
+    }
+    return new StringLiteral(c);
   }
 }

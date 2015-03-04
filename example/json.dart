@@ -14,6 +14,9 @@ main() {
   }
 
   var program = result.value;
-  var j = new BadgerJsonBuilder(program);
-  print(new JsonEncoder.withIndent("  ").convert(j.build()));
+  var jb = new BadgerJsonBuilder(program);
+  var asJson = jb.build();
+  var jp = new BadgerJsonParser(asJson);
+  print(new JsonEncoder.withIndent("  ").convert(asJson));
+  print(jp.build());
 }
