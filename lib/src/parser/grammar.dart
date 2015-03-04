@@ -2,9 +2,11 @@ part of badger.parser;
 
 class BadgerGrammarDefinition extends GrammarDefinition {
   @override
-  start() => (ref(declarations).optional() &
+  start() => (
+    ref(declarations).optional() &
     whitespace().star() &
-    ref(statement).separatedBy(whitespace().star()) & whitespace().star());
+    ref(statement).separatedBy(whitespace().star()) & whitespace().star()
+  ).end();
 
   statement() => (
     (
@@ -152,6 +154,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(doubleLiteral) |
       ref(integerLiteral) |
       ref(anonymousFunction) |
       ref(emptyListDefinition) |
@@ -189,7 +192,17 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ).optional() & whitespace().star() & string(") ->") &
     ref(block);
 
-  integerLiteral() => digit().plus().flatten();
+  integerLiteral() => (
+    anyIn(["-", "+"]).optional() &
+    digit().plus()
+  ).flatten();
+
+  doubleLiteral() => (
+    anyIn(["-", "+"]).optional() &
+    digit().plus() &
+    char(".") &
+    digit().plus()
+  ).flatten();
 
   stringLiteral() => char('"') &
     (

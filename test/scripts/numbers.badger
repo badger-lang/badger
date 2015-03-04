@@ -1,0 +1,4 @@
+let x = 5.0
+let y = 5.0
+
+testEqual(x + y, 10.0)

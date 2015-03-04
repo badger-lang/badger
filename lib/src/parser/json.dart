@@ -107,6 +107,11 @@ class BadgerJsonBuilder {
         "type": "integer literal",
         "value": expression.value
       };
+    } else if (expression is DoubleLiteral) {
+      return {
+        "type": "double literal",
+        "value": expression.value
+      };
     } else if (expression is MethodCall) {
       return {
         "type": "method call",
@@ -214,6 +219,8 @@ class BadgerJsonParser {
       return _buildMethodCall(it);
     } else if (type == "integer literal") {
       return new IntegerLiteral(it["value"]);
+    } else if (type == "double literal") {
+      return new DoubleLiteral(it["value"]);
     } else if (type == "list definition") {
       return new ListDefinition(it["elements"].map(_buildExpression).toList());
     } else if (type == "bracket access") {

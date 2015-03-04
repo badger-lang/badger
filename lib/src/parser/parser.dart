@@ -50,6 +50,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  doubleLiteral() => super.doubleLiteral().map((it) {
+    return new DoubleLiteral(double.parse(it));
+  });
+
+  @override
   ternaryOperator() => super.ternaryOperator().map((it) {
     return new TernaryOperator(it[0], it[4], it[8]);
   });

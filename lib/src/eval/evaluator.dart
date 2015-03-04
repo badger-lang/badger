@@ -172,6 +172,8 @@ class Evaluator {
       return components.join();
     } else if (expr is IntegerLiteral) {
       return expr.value;
+    } else if (expr is DoubleLiteral) {
+      return expr.value;
     } else if (expr is VariableReference) {
       return Context.current.getVariable(expr.identifier);
     } else if (expr is AnonymousFunction) {

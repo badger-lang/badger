@@ -116,6 +116,15 @@ class IntegerLiteral extends Expression {
   String toString() => "IntegerLiteral(${value})";
 }
 
+class DoubleLiteral extends Expression {
+  final double value;
+
+  DoubleLiteral(this.value);
+
+  @override
+  String toString() => "DoubleLiteral(${value})";
+}
+
 class VariableReference extends Expression {
   final String identifier;
 
