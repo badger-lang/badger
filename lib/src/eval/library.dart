@@ -46,8 +46,26 @@ class StandardLibrary {
       return timer;
     });
 
-    context.define("cancelPeriodicTimer", (args) async {
+    context.define("async", (args) async {
+      Timer.run(() {
+        args[0]([]);
+      });
+    });
+
+    context.define("cancelTimer", (args) async {
       return args[0].cancel();
+    });
+
+    context.define("isTimerActive", (args) {
+      return args[0].isActive;
+    });
+
+    context.define("createTimer", (args) {
+      var timer = new Timer(new Duration(milliseconds: args[0]), () {
+        args[1]([]);
+      });
+
+      return timer;
     });
 
     context.define("encodeJSON", (args) {

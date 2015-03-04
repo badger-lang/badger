@@ -4,7 +4,11 @@ let timer = createPeriodicTimer(1000, () -> {
   x = x + 1
 
   if x == 5 {
-    cancelPeriodicTimer(timer)
+    cancelTimer(timer)
+    createTimer(2000, () -> {
+      print("This will run after the timer.")
+    })
+    return
   }
 
   print(x)
