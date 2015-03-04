@@ -4,5 +4,4 @@ let map = {
 
 let world = map["Hello"]
 
-print(map)
-print(world)
+testEqual(world, "World")
