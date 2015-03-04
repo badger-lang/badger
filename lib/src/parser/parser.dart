@@ -20,12 +20,22 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  breakStatement() => super.breakStatement().map((it) {
+    return new BreakStatement();
+  });
+
+  @override
   interpolation() => super.interpolation().map((it) {
     return it[1];
   });
 
   @override
-  arguments() => super.arguments().map((it) {
+  statement() => super.statement().map((it) {
+    return it;
+  });
+
+  @override
+  arguments([bool allowAnd = false]) => super.arguments(allowAnd).map((it) {
     return it.where((it) => it is Expression).toList();
   });
 
@@ -35,13 +45,43 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  ternaryOperator() => super.ternaryOperator().map((it) {
+    return new TernaryOperator(it[0], it[2], it[4]);
+  });
+
+  @override
   assignment() => super.assignment().map((it) {
-    return new Assignment(it[0], it[4]);
+    return new Assignment(it[1], it[5], it[0] == "let");
+  });
+
+  @override
+  forInStatement() => super.forInStatement().map((it) {
+    return new ForInStatement(it[2], it[6], it[7]);
   });
 
   @override
   integerLiteral() => super.integerLiteral().map((it) {
     return new IntegerLiteral(int.parse(it[0]));
+  });
+
+  @override
+  ifStatement() => super.ifStatement().map((it) {
+    return new IfStatement(it[2], it[4], it[5] != null ? it[5][2] : null);
+  });
+
+  @override
+  whileStatement() => super.whileStatement().map((it) {
+    return new WhileStatement(it[2], it[4]);
+  });
+
+  @override
+  booleanLiteral() => super.booleanLiteral().map((it) {
+    return new BooleanLiteral(it);
+  });
+
+  @override
+  parens() => super.parens().map((it) {
+    return it[1];
   });
 
   @override
@@ -62,6 +102,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   @override
   bracketAccess() => super.bracketAccess().map((it) {
     return new BracketAccess(it[0], it[2]);
+  });
+
+  @override
+  anonymousFunction() => super.anonymousFunction().map((it) {
+    return new AnonymousFunction(it[1], it[4]);
   });
 
   @override

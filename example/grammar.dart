@@ -6,20 +6,12 @@ import "package:badger/io.dart";
 main() {
   var file = new File("example/test.badger");
   var content = file.readAsStringSync();
-  var parser = new BadgerParser();
+  var parser = new BadgerGrammar();
   var result = parser.parse(content);
 
   if (result.isFailure) {
     throw new Exception(result.toString());
   }
 
-  var program = result.value;
-
-  var context = new Context();
-  StandardLibrary.import(context);
-  IOLibrary.import(context);
-
-  var evaluator = new Evaluator(program, context);
-
-  evaluator.eval();
+  print(result.value);
 }

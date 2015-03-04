@@ -1,6 +1,7 @@
 part of badger.eval;
 
-const Object VOID = const Object();
+final Object VOID = new Object();
+final Object _BREAK_NOW = new Object();
 
 class Evaluator {
   static const List<String> SUPPORTED_FEATURES = const [
@@ -13,12 +14,12 @@ class Evaluator {
 
   Evaluator(this.program, this.globalContext);
 
-  void eval() {
-    _processDeclarations(program.declarations);
-    _evaluateBlock(program.statements);
+  eval() async {
+    await _processDeclarations(program.declarations);
+    await _evaluateBlock(program.statements);
   }
 
-  void _processDeclarations(List<Declaration> declarations) {
+  _processDeclarations(List<Declaration> declarations) async {
     for (var decl in declarations) {
       if (decl is FeatureDeclaration) {
         if (decl.feature.components.any((it) => it is! String)) {
@@ -38,49 +39,103 @@ class Evaluator {
     }
   }
 
-  dynamic _evaluateBlock(List<Statement> statements, {Context context}) {
+  _evaluateBlock(List<Statement> statements, {Context context}) async {
     if (context == null) {
       context = globalContext;
     }
 
     for (var statement in statements) {
-      var value = _evaluateStatement(statement, context: context);
+      var value = await _evaluateStatement(statement, context: context);
 
-      if (value != null && value is ReturnValue) {
-        return value.value;
+      if (value != null) {
+        if (value is ReturnValue) {
+          return value.value;
+        } else if (value == _BREAK_NOW) {
+          return _BREAK_NOW;
+        }
       }
     }
 
     return VOID;
   }
 
-  dynamic _evaluateStatement(Statement statement, {Context context}) {
+  _evaluateStatement(Statement statement, {Context context}) async {
     if (context == null) {
       context = globalContext;
     }
 
     if (statement is MethodCall) {
-      var args = statement.args.map((it) => _resolveValue(it, context: context)).toList();
-      context.invoke(statement.identifier, args);
+      var args = [];
+      for (var s in statement.args) {
+        args.add(await _resolveValue(s, context: context));
+      }
+
+      return await context.invoke(statement.identifier, args);
     } else if (statement is Assignment) {
-      var value = _resolveValue(statement.value, context: context);
+      var value = await _resolveValue(statement.value, context: context);
+      if (statement.immutable) {
+        value = new Immutable(value);
+      }
       context.setVariable(statement.identifier, value);
+      return value;
     } else if (statement is ReturnStatement) {
       var value = null;
 
       if (statement.expression != null) {
-        value = _resolveValue(statement.expression, context: context);
+        value = await _resolveValue(statement.expression, context: context);
       }
 
       return new ReturnValue(value);
+    } else if (statement is IfStatement) {
+      var value = await _resolveValue(statement.condition, context: context);
+      var c = BadgerUtils.asBoolean(value);
+      var ctx = context.fork();
+
+      if (c) {
+        return await _evaluateBlock(statement.block.statements, context: ctx);
+      } else {
+        if (statement.elseBlock != null) {
+          return await _evaluateBlock(statement.elseBlock.statements, context: ctx);
+        }
+      }
+    } else if (statement is WhileStatement) {
+      while (BadgerUtils.asBoolean(await _resolveValue(statement.condition, context: context))) {
+        var value = await _evaluateBlock(statement.block.statements, context: context);
+
+        if (value == _BREAK_NOW) {
+          return value;
+        }
+      }
+    } else if (statement is ForInStatement) {
+      var i = statement.identifier;
+      var n = await _resolveValue(statement.value, context: context);
+      call(value) async {
+        var c = context.fork();
+        c.setVariable(i, value);
+        return await _evaluateBlock(statement.block.statements, context: c);
+      }
+      if (n is Stream) {
+        await for (var x in n) {
+          var result = await call(x);
+
+          if (result == _BREAK_NOW) {
+            break;
+          }
+        }
+      } else {
+        for (var x in n) {
+          call(x);
+        }
+      }
     } else if (statement is FunctionDefinition) {
       var name = statement.name;
       var argnames = statement.args;
       var block = statement.block;
 
-      context.define(name, (args) {
+      context.define(name, (args) async {
         var i = 0;
-        var inputs = {};
+        var inputs = {
+        };
         for (var n in args) {
           if (i >= argnames.length) {
             break;
@@ -94,8 +149,10 @@ class Evaluator {
           c.setVariable(n, inputs[n]);
         }
 
-        return _evaluateBlock(block.statements, context: c);
+        return await _evaluateBlock(block.statements, context: c);
       });
+    } else if (statement is BreakStatement) {
+      return _BREAK_NOW;
     } else {
       throw new Exception("Unable to Execute Statement");
     }
@@ -103,37 +160,80 @@ class Evaluator {
     return null;
   }
 
-  dynamic _resolveValue(Expression expr, {Context context}) {
+  _resolveValue(Expression expr, {Context context}) async {
     if (context == null) {
       context = globalContext;
     }
 
     if (expr is StringLiteral) {
-      var components = expr.components.map((it) {
+      var components = [];
+      for (var it in expr.components) {
         if (it is Expression) {
-          return _resolveValue(it, context: context);
+          components.add(await _resolveValue(it, context: context));
         } else {
-          return it;
+          components.add(it);
         }
-      }).join();
-      return components;
+      }
+      return components.join();
     } else if (expr is IntegerLiteral) {
       return expr.value;
     } else if (expr is VariableReference) {
       return context.getVariable(expr.identifier);
-    } else if (expr is MethodCall) {
-      var args = expr.args.map((it) =>_resolveValue(it, context: context)).toList();
-      return context.invoke(expr.identifier, args);
-    } else if (expr is ListDefinition) {
-      return expr.elements.map((it) =>_resolveValue(it, context: context)).toList();
-    } else if (expr is BracketAccess) {
-      var index = _resolveValue(expr.index);
+    } else if (expr is AnonymousFunction) {
+      var argnames = expr.args;
+      var block = expr.block;
+      var func = (args) async {
+        var i = 0;
+        var inputs = {
+        };
+        for (var n in args) {
+          if (i >= argnames.length) {
+            break;
+          }
+          inputs[argnames[i]] = n;
+          i++;
+        }
+        var c = context.fork();
 
-      if (features.contains("one based index")) {
+        for (var n in inputs.keys) {
+          c.setVariable(n, inputs[n]);
+        }
+
+        return await _evaluateBlock(block.statements, context: c);
+      };
+
+      return func;
+    } else if (expr is MethodCall) {
+      var x = [];
+      for (var e in expr.args) {
+        x.add(await _resolveValue(e, context: context));
+      }
+      return await context.invoke(expr.identifier, x);
+    } else if (expr is TernaryOperator) {
+      var value = await _resolveValue(expr.condition, context: context);
+      var c = BadgerUtils.asBoolean(value);
+
+      if (c) {
+        return await _resolveValue(expr.whenTrue, context: context);
+      } else {
+        return await _resolveValue(expr.whenFalse, context: context);
+      }
+    } else if (expr is ListDefinition) {
+      var x = [];
+      for (var e in expr.elements) {
+        x.add(await _resolveValue(e, context: context));
+      }
+      return x;
+    } else if (expr is BooleanLiteral) {
+      return expr.value;
+    } else if (expr is BracketAccess) {
+      var index = await _resolveValue(expr.index);
+
+      if (features.contains("one based index") && index is int) {
         index = index - 1;
       }
 
-      return _resolveValue(expr.reference, context: context)[index];
+      return (await _resolveValue(expr.reference, context: context))[index];
     } else {
       throw new Exception("Unable to Resolve Value: ${expr}");
     }

@@ -1,7 +1,7 @@
+import "dart:convert";
 import "dart:io";
 import "package:badger/parser.dart";
 import "package:badger/eval.dart";
-import "package:badger/io.dart";
 
 main() {
   var file = new File("example/test.badger");
@@ -14,12 +14,6 @@ main() {
   }
 
   var program = result.value;
-
-  var context = new Context();
-  StandardLibrary.import(context);
-  IOLibrary.import(context);
-
-  var evaluator = new Evaluator(program, context);
-
-  evaluator.eval();
+  var j = new BadgerJsonBuilder(program);
+  print(new JsonEncoder.withIndent("  ").convert(j.build()));
 }

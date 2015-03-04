@@ -1,7 +1,6 @@
 import "dart:io";
 import "package:badger/parser.dart";
-import "package:badger/eval.dart";
-import "package:badger/io.dart";
+import "package:badger/compiler.dart";
 
 main() {
   var file = new File("example/test.badger");
@@ -13,13 +12,9 @@ main() {
     throw new Exception(result.toString());
   }
 
-  var program = result.value;
+  var value = result.value;
 
-  var context = new Context();
-  StandardLibrary.import(context);
-  IOLibrary.import(context);
-
-  var evaluator = new Evaluator(program, context);
-
-  evaluator.eval();
+  var target = new JsTarget();
+  var js = target.compile(value);
+  print(js.trim());
 }

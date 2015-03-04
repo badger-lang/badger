@@ -2,19 +2,63 @@ part of badger.eval;
 
 typedef BadgerFunction(List<dynamic> args);
 
+abstract class BadgerObject {
+  bool asBoolean() => true;
+  dynamic getValue() => this;
+}
+
+class Immutable extends BadgerObject {
+  final dynamic value;
+
+  Immutable(this.value);
+
+  @override
+  dynamic getValue() {
+    return value;
+  }
+}
+
+class BadgerUtils {
+  static bool asBoolean(value) {
+    if (value == null) {
+      return false;
+    } else if (value == VOID) {
+      return false;
+    } else if (value is int) {
+      return value != 0;
+    } else if (value is double) {
+      return value != 0.0;
+    } else if (value is String) {
+      return value.isNotEmpty;
+    } else if (value is bool) {
+      return value;
+    } else if (value is BadgerObject) {
+      return value.asBoolean();
+    } else {
+      return true;
+    }
+  }
+}
+
 class Context {
-  static int ctxId = 0;
+  final Context parent;
 
-  final int id;
-
-  Context() : id = ctxId++;
+  Context([this.parent]);
 
   Map<String, BadgerFunction> functions = {};
   Map<String, dynamic> variables = {};
 
   dynamic getVariable(String name) {
     if (variables.containsKey(name)) {
-      return variables[name];
+      var x = variables[name];
+
+      if (x is Immutable) {
+        x = x.value;
+      }
+
+      return x;
+    } else if (parent != null && parent.hasVariable(name)) {
+      return parent.getVariable(name);
     } else {
       throw new Exception("Variable ${name} is not defined.");
     }
@@ -29,27 +73,52 @@ class Context {
   }
 
   Context fork() {
-    var context = new Context();
-    context.functions = new Map<String, BadgerFunction>.from(functions);
-    context.variables = new Map<String, dynamic>.from(variables);
-    return context;
+    return new Context(this);
+  }
+
+  bool hasFunction(String name) {
+    if (functions.containsKey(name)) {
+      return true;
+    } else if (variables.containsKey(name) && variables[name] is Function) {
+      return true;
+    } else if (parent != null && parent.hasFunction(name)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   dynamic invoke(String name, List<dynamic> args) {
     if (functions.containsKey(name)) {
       return functions[name](args);
+    } else if (variables.containsKey(name) && variables[name] is Function) {
+      return variables[name](args);
+    } else if (parent != null && parent.hasFunction(name)) {
+      return parent.invoke(name, args);
     } else {
       throw new Exception("Method ${name} is not defined.");
     }
   }
 
+  bool hasVariable(String name) {
+    return variables.containsKey(name) || (parent != null && parent.hasVariable(name));
+  }
+
   void setVariable(String name, dynamic value) {
-    variables[name] = value;
+    if (parent != null && parent.hasVariable(name)) {
+      parent.setVariable(name, value);
+    } else {
+      if (variables.containsKey(name) && variables[name] is Immutable) {
+        throw new Exception("Unable to set ${name}, it is immutable.");
+      }
+
+      variables[name] = value;
+    }
   }
 
   @override
   String toString() {
-    var buff = new StringBuffer("Context(\n  id: ${id},\n  variables: [\n");
+    var buff = new StringBuffer("Context(\nvariables: [\n");
     for (var v in variables.keys) {
       buff.writeln("    ${v}: ${variables[v]}");
     }

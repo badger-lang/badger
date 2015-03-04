@@ -23,6 +23,12 @@ class Block {
   String toString() => "Block(${statements})";
 }
 
+class BooleanLiteral extends Expression {
+  final bool value;
+
+  BooleanLiteral(String x) : value = x == "true";
+}
+
 class FunctionDefinition extends Statement {
   final String name;
   final List<String> args;
@@ -32,6 +38,47 @@ class FunctionDefinition extends Statement {
 
   @override
   String toString() => "FunctionDefinition(name: ${name}, args: ${args}, block: ${block})";
+}
+
+class AnonymousFunction extends Expression {
+  final List<String> args;
+  final Block block;
+
+  AnonymousFunction(this.args, this.block);
+}
+
+class BreakStatement extends Statement {
+}
+
+class IfStatement extends Statement {
+  final Expression condition;
+  final Block block;
+  final Block elseBlock;
+
+  IfStatement(this.condition, this.block, this.elseBlock);
+}
+
+class TernaryOperator extends Expression {
+  final Expression condition;
+  final Expression whenTrue;
+  final Expression whenFalse;
+
+  TernaryOperator(this.condition, this.whenTrue, this.whenFalse);
+}
+
+class ForInStatement extends Statement {
+  final String identifier;
+  final Expression value;
+  final Block block;
+
+  ForInStatement(this.identifier, this.value, this.block);
+}
+
+class WhileStatement extends Statement {
+  final Expression condition;
+  final Block block;
+
+  WhileStatement(this.condition, this.block);
 }
 
 class ReturnStatement extends Statement {
@@ -49,7 +96,7 @@ class StringLiteral extends Expression {
   StringLiteral(this.components);
 
   @override
-  String toString() => "StringLiteral(${value})";
+  String toString() => "StringLiteral(${components})";
 }
 
 class IntegerLiteral extends Expression {
@@ -71,10 +118,11 @@ class VariableReference extends Expression {
 }
 
 class Assignment extends Statement {
+  final bool immutable;
   final String identifier;
   final Expression value;
 
-  Assignment(this.identifier, this.value);
+  Assignment(this.identifier, this.value, this.immutable);
 
   @override
   String toString() => "Assignment(identifier: ${identifier}, value: ${value})";

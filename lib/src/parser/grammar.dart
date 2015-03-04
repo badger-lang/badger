@@ -2,25 +2,45 @@ part of badger.parser;
 
 class BadgerGrammarDefinition extends GrammarDefinition {
   @override
-  start() => ref(declarations).optional() &
+  start() => (ref(declarations).optional() &
     whitespace().star() &
-    ref(statement).separatedBy(whitespace().star());
+    ref(statement).separatedBy(whitespace().star()) & whitespace().star());
 
-  statement() => ref(methodCall) |
-    ref(assignment) |
-    ref(functionDefinition) |
-    ref(returnStatement);
+  statement() => (
+    (
+      ref(methodCall) |
+      ref(assignment) |
+      ref(functionDefinition) |
+      ref(whileStatement) |
+      ref(breakStatement) |
+      ref(forInStatement) |
+      ref(returnStatement) |
+      ref(ifStatement)
+    ) & char(";").optional()
+  ).pick(0);
+
+  breakStatement() => string("break");
+  booleanLiteral() => string("true") | string("false");
 
   methodCall() => ref(identifier) &
     char("(") &
-    ref(arguments).optional() &
+    ref(arguments, false).optional() &
     char(")");
 
-  arguments() => ref(expression).separatedBy(
+  arguments([bool allowAnd = false]) => ref(expression).separatedBy(
     whitespace().star() &
-    char(",") &
+    (allowAnd ? char(",") | string("and") : char(",")) &
     whitespace().star()
   );
+
+  forInStatement() => string("for") &
+    whitespace().plus() &
+    ref(identifier) &
+    whitespace().plus() &
+    string("in") &
+    whitespace().plus() &
+    ref(expression) &
+    ref(block);
 
   parens() => char("(") &
     ref(expression) &
@@ -33,9 +53,18 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   );
 
   listDefinition() => char("[") &
-    ref(arguments) &
+    ref(arguments, false) &
     char("]");
 
+  ternaryOperator() => ref(expression) &
+    whitespace().star() &
+    char("?") &
+    whitespace().star() &
+    char(":") &
+    whitespace().star() &
+    ref(expression);
+
+  comment() => char("#") & any() & char("\n");
   declarations() => ref(declaration).separatedBy(char("\n"));
   declaration() => ref(featureDeclaration);
 
@@ -67,22 +96,52 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   emptyListDefinition() => string("[]");
 
-  assignment() => ref(identifier) &
+  assignment() => ((string("let") | string("var")).flatten().optional() & whitespace().plus()).optional() &
+    ref(identifier) &
     whitespace().star() &
-    char("=") &
+    string("=") &
     whitespace().star() &
     ref(expression);
 
   variableReference() => ref(identifier);
-  expression() =>
-    ref(emptyListDefinition) |
-    ref(listDefinition) |
-    ref(stringLiteral) |
-    ref(integerLiteral) |
-    ref(methodCall) |
-    ref(parens) |
-    ref(bracketAccess) |
-    ref(variableReference);
+  expression() => (
+    (
+      ref(anonymousFunction) |
+      ref(emptyListDefinition) |
+      ref(listDefinition) |
+      ref(stringLiteral) |
+      ref(integerLiteral) |
+      ref(methodCall) |
+      ref(parens) |
+      ref(bracketAccess) |
+      ref(booleanLiteral) |
+      ref(variableReference)
+    ) & char(";").optional()
+  ).pick(0);
+
+  ifStatement() => string("if") &
+    whitespace().plus() &
+    ref(expression) &
+    whitespace().plus() &
+    ref(block) & (
+    whitespace().star() &
+    string("else") &
+    ref(block)
+  ).optional();
+
+  whileStatement() => string("while") &
+    whitespace().plus() &
+    ref(expression) &
+    whitespace().plus() &
+    ref(block);
+
+  anonymousFunction() => char("(") &
+    ref(identifier).separatedBy(
+      whitespace().star() &
+      char(",") &
+      whitespace().star()
+    ).optional() & whitespace().star() & string(") ->") &
+    ref(block);
 
   integerLiteral() => digit().plus().flatten();
 
@@ -97,8 +156,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression) &
     char(")");
 
-  character() => pattern("A-Za-z0-9{}[] ");
-  identifier() => pattern("A-Za-z_+-").plus();
+  character() => pattern("A-Za-z0-9{}[] ") | anyIn([".", "/", ":"]);
+  identifier() => (
+    pattern("A-Za-z_+-") | anyIn(["\$", "&", "^", "!", "<", ">", "="])
+  ).plus();
 }
 
 class BadgerGrammar extends GrammarParser {
