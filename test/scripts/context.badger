@@ -1,5 +1,8 @@
 let myctx = currentContext()
 let emptyctx = newContext()
 
-print(myctx)
-print(emptyctx)
+shouldThrow(() -> {
+  withContext(() -> {
+    print(emptyctx)
+  }, emptyctx)
+})

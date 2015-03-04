@@ -61,7 +61,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   integerLiteral() => super.integerLiteral().map((it) {
-    return new IntegerLiteral(int.parse(it[0]));
+    return new IntegerLiteral(int.parse(it));
   });
 
   @override

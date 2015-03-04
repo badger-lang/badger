@@ -13,6 +13,18 @@ class StandardLibrary {
       });
     });
 
+    context.define("*", (args) {
+      return args[0] * args[1];
+    });
+
+    context.define("/", (args) {
+      return args[0] / args[1];
+    });
+
+    context.define("~/", (args) {
+      return args[0] ~/ args[1];
+    });
+
     context.define("-", (args) {
       return args[0] - args[1];
     });
@@ -28,6 +40,10 @@ class StandardLibrary {
       return ctx.run(() {
         return func([]);
       });
+    });
+
+    context.define("currentContext", (args) {
+      return Context.current;
     });
 
     context.define("newContext", (args) {
@@ -52,10 +68,6 @@ class StandardLibrary {
       } else if (x is Context) {
         return x.variables.keys.toList();
       }
-    });
-
-    context.define("currentContext", (args) {
-      return Context.current;
     });
 
     context.define(">=", (args) {
@@ -104,6 +116,36 @@ class IOLibrary {
       client.close();
 
       return text;
+    });
+  }
+}
+
+class TestingLibrary {
+  static void import(Context context) {
+    context.define("testEqual", (args) {
+      var a = args[0];
+      var b = args[1];
+
+      var result = a == b;
+
+      if (!result) {
+        throw new Exception("Test failed: ${a} != ${b}");
+      }
+    });
+
+    context.define("shouldThrow", (args) {
+      var func = args[0];
+      var threw = false;
+
+      try {
+        func();
+      } catch (e) {
+        threw = true;
+      }
+
+      if (!threw) {
+        throw new Exception("Function did not throw an exception.");
+      }
     });
   }
 }

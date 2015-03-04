@@ -58,20 +58,19 @@ class Evaluator {
   }
 
   _evaluateStatement(Statement statement) async {
-    var ctx = Context.current;
     if (statement is MethodCall) {
       var args = [];
       for (var s in statement.args) {
         args.add(await _resolveValue(s));
       }
 
-      return await ctx.invoke(statement.identifier, args);
+      return await Context.current.invoke(statement.identifier, args);
     } else if (statement is Assignment) {
       var value = await _resolveValue(statement.value);
       if (statement.immutable) {
         value = new Immutable(value);
       }
-      ctx.setVariable(statement.identifier, value);
+      Context.current.setVariable(statement.identifier, value);
       return value;
     } else if (statement is ReturnStatement) {
       var value = null;
@@ -84,7 +83,7 @@ class Evaluator {
     } else if (statement is IfStatement) {
       var value = await _resolveValue(statement.condition);
       var c = BadgerUtils.asBoolean(value);
-      return ctx.createContext(() async {
+      return Context.current.createContext(() async {
         if (c) {
           return await _evaluateBlock(statement.block.statements);
         } else {
@@ -106,7 +105,7 @@ class Evaluator {
       var n = await _resolveValue(statement.value);
 
       call(value) async {
-        return ctx.createContext(() async {
+        return Context.current.createContext(() async {
           Context.current.setVariable(i, value);
           return await _evaluateBlock(statement.block.statements);
         });
@@ -130,7 +129,7 @@ class Evaluator {
       var argnames = statement.args;
       var block = statement.block;
 
-      ctx.define(name, (args) async {
+      Context.current.define(name, (args) async {
         var i = 0;
         var inputs = {};
 
@@ -142,7 +141,7 @@ class Evaluator {
           i++;
         }
 
-        return ctx.createContext(() async {
+        return Context.current.createContext(() async {
           var cmt = Context.current;
           for (var n in inputs.keys) {
             cmt.setVariable(n, inputs[n]);
@@ -161,8 +160,6 @@ class Evaluator {
   }
 
   _resolveValue(Expression expr) async {
-    var ctx = Context.current;
-
     if (expr is StringLiteral) {
       var components = [];
       for (var it in expr.components) {
@@ -176,7 +173,7 @@ class Evaluator {
     } else if (expr is IntegerLiteral) {
       return expr.value;
     } else if (expr is VariableReference) {
-      return ctx.getVariable(expr.identifier);
+      return Context.current.getVariable(expr.identifier);
     } else if (expr is AnonymousFunction) {
       var argnames = expr.args;
       var block = expr.block;
@@ -192,7 +189,7 @@ class Evaluator {
           i++;
         }
 
-        return ctx.createContext(() async {
+        return Context.current.createContext(() async {
           var c = Context.current;
 
           for (var n in inputs.keys) {
@@ -209,7 +206,7 @@ class Evaluator {
       for (var e in expr.args) {
         x.add(await _resolveValue(e));
       }
-      return await ctx.invoke(expr.identifier, x);
+      return await Context.current.invoke(expr.identifier, x);
     } else if (expr is TernaryOperator) {
       var value = await _resolveValue(expr.condition);
       var c = BadgerUtils.asBoolean(value);

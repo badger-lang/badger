@@ -7,7 +7,7 @@ void main() {
 
   for (File file in dir.listSync(recursive: true).where((it) => it is File && it.path.endsWith(".badger"))) {
     var content = file.readAsStringSync();
-    var name = file.path.replaceAll(dir.path, "");
+    var name = file.path.replaceAll(dir.path + "/", "");
     print("== Script ${name} ==");
     var parser = new BadgerParser();
     var result = parser.parse(content);
@@ -22,6 +22,7 @@ void main() {
     var context = new Context();
     StandardLibrary.import(context);
     IOLibrary.import(context);
+    TestingLibrary.import(context);
     evaluator.eval(context);
   }
 }
