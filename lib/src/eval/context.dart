@@ -47,6 +47,7 @@ class Context {
 
   Map<String, BadgerFunction> functions = {};
   Map<String, dynamic> variables = {};
+  Map<String, dynamic> meta = {};
 
   dynamic getVariable(String name) {
     if (variables.containsKey(name)) {
@@ -114,15 +115,15 @@ class Context {
     return variables.containsKey(name) || (parent != null && parent.hasVariable(name));
   }
 
-  void setVariable(String name, dynamic value) {
+  dynamic setVariable(String name, dynamic value) {
     if (parent != null && parent.hasVariable(name)) {
-      parent.setVariable(name, value);
+      return parent.setVariable(name, value);
     } else {
       if (variables.containsKey(name) && variables[name] is Immutable) {
         throw new Exception("Unable to set ${name}, it is immutable.");
       }
 
-      variables[name] = value;
+      return variables[name] = value;
     }
   }
 

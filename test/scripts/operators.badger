@@ -1,14 +1,16 @@
-let x = 5
-let y = 5
+test("Operators produce correct values", () -> {
+  let x = 5
+  let y = 5
 
-testEqual(x + y, 10)
-testEqual(x * y, 25)
-testEqual(x / y, 1)
-testEqual(x ~/ y, 1)
-testEqual(x < y, false)
-testEqual(x > y, false)
-testEqual(x == y, true)
-testEqual(true && true, true)
-testEqual(true && false, false)
-testEqual(true || false, true)
-testEqual(false || false, false)
+  testEqual(x + y, 10)
+  testEqual(x * y, 25)
+  testEqual(x / y, 1)
+  testEqual(x ~/ y, 1)
+  testEqual(x < y, false)
+  testEqual(x > y, false)
+  testEqual(x == y, true)
+  testEqual(true && true, true)
+  testEqual(true && false, false)
+  testEqual(true || false, true)
+  testEqual(false || false, false)
+})

@@ -1,3 +1,5 @@
-let deadBeef = 0xDEADBEEF
+test("Hexadecimal is interpreted correctly", () -> {
+  let deadBeef = 0xDEADBEEF
 
-testEqual(deadBeef, 3735928559)
+  testEqual(deadBeef, 3735928559)
+})

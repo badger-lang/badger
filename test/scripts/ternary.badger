@@ -1,9 +1,7 @@
-let x = 0
-
-m = x == 1
-
-testEqual(m ? 5 : 0, 0)
-
-m = x == 0
-
-testEqual(m ? 0 : 5, 0)
+test("Ternary operator produces correct results", () -> {
+  let x = 0
+  var m = x == 1
+  testEqual(m ? 5 : 0, 0)
+  m = x == 0
+  testEqual(m ? 0 : 5, 0)
+})

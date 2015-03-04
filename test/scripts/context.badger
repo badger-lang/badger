@@ -1,8 +1,10 @@
-let myctx = currentContext()
-let emptyctx = newContext()
+test("Context does not leak into another context", () -> {
+  let myctx = currentContext()
+  let emptyctx = newContext()
 
-shouldThrow(() -> {
-  withContext(() -> {
-    print(emptyctx)
-  }, emptyctx)
+  shouldThrow(() -> {
+    withContext(() -> {
+      print(emptyctx)
+    }, emptyctx)
+  })
 })

@@ -72,6 +72,19 @@ class IOLibrary {
 
 class TestingLibrary {
   static void import(Context context) {
+    context.define("test", (args) {
+      var name = args[0];
+      var func = args[1];
+
+      if (!Context.current.meta.containsKey("__tests__")) {
+        Context.current.meta["__tests__"] = [];
+      }
+
+      var tests = Context.current.meta["__tests__"];
+
+      tests.add([name, func]);
+    });
+
     context.define("testEqual", (args) {
       var a = args[0];
       var b = args[1];
@@ -83,18 +96,41 @@ class TestingLibrary {
       }
     });
 
-    context.define("shouldThrow", (args) {
+    context.define("shouldThrow", (args) async {
       var func = args[0];
       var threw = false;
 
       try {
-        func();
+        await func([]);
       } catch (e) {
         threw = true;
       }
 
       if (!threw) {
         throw new Exception("Function did not throw an exception.");
+      }
+    });
+
+    context.define("runTests", (args) async {
+      if (!Context.current.meta.containsKey("__tests__")) {
+        print("No Tests Defined");
+      } else {
+        var tests = Context.current.meta["__tests__"];
+
+        for (var test in tests) {
+          var name = test[0];
+          var func = test[1];
+
+          try {
+            await func([]);
+          } catch (e) {
+            print("== ${name}: Failure ==");
+            print(e.toString());
+            exit(1);
+          }
+
+          print("=== ${name}: Success ==");
+        }
       }
     });
   }

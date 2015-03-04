@@ -1,4 +1,6 @@
-let x = 5.0
-let y = 5.0
+test("Adding doubles produces correct result", () -> {
+  let x = 5.0
+  let y = 5.0
 
-testEqual(x + y, 10.0)
+  testEqual(x + y, 10.0)
+})

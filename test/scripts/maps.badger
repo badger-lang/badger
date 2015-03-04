@@ -1,7 +1,8 @@
-let map = {
-  "Hello": "World"
-}
+test("Bracket Access works with Map Keys", () -> {
+  let map = {
+    "Hello": "World"
+  }
 
-let world = map["Hello"]
-
-testEqual(world, "World")
+  let world = map["Hello"]
+  testEqual(world, "World")
+})

@@ -13,7 +13,7 @@ class FileEnvironment extends Environment {
   FileEnvironment(this.file);
 
   eval(Context context) async {
-    var program =_parse(await file.readAsString());
+    var program = _parse(await file.readAsString());
     return await new Evaluator(program, this).eval(context);
   }
 
