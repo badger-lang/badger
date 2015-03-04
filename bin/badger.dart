@@ -33,4 +33,10 @@ main(List<String> args) async {
 
   var env = new FileEnvironment(file);
   await env.eval(context);
+
+  if (opts["test"] && !(context.meta["tests.ran"] == true)) {
+    await context.run(() async {
+      await context.invoke("runTests", []);
+    });
+  }
 }

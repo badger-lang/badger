@@ -112,6 +112,8 @@ class TestingLibrary {
     });
 
     context.define("runTests", (args) async {
+      Context.current.meta["tests.ran"] = true;
+
       if (!Context.current.meta.containsKey("__tests__")) {
         print("No Tests Defined");
       } else {
