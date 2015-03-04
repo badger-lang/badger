@@ -1,0 +1,5 @@
+let myctx = currentContext()
+let emptyctx = newContext()
+
+print(myctx)
+print(emptyctx)

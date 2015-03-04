@@ -117,7 +117,7 @@ class Context {
   }
 
    dynamic run(void c()) {
-    return Zone.current.fork(zoneValues: {
+    return Zone.ROOT.fork(zoneValues: {
       "context": this
     }).run(c);
   }
