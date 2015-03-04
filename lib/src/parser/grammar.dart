@@ -17,7 +17,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(breakStatement) |
       ref(forInStatement) |
       ref(returnStatement) |
-      ref(ifStatement)
+      ref(ifStatement) |
+      ref(expression)
     ) & char(";").optional()
   ).pick(0);
 
@@ -162,6 +163,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(hexadecimalLiteral) |
       ref(doubleLiteral) |
       ref(integerLiteral) |
+      ref(simpleAnonymousFunction) |
       ref(anonymousFunction) |
       ref(emptyListDefinition) |
       ref(listDefinition) |
@@ -183,6 +185,15 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     string("else") &
     ref(block)
   ).optional();
+
+  simpleAnonymousFunction() => char("(") &
+    ref(identifier).separatedBy(
+      whitespace().star() &
+      char(",") &
+      whitespace().star()
+    ).optional() & whitespace().star() & string(") =>") &
+    whitespace().star() &
+    ref(expression);
 
   whileStatement() => string("while") &
     whitespace().plus() &

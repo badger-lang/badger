@@ -49,7 +49,7 @@ class StandardLibrary {
     });
 
     context.define("run", (args) {
-      return args[0]([]);
+      return args[0](args.skip(1).toList());
     });
   }
 }

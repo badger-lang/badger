@@ -96,16 +96,22 @@ class Evaluator {
     ctx.merge(c);
   }
 
-  _evaluateBlock(List<Statement> statements) async {
+  _evaluateBlock(List<dynamic> statements) async {
     for (var statement in statements) {
-      var value = await _evaluateStatement(statement);
+      if (statement is Statement) {
+        var value = await _evaluateStatement(statement);
 
-      if (value != null) {
-        if (value is ReturnValue) {
-          return value.value;
-        } else if (value == _BREAK_NOW) {
-          return _BREAK_NOW;
+        if (value != null) {
+          if (value is ReturnValue) {
+            return value.value;
+          } else if (value == _BREAK_NOW) {
+            return _BREAK_NOW;
+          }
         }
+      } else if (statement is Expression) {
+        return await _resolveValue(statement);
+      } else {
+        throw new Exception("Invalid Block Statement");
       }
     }
 

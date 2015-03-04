@@ -223,7 +223,7 @@ class PlusOperator extends Expression {
 }
 
 class Program {
-  final List<Statement> statements;
+  final List<dynamic> statements;
   final List<Declaration> declarations;
 
   Program(this.declarations, this.statements);

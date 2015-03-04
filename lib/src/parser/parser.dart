@@ -35,6 +35,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  simpleAnonymousFunction() => super.simpleAnonymousFunction().map((it) {
+    return new AnonymousFunction(it[1], new Block([it[5]]));
+  });
+
+  @override
   mapEntry() => super.mapEntry().map((it) {
     return new MapEntry(it[0], it[4]);
   });

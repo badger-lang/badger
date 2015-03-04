@@ -1,0 +1,4 @@
+test("Simple Anonymous Functions are called and return a correct result", () -> {
+  let result = run(() => true)
+  testEqual(result, true)
+})
