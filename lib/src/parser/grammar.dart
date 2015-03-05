@@ -280,7 +280,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   character() => pattern("A-Za-z0-9{}[] ") | anyIn([".", "/", ":"]);
   identifier() => (
-    pattern("A-Za-z_+-") | anyIn(["\$", "&", "^", "!", "<", ">", "=", "/", "~"])
+    pattern("A-Za-z_") | anyIn(["\$"])
   ).plus();
 }
 
