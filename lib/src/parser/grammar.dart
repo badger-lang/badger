@@ -155,10 +155,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(greaterThanOrEqualOperator) |
     ref(lessThanOrEqualOperator) |
     ref(equalOperator) |
+    ref(negate) |
     ref(expressionItem);
 
   expressionItem() => (
     (
+      ref(rangeLiteral) |
       ref(mapDefinition) |
       ref(hexadecimalLiteral) |
       ref(doubleLiteral) |
@@ -175,6 +177,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(variableReference)
     ) & char(";").optional()
   ).pick(0);
+
+  negate() => char("!") & ref(expressionItem);
 
   ifStatement() => string("if") &
     whitespace().plus() &
@@ -213,6 +217,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     anyIn(["-", "+"]).optional() &
     digit().plus()
   ).flatten();
+
+  rangeLiteral() => (
+    ref(integerLiteral) &
+    string("..") &
+    ref(integerLiteral)
+  );
 
   hexadecimalLiteral() => (
     string("0x") &

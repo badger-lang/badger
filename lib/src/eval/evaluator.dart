@@ -272,6 +272,10 @@ class Evaluator {
         x.add(await _resolveValue(e));
       }
       return await Context.current.invoke(expr.identifier, x);
+    } else if (expr is Negate) {
+      return !(await _resolveValue(expr.expression));
+    } else if (expr is RangeLiteral) {
+      return _createRange(await _resolveValue(expr.left), await _resolveValue(expr.right));
     } else if (expr is TernaryOperator) {
       var value = await _resolveValue(expr.condition);
       var c = BadgerUtils.asBoolean(value);
@@ -346,6 +350,22 @@ class Evaluator {
       default:
         throw new Exception("Unsupported Operator");
     }
+  }
+}
+
+Iterable<int> _createRange(int lower, int upper, {bool inclusive: true, int step: 1}) {
+  if (step == 1) {
+    if (inclusive) {
+      return new Iterable<int>.generate(upper - lower + 1, (i) => lower + i);
+    } else {
+      return new Iterable<int>.generate(upper - lower - 1, (i) => lower + i + 1);
+    }
+  } else {
+    var list = [];
+    for (var i = inclusive ? lower : lower + step; inclusive ? i <= upper : i < upper; i += step) {
+      list.add(i);
+    }
+    return list;
   }
 }
 

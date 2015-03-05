@@ -66,6 +66,19 @@ class TernaryOperator extends Expression {
   TernaryOperator(this.condition, this.whenTrue, this.whenFalse);
 }
 
+class RangeLiteral extends Expression {
+  final Expression left;
+  final Expression right;
+
+  RangeLiteral(this.left, this.right);
+}
+
+class Negate extends Expression {
+  final Expression expression;
+
+  Negate(this.expression);
+}
+
 class Operator extends Expression {
   final Expression left;
   final Expression right;

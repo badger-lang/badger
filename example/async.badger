@@ -1,0 +1,3 @@
+async(() => print("Hello World"))
+async(() => print("End"))
+print("Start")

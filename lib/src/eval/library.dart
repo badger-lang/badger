@@ -52,6 +52,38 @@ class StandardLibrary {
       });
     });
 
+    context.define("chars", (args) {
+      return args[0].split("");
+    });
+
+    context.define("firstWhere", (args) {
+      return args[0].firstWhere((it) => args[1]([it]), orElse: () => null);
+    });
+
+    context.define("join", (args) {
+      return args[0].join(args[1]);
+    });
+
+    context.define("substring", (args) {
+      return args[0].substring(args[1], args[2]);
+    });
+
+    context.define("split", (args) {
+      return args[0].split(args[1]);
+    });
+
+    context.define("trim", (args) {
+      return args[0].trim();
+    });
+
+    context.define("lowercase", (args) {
+      return args[0].toLowerCase();
+    });
+
+    context.define("map", (args) {
+      return args[0].map((it) => args[1]([it])).toList();
+    });
+
     context.define("cancelTimer", (args) async {
       return args[0].cancel();
     });

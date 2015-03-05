@@ -50,6 +50,16 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  rangeLiteral() => super.rangeLiteral().map((it) {
+    return new RangeLiteral(it[0], it[2]);
+  });
+
+  @override
+  negate() => super.negate().map((it) {
+    return new Negate(it[1]);
+  });
+
+  @override
   arguments() => super.arguments().map((it) {
     return it.where((it) => it is Expression).toList();
   });
