@@ -1,81 +1,168 @@
 part of badger.compiler;
 
+class JsAstVisitor extends AstVisitor {
+  StringBuffer buff;
+
+  JsAstVisitor(this.buff);
+
+  void visitForInStatement(ForInStatement statement) {
+
+  }
+
+  void visitImportDeclaration(ImportDeclaration declaration) {
+
+  }
+
+  void visitFeatureDeclaration(FeatureDeclaration declaration) {
+
+  }
+
+  void visitIfStatement(IfStatement statement) {
+
+  }
+
+  void visitWhileStatement(WhileStatement statement) {
+
+  }
+
+  void visitReturnStatement(ReturnStatement statement) {
+
+  }
+
+  void visitBreakStatement(BreakStatement statement) {
+
+  }
+
+  void visitAssignment(Assignment assignment) {
+
+  }
+
+  void visitFunctionDefinition(FunctionDefinition definition) {
+
+  }
+
+  void visitMethodCall(MethodCall call) {
+    if(call.reference is String) {
+      this.buff.write("${call.reference}(");
+    }
+
+    for(var exp in call.args) {
+      this.visitExpression(exp);
+
+      if(call.args.indexOf(exp) != call.args.length - 1) {
+        this.buff.write(",");
+      }
+    }
+
+    this.buff.write(");");
+  }
+
+  void visitStringLiteral(StringLiteral literal) {
+    this.buff.write("'${literal.components.join()}'");
+  }
+
+  void visitIntegerLiteral(IntegerLiteral literal) {
+
+  }
+
+  void visitDoubleLiteral(DoubleLiteral literal) {
+
+  }
+
+  void visitRangeLiteral(RangeLiteral literal) {
+
+  }
+
+  void visitVariableReference(VariableReference reference) {
+
+  }
+
+  void visitListDefinition(ListDefinition definition) {
+
+  }
+
+  void visitMapDefinition(MapDefinition definition) {
+
+  }
+
+  void visitNegate(Negate negate) {
+
+  }
+
+  void visitBooleanLiteral(BooleanLiteral literal) {
+
+  }
+
+  void visitHexadecimalLiteral(HexadecimalLiteral literal) {
+
+  }
+
+  void visitOperator(Operator operator) {
+
+  }
+
+  void visitAccess(Access access) {
+
+  }
+
+  void visitBracketAccess(BracketAccess access) {
+
+  }
+
+  void visitTernaryOperator(TernaryOperator operator) {
+
+  }
+
+  void visitAnonymousFunction(AnonymousFunction function) {
+    this.buff.write("function(");
+
+    if(function.args != null)
+      this.buff.write(function.args.join(","));
+
+    this.buff.write("){");
+
+    for(var statement in function.block.statements) {
+      this.visitStatement(statement);
+
+      if(function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
+        this.buff.write(",");
+      }
+    }
+
+    this.buff.write("}.bind(this)");
+  }
+}
+
 class JsCompilerTarget extends CompilerTarget<String> {
+
+  StringBuffer buff = new StringBuffer();
+  List<String> _names = <String>[];
+  List<String> _bodies = <String>[];
+
+  JsCompilerTarget();
 
   @override
   String compile(Program program) {
-    var buff = new StringBuffer();
-    buff.write("(function() {");
+    addGlobal("print", "function(obj) { console.log(obj.toString()); }");
+    addGlobal("async", "function(cb) { setTimeout(cb, 0); }");
 
-    /*
-    for (var declaration in program.declarations) {
-      if (declaration is FeatureDeclaration) {
-        buff.writeln("Badger.usingFeature(\"" + declaration.feature.components.join() + "\");");
-      }
-    }
-    */
-
-    for (var statement in program.statements) {
-      buff.writeln(_compileStatement(statement));
-    }
-
-    buff.writeln("});");
+    writePrelude();
+    new JsAstVisitor(buff).visit(program);
+    writePostlude();
 
     return buff.toString();
   }
 
-  String _compileStatement(Statement statement) {
-    var buff = new StringBuffer();
-    if (statement is MethodCall) {
-      buff.write('Badger.callMethod("');
-      buff.write(statement.identifier);
-      buff.write('", [');
-
-      var expressions = statement.args.map(_compileExpression).join(", ");
-
-      buff.write(expressions);
-
-      buff.write("]);");
-      return buff.toString();
-    } else if (statement is Assignment) {
-      buff.write('Badger.setVariable("${statement.identifier}", ${_compileExpression(statement.value)}, ${statement.immutable});');
-      return buff.toString();
-    } else {
-      throw new Exception("Unsupported");
-    }
+  void addGlobal(String name, String body) {
+    _names.add(name);
+    _bodies.add(body);
   }
 
-  String _compileExpression(Expression expr) {
-    var buff = new StringBuffer();
-    if (expr is StringLiteral) {
-      var lastWasExpr = false;
-      buff.write('"');
-      for (var c in expr.components) {
-        if (c is String) {
-          if (lastWasExpr) {
-            buff.write('"');
-          }
+  void writePrelude() {
+    buff.write("(function(${_names.join(",")}){");
+  }
 
-          buff.write(c);
-        } else {
-          lastWasExpr = true;
-          buff.write('" + ' + _compileExpression(c));
-        }
-      }
-
-      if (!lastWasExpr) {
-        buff.write('"');
-      }
-
-      return buff.toString();
-    }  else if (expr is IntegerLiteral) {
-      buff.write(expr.value);
-      return buff.toString();
-    } else if (expr is VariableReference) {
-      buff.write('Badger.getVariable("${expr.identifier}")');
-      return buff.toString();
-    } else {
-      throw new Exception("Unsupported");
-    }
+  void writePostlude() {
+    buff.write("})(${_bodies.join(",")});");
   }
 }
