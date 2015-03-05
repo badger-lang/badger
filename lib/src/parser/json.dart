@@ -216,20 +216,20 @@ class BadgerJsonParser {
     } else if (type == "assignment") {
       return new Assignment(it["identifier"], _buildExpression(it["value"]), it["immutable"]);
     } else if (type == "function definition") {
-      return new FunctionDefinition(it["identifier"], it["args"], it["block"].map(_buildStatement).toList());
+      return new FunctionDefinition(it["identifier"], it["args"], new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "while") {
-      return new WhileStatement(_buildExpression(it["condition"]), it["block"].map(_buildStatement).toList());
+      return new WhileStatement(_buildExpression(it["condition"]), new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "if") {
       return new IfStatement(
         _buildExpression(it["condition"]),
-        it["block"].map(_buildStatement).toList(),
-        it["elseBlock"] == null ? null : it["elseBlok"].map(_buildStatement).toList()
+        new Block(it["block"].map(_buildStatement).toList()),
+        new Block(it["elseBlock"] == null ? [] : it["elseBlock"].map(_buildStatement).toList())
       );
     } else if (type == "for in") {
       return new ForInStatement(
         it["identifier"],
         _buildExpression(it["value"]),
-        it["block"].map(_buildStatement).toList()
+        new Block(it["block"].map(_buildStatement).toList())
       );
     } else if (type == "return") {
       return new ReturnStatement(
