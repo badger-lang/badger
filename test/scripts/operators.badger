@@ -1,16 +1,40 @@
-test("Operators produce correct values", () -> {
-  let x = 5
-  let y = 5
+let x = 5
+let y = 5
 
+test("Addition operator produces correct values", () -> {
   testEqual(x + y, 10)
+})
+
+test("Multiplication operator produces correct values", () -> {
   testEqual(x * y, 25)
+})
+
+test("Division operator produces correct values", () -> {
   testEqual(x / y, 1)
+})
+
+test("Integer Division produces correct values", () -> {
   testEqual(x ~/ y, 1)
+})
+
+test("Less than operator produces correct values", () -> {
   testEqual(x < y, false)
+})
+
+test("Greater than operator produces correct values", () -> {
   testEqual(x > y, false)
+})
+
+test("Equals operator produces correct values", () -> {
   testEqual(x == y, true)
+})
+
+test("And operator produces correct values", () -> {
   testEqual(true && true, true)
   testEqual(true && false, false)
+})
+
+test("Or operator produces correct values", () -> {
   testEqual(true || false, true)
   testEqual(false || false, false)
 })

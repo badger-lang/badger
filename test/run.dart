@@ -12,27 +12,24 @@ main() async {
     }
 
     var env = new FileEnvironment(file);
-    {
-      var context = new Context();
-      StandardLibrary.import(context);
-      IOLibrary.import(context);
-      TestingLibrary.import(context);
-      await env.eval(context);
-      await context.run(() async {
-        await context.invoke("runTests", ["Parser AST"]);
-      });
-    }
 
-    {
-      var context = new Context();
-      StandardLibrary.import(context);
-      IOLibrary.import(context);
-      TestingLibrary.import(context);
-      await env.buildEvalJSON(context);
-      await context.run(() async {
-        await context.invoke("runTests", ["JSON AST"]);
-      });
-    }
+    var context = new Context();
+    StandardLibrary.import(context);
+    IOLibrary.import(context);
+    TestingLibrary.import(context);
+    await env.eval(context);
+    await context.run(() async {
+      await context.invoke("runTests", ["Parser AST"]);
+    });
+
+    context = new Context();
+    StandardLibrary.import(context);
+    IOLibrary.import(context);
+    TestingLibrary.import(context);
+    await env.buildEvalJSON(context);
+    await context.run(() async {
+      await context.invoke("runTests", ["JSON AST"]);
+    });
   }
 }
 

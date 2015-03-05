@@ -121,7 +121,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   booleanLiteral() => super.booleanLiteral().map((it) {
-    return new BooleanLiteral(it);
+    return new BooleanLiteral(it == "true");
   });
 
   @override

@@ -177,6 +177,13 @@ class BadgerJsonBuilder {
         "reference": _generateExpression(expression.reference),
         "index": _generateExpression(expression.index)
       };
+    } else if (expression is TernaryOperator) {
+      return {
+        "type": "ternary",
+        "condition": _generateExpression(expression.condition),
+        "whenTrue": _generateExpression(expression.whenTrue),
+        "whenFalse": _generateExpression(expression.whenFalse)
+      };
     } else if (expression is AnonymousFunction) {
       return {
         "type": "anonymous function",
@@ -193,7 +200,7 @@ class BadgerJsonBuilder {
     }
   }
 
-  Map _generateStringLiteralComponents(List<dynamic> components) {
+  List<dynamic> _generateStringLiteralComponents(List<dynamic> components) {
     var cm = [];
     for (var c in components) {
       if (c is Expression) {
@@ -287,6 +294,12 @@ class BadgerJsonParser {
       return new HexadecimalLiteral(it["value"]);
     } else if (type == "boolean literal") {
       return new BooleanLiteral(it["value"]);
+    } else if (type == "ternary") {
+      return new TernaryOperator(
+        _buildExpression(it["condition"]),
+        _buildExpression(it["whenTrue"]),
+        _buildExpression(it["whenFalse"])
+      );
     } else if (type == "map definition") {
       return new MapDefinition(it["entries"].map(_buildExpression).toList());
     } else if (type == "map entry") {

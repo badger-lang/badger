@@ -26,7 +26,7 @@ class Block {
 class BooleanLiteral extends Expression {
   final bool value;
 
-  BooleanLiteral(String x) : value = x == "true";
+  BooleanLiteral(this.value);
 }
 
 class FunctionDefinition extends Statement {
