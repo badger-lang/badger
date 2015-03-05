@@ -1,6 +1,6 @@
 part of badger.compiler;
 
-class JsTarget extends Target<String> {
+class JsCompilerTarget extends CompilerTarget<String> {
 
   @override
   String compile(Program program) {

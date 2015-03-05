@@ -1,6 +1,6 @@
 part of badger.compiler;
 
-class AstTarget extends Target<String> {
+class AstCompilerTarget extends CompilerTarget<String> {
   @override
   String compile(Program program) {
     var ast = new BadgerJsonBuilder(program);

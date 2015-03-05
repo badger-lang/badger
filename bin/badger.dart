@@ -7,7 +7,7 @@ import "package:badger/eval.dart";
 main(List<String> args) async {
   var argp = new ArgParser();
   argp.addFlag("test", negatable: false, abbr: "t", help: "Runs the script in a testing environment.");
-  argp.addOption("compile", abbr: "c", defaultsTo: "none", allowed: ["none", "ast", "js"]);
+  argp.addOption("compile", abbr: "c", defaultsTo: "none", allowed: ["none", "ast", "js", "badger"], help: "Compiles Badger Code");
 
   var opts = argp.parse(args);
 
@@ -38,12 +38,18 @@ main(List<String> args) async {
   var env = new FileEnvironment(file);
 
   if (opts["compile"] != null && opts["compile"] != "none") {
-    Target<String> target;
+    var name = opts["compile"];
+    CompilerTarget<String> target;
 
-    if (opts["compile"] == "ast") {
-      target = Target.AST_TARGET;
-    } else if(opts["compile"] == "js") {
-      target = Target.JS_TARGET;
+    if (name == "ast") {
+      target = CompilerTarget.AST;
+    } else if (name == "js") {
+      target = CompilerTarget.JS;
+    } else if (name == "badger") {
+      target = CompilerTarget.BADGER;
+    } else {
+      print("Unknown Compiler Target: ${name}");
+      exit(1);
     }
 
     var program = await env.parse();

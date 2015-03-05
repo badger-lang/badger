@@ -115,7 +115,11 @@ class Context {
     return variables.containsKey(name) || (parent != null && parent.hasVariable(name));
   }
 
-  dynamic setVariable(String name, dynamic value) {
+  dynamic setVariable(String name, dynamic value, [bool checkExists = false]) {
+    if (checkExists && hasVariable(name)) {
+      throw new Exception("Unable to set ${name}, it is already defined.");
+    }
+
     if (parent != null && parent.hasVariable(name)) {
       return parent.setVariable(name, value);
     } else {

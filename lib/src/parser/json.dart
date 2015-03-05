@@ -60,7 +60,8 @@ class BadgerJsonBuilder {
         "type": "assignment",
         "identifier": statement.identifier,
         "value": _generateExpression(statement.value),
-        "immutable": statement.immutable
+        "immutable": statement.immutable,
+        "isInitialDefine": statement.isInitialDefine
       };
     } else if (statement is FunctionDefinition) {
       return {
@@ -243,7 +244,7 @@ class BadgerJsonParser {
     if (type == "method call") {
       return _buildMethodCall(it);
     } else if (type == "assignment") {
-      return new Assignment(it["identifier"], _buildExpression(it["value"]), it["immutable"]);
+      return new Assignment(it["identifier"], _buildExpression(it["value"]), it["immutable"], it["isInitialDefine"]);
     } else if (type == "function definition") {
       return new FunctionDefinition(it["identifier"], it["args"], new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "while") {

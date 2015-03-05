@@ -1,8 +1,9 @@
 part of badger.compiler;
 
-abstract class Target<T> {
-  static final Target<String> JS_TARGET = new JsTarget();
-  static final Target<String> AST_TARGET = new AstTarget();
+abstract class CompilerTarget<T> {
+  static final CompilerTarget<String> JS = new JsCompilerTarget();
+  static final CompilerTarget<String> AST = new AstCompilerTarget();
+  static final CompilerTarget<String> BADGER = new BadgerCompilerTarget();
 
   T compile(Program program);
 }

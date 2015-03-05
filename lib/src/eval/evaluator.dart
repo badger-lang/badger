@@ -156,10 +156,12 @@ class Evaluator {
       return await Context.current.invoke(statement.identifier, args);
     } else if (statement is Assignment) {
       var value = await _resolveValue(statement.value);
+
       if (statement.immutable) {
         value = new Immutable(value);
       }
-      Context.current.setVariable(statement.identifier, value);
+
+      Context.current.setVariable(statement.identifier, value, statement.isInitialDefine);
       return value;
     } else if (statement is ReturnStatement) {
       var value = null;

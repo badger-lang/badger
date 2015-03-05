@@ -1,7 +1,9 @@
 part of badger.parser;
 
 abstract class Statement {}
+
 abstract class Expression {}
+
 abstract class Declaration {}
 
 class MethodCall extends Expression with Statement {
@@ -157,8 +159,9 @@ class Assignment extends Statement {
   final bool immutable;
   final String identifier;
   final Expression value;
+  final bool isInitialDefine;
 
-  Assignment(this.identifier, this.value, this.immutable);
+  Assignment(this.identifier, this.value, this.immutable, this.isInitialDefine);
 
   @override
   String toString() => "Assignment(identifier: ${identifier}, value: ${value})";
