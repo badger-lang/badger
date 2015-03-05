@@ -2,117 +2,18 @@ part of badger.eval;
 
 class StandardLibrary {
   static void import(Context context) {
-    context.define("print", (args) => print(args.join("\n")));
-    context.define("withContext", (args) {
-      var func = args[0];
-      var ctx = args[1];
+    context.proxy("print", print);
+    context.proxy("currentContext", () => Context.current);
+    context.proxy("newContext", () => new Context());
+    context.proxy("run", (func) => func([]));
+  }
+}
 
-      return ctx.run(() {
-        return func([]);
-      });
-    });
+class NativeHelper {
+  static LibraryMirror getLibrary(String name) {
+    var symbol = new Symbol(name);
 
-    context.define("currentContext", (args) {
-      return Context.current;
-    });
-
-    context.define("newContext", (args) {
-      return new Context();
-    });
-
-    context.define("keys", (args) {
-      var x = args[0];
-
-      if (x is Map) {
-        return x.keys.toList();
-      } else if (x is List) {
-        return new List<int>.generate(x.length, (i) => i);
-      } else if (x is Context) {
-        return x.variables.keys.toList();
-      }
-    });
-
-    context.define("parseJSON", (args) {
-      var x = args.join();
-
-      return JSON.decode(x);
-    });
-
-    context.define("createPeriodicTimer", (args) async {
-      var timer = new Timer.periodic(new Duration(milliseconds: args[0]), (t) {
-        args[1]([]);
-      });
-
-      return timer;
-    });
-
-    context.define("async", (args) async {
-      Timer.run(() {
-        args[0]([]);
-      });
-    });
-
-    context.define("chars", (args) {
-      return args[0].split("");
-    });
-
-    context.define("firstWhere", (args) {
-      return args[0].firstWhere((it) => args[1]([it]), orElse: () => null);
-    });
-
-    context.define("join", (args) {
-      return args[0].join(args[1]);
-    });
-
-    context.define("substring", (args) {
-      return args[0].substring(args[1], args[2]);
-    });
-
-    context.define("split", (args) {
-      return args[0].split(args[1]);
-    });
-
-    context.define("trim", (args) {
-      return args[0].trim();
-    });
-
-    context.define("lowercase", (args) {
-      return args[0].toLowerCase();
-    });
-
-    context.define("map", (args) {
-      return args[0].map((it) => args[1]([it])).toList();
-    });
-
-    context.define("cancelTimer", (args) async {
-      return args[0].cancel();
-    });
-
-    context.define("isTimerActive", (args) {
-      return args[0].isActive;
-    });
-
-    context.define("createTimer", (args) {
-      var timer = new Timer(new Duration(milliseconds: args[0]), () {
-        args[1]([]);
-      });
-
-      return timer;
-    });
-
-    context.define("encodeJSON", (args) {
-      args = [args[0], args.length == 2 ? args[1] : false];
-      var input = args[0];
-      if (args[1] == true) {
-        return new JsonEncoder.withIndent("  ").convert(input);
-      } else {
-        return JSON.encode(input);
-      }
-    });
-
-    context.define("run", (args) {
-      return args[0](args.skip(1).toList());
-    });
+    return currentMirrorSystem().findLibrary(symbol);
   }
 }
 
@@ -134,10 +35,7 @@ class IOLibrary {
 
 class TestingLibrary {
   static void import(Context context) {
-    context.define("test", (args) {
-      var name = args[0];
-      var func = args[1];
-
+    context.define("test", (name, func) {
       if (!Context.current.meta.containsKey("__tests__")) {
         Context.current.meta["__tests__"] = [];
       }
@@ -147,10 +45,7 @@ class TestingLibrary {
       tests.add([name, func]);
     });
 
-    context.define("testEqual", (args) {
-      var a = args[0];
-      var b = args[1];
-
+    context.define("testEqual", (a, b) {
       var result = a == b;
 
       if (!result) {
@@ -158,8 +53,7 @@ class TestingLibrary {
       }
     });
 
-    context.define("shouldThrow", (args) async {
-      var func = args[0];
+    context.define("shouldThrow", (func) async {
       var threw = false;
 
       try {
@@ -173,9 +67,7 @@ class TestingLibrary {
       }
     });
 
-    context.define("runTests", (args) async {
-      var prefix = args.length == 0 ? null : args[0];
-
+    context.define("runTests", ([prefix]) async {
       Context.current.meta["tests.ran"] = true;
 
       if (!Context.current.meta.containsKey("__tests__")) {

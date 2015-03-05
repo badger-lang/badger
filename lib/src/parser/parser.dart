@@ -99,6 +99,10 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
     return new Assignment(it[1], it[5], it[0] != null ? it[0][0] == "let" : false, it[0] != null);
   });
 
+  accessAssignment() => super.accessAssignment().map((it) {
+    return new Assignment(it[0], it[4], false, false);
+  });
+
   @override
   forInStatement() => super.forInStatement().map((it) {
     return new ForInStatement(it[2], it[6], it[7]);

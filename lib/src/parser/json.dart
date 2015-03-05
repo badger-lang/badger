@@ -52,13 +52,13 @@ class BadgerJsonBuilder {
     if (statement is MethodCall) {
       return {
         "type": "method call",
-        "identifier": statement.identifier,
+        "reference": statement.reference is String ? statement.reference : _generateExpression(statement.reference),
         "args": _generateExpressions(statement.args)
       };
     } else if (statement is Assignment) {
       return {
         "type": "assignment",
-        "identifier": statement.identifier,
+        "reference": statement.reference is String ? statement.reference : _generateExpression(statement.reference),
         "value": _generateExpression(statement.value),
         "immutable": statement.immutable,
         "isInitialDefine": statement.isInitialDefine
@@ -130,7 +130,7 @@ class BadgerJsonBuilder {
     } else if (expression is MethodCall) {
       return {
         "type": "method call",
-        "identifier": expression.identifier,
+        "reference": expression.reference is String ? expression.reference : _generateExpression(expression.reference),
         "args": _generateExpressions(expression.args)
       };
     } else if (expression is Operator) {
@@ -244,7 +244,12 @@ class BadgerJsonParser {
     if (type == "method call") {
       return _buildMethodCall(it);
     } else if (type == "assignment") {
-      return new Assignment(it["identifier"], _buildExpression(it["value"]), it["immutable"], it["isInitialDefine"]);
+      return new Assignment(
+        it["reference"] is String ? it["reference"] : _buildExpression(it["reference"]),
+        _buildExpression(it["value"]),
+        it["immutable"],
+        it["isInitialDefine"]
+      );
     } else if (type == "function definition") {
       return new FunctionDefinition(it["identifier"], it["args"], new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "while") {
@@ -317,10 +322,14 @@ class BadgerJsonParser {
   }
 
   MethodCall _buildMethodCall(Map it) {
-    var id = it["identifier"];
+    var ref = it["reference"];
     var args = it["args"].map(_buildExpression).toList();
 
-    return new MethodCall(id, args);
+    if (ref is Map) {
+      ref = _buildExpression(ref);
+    }
+
+    return new MethodCall(ref, args);
   }
 
   StringLiteral _buildStringLiteral(List components) {

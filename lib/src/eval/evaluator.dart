@@ -149,11 +149,21 @@ class Evaluator {
   _evaluateStatement(Statement statement) async {
     if (statement is MethodCall) {
       var args = [];
+
       for (var s in statement.args) {
         args.add(await _resolveValue(s));
       }
 
-      return await Context.current.invoke(statement.identifier, args);
+      var ref = statement.reference;
+
+      if (ref is String) {
+        return await Context.current.invoke(ref, args);
+      } else {
+        var v = await _resolveValue(ref.reference);
+        var n = ref.identifier;
+
+        return BadgerUtils.getProperty(n, v);
+      }
     } else if (statement is Assignment) {
       var value = await _resolveValue(statement.value);
 
@@ -161,7 +171,21 @@ class Evaluator {
         value = new Immutable(value);
       }
 
-      Context.current.setVariable(statement.identifier, value, statement.isInitialDefine);
+      var ref = statement.reference;
+
+      if (ref is String) {
+        Context.current.setVariable(ref, value, statement.isInitialDefine);
+      } else {
+        var n = ref.identifier;
+        var x = await _resolveValue(ref.reference);
+
+        if (x is BadgerObject) {
+          x.setProperty(n, value);
+        } else {
+          BadgerUtils.setProperty(n, value, x);
+        }
+      }
+
       return value;
     } else if (statement is ReturnStatement) {
       var value = null;
@@ -276,8 +300,8 @@ class Evaluator {
       var block = expr.block;
       var func = (args) async {
         var i = 0;
-        var inputs = {
-        };
+        var inputs = {};
+
         for (var n in args) {
           if (i >= argnames.length) {
             break;
@@ -297,13 +321,26 @@ class Evaluator {
         });
       };
 
-      return func;
+      return new Interceptor((a, b) {
+        return Function.apply(func, a);
+      });
     } else if (expr is MethodCall) {
-      var x = [];
-      for (var e in expr.args) {
-        x.add(await _resolveValue(e));
+      var args = [];
+
+      for (var s in expr.args) {
+        args.add(await _resolveValue(s));
       }
-      return await Context.current.invoke(expr.identifier, x);
+
+      var ref = expr.reference;
+
+      if (ref is String) {
+        return await Context.current.invoke(ref, args);
+      } else {
+        var v = await _resolveValue(ref.reference);
+        var n = ref.identifier;
+
+        return Function.apply(BadgerUtils.getProperty(n, v), args);
+      }
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 

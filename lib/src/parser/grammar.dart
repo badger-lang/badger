@@ -7,12 +7,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(statement).separatedBy(whitespace().star()) &
     whitespace().star()
-  ).end();
+  );
 
   statement() => (
     (
-      ref(methodCall) |
+      ref(accessAssignment) |
       ref(assignment) |
+      ref(methodCall) |
       ref(functionDefinition) |
       ref(whileStatement) |
       ref(breakStatement) |
@@ -26,7 +27,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   breakStatement() => string("break");
   booleanLiteral() => string("true") | string("false");
 
-  methodCall() => ref(identifier) &
+  methodCall() => (ref(access) | ref(identifier)) &
     char("(") &
     ref(arguments).optional() &
     char(")");
@@ -140,6 +141,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(expression);
 
+  accessAssignment() =>
+    ref(access) &
+    whitespace().star() &
+    string("=") &
+    whitespace().star() &
+    ref(expression);
+
   variableReference() => ref(identifier);
   expression() => ref(ternaryOperator) |
     ref(plusOperator) |
@@ -159,21 +167,14 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(negate) |
     ref(expressionItem);
 
-  accessible() => ref(methodCall) |
-    ref(variableReference) |
-    ref(listDefinition) |
-    ref(mapDefinition) |
-    ref(stringLiteral) |
-    ref(integerLiteral) |
-    ref(doubleLiteral) |
-    ref(emptyListDefinition);
+  accessible() => ref(variableReference);
 
   access() => ref(accessible) &
-    char(".") &
-    ref(identifier);
+    char(".") & ref(identifier);
 
   expressionItem() => (
     (
+      ref(methodCall) |
       ref(access) |
       ref(rangeLiteral) |
       ref(mapDefinition) |
@@ -185,7 +186,6 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(emptyListDefinition) |
       ref(listDefinition) |
       ref(stringLiteral) |
-      ref(methodCall) |
       ref(parens) |
       ref(bracketAccess) |
       ref(booleanLiteral) |

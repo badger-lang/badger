@@ -7,13 +7,13 @@ abstract class Expression {}
 abstract class Declaration {}
 
 class MethodCall extends Expression with Statement {
-  final String identifier;
+  final dynamic reference;
   final List<Expression> args;
 
-  MethodCall(this.identifier, this.args);
+  MethodCall(this.reference, this.args);
 
   @override
-  String toString() => "MethodCall(identifier: ${identifier}, args: ${args})";
+  String toString() => "MethodCall(reference: ${reference}, args: ${args})";
 }
 
 class Block {
@@ -164,14 +164,14 @@ class VariableReference extends Expression {
 
 class Assignment extends Statement {
   final bool immutable;
-  final String identifier;
+  final dynamic reference;
   final Expression value;
   final bool isInitialDefine;
 
-  Assignment(this.identifier, this.value, this.immutable, this.isInitialDefine);
+  Assignment(this.reference, this.value, this.immutable, this.isInitialDefine);
 
   @override
-  String toString() => "Assignment(identifier: ${identifier}, value: ${value})";
+  String toString() => "Assignment(identifier: ${reference}, value: ${value})";
 }
 
 class ListDefinition extends Expression {

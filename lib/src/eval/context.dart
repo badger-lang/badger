@@ -8,6 +8,29 @@ abstract class BadgerObject {
   dynamic getProperty(String name) {
     return BadgerUtils.getProperty(name, this);
   }
+  void setProperty(String name, dynamic value) {
+    BadgerUtils.setProperty(name, value, this);
+  }
+}
+
+typedef InterceptionHandler(List<dynamic> positional, Map<Symbol, dynamic> named);
+
+class Interceptor {
+  final InterceptionHandler handler;
+
+  Interceptor(this.handler);
+
+  @override
+  noSuchMethod(inv) {
+    if (!inv.isAccessor && inv.memberName == #call) {
+      var positional = inv.positionalArguments;
+      var named = inv.namedArguments;
+
+      return handler(positional, named);
+    } else {
+      return super.noSuchMethod(inv);
+    }
+  }
 }
 
 class Immutable extends BadgerObject {
@@ -23,9 +46,21 @@ class Immutable extends BadgerObject {
 
 class BadgerUtils {
   static dynamic getProperty(String name, obj) {
-    var mirror = reflect(obj);
-    var field = mirror.getField(MirrorSystem.getSymbol(name));
+    ObjectMirror f;
+    if (obj is Type) {
+      f = reflectClass(obj);
+    } else {
+      f = reflect(obj);
+    }
+
+    var field = f.getField(MirrorSystem.getSymbol(name));
+
     return field.reflectee;
+  }
+
+  static void setProperty(String name, value, obj) {
+    var mirror = reflect(obj);
+    mirror.setField(MirrorSystem.getSymbol(name), value);
   }
 
   static bool asBoolean(value) {
@@ -48,6 +83,7 @@ class BadgerUtils {
     }
   }
 }
+
 
 class Context extends BadgerObject {
   final Context parent;
@@ -74,8 +110,20 @@ class Context extends BadgerObject {
     }
   }
 
-  void define(String name, BadgerFunction function) {
-    functions[name] = function;
+  void define(String name, Function function) {
+    functions[name] = (args) {
+      return Function.apply(function, args);
+    };
+  }
+
+  void proxy(String name, dynamic value) {
+    if (value is Function) {
+      functions[name] = (args) {
+        return Function.apply(value, args);
+      };
+    } else {
+      variables[name] = value;
+    }
   }
 
   void defun(String name, BadgerFunction function) {
@@ -169,6 +217,11 @@ class Context extends BadgerObject {
     } else {
       throw new Exception("Failed to get property ${name} on context.");
     }
+  }
+
+  @override
+  void setProperty(String name, dynamic value) {
+    setVariable(name, value);
   }
 
   dynamic createContext(void handler()) {
