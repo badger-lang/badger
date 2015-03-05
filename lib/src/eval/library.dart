@@ -76,8 +76,28 @@ class IOLibrary {
   }
 }
 
+enum TestResultType {
+  SUCCESS, FAILURE
+}
+
+class TestResult {
+  final String name;
+  final TestResultType type;
+  final String message;
+
+  TestResult(this.name, this.type, [this.message]);
+}
+
 class TestingLibrary {
-  static void import(Context context) {
+  static void _defaultResultHandler(TestResult result) {
+    var status = result.type == TestResultType.SUCCESS ? "Success" : "Failure";
+    print("${result.name}: ${status}");
+    if (result.message != null && result.message.isNotEmpty) {
+      print(result.message);
+    }
+  }
+
+  static void import(Context context, {void handleTestResult(TestResult result): _defaultResultHandler}) {
     context.define("test", (name, func) {
       if (!Context.current.meta.containsKey("__tests__")) {
         Context.current.meta["__tests__"] = [];
@@ -110,11 +130,11 @@ class TestingLibrary {
       }
     });
 
-    context.define("runTests", ([prefix]) async {
+    context.define("runTests", () async {
       Context.current.meta["tests.ran"] = true;
 
       if (!Context.current.meta.containsKey("__tests__")) {
-        print("${prefix != null ? '[${prefix}] ' : ''}No Tests Defined");
+        return false;
       } else {
         var tests = Context.current.meta["__tests__"];
 
@@ -125,13 +145,13 @@ class TestingLibrary {
           try {
             await func([]);
           } catch (e) {
-            print("${prefix != null ? '[${prefix}] ' : ''}${name}: Failure");
-            print(e.toString());
-            exit(1);
+            handleTestResult(new TestResult(name, TestResultType.FAILURE, e.toString()));
+            continue;
           }
 
-          print("${prefix != null ? '[${prefix}] ' : ''}${name}: Success");
+          handleTestResult(new TestResult(name, TestResultType.SUCCESS));
         }
+        return true;
       }
     });
   }

@@ -28,11 +28,11 @@ class FileEnvironment extends Environment {
   }
 
   Future<Program> parseJSON() async {
-    return new BadgerJsonParser(JSON.decode(await file.readAsString())).build();
+    return new BadgerJsonParser().build(JSON.decode(await file.readAsString()));
   }
 
   Future<Program> _parseJSON(String content) async {
-    return new BadgerJsonParser(JSON.decode(content)).build();
+    return new BadgerJsonParser().build(JSON.decode(content));
   }
 
   buildEvalJSON(Context ctx) async {
@@ -42,7 +42,7 @@ class FileEnvironment extends Environment {
   Program _parse(String content) {
     try {
       var json = JSON.decode(content);
-      return new BadgerJsonParser(json).build();
+      return new BadgerJsonParser().build(json);
     } catch (e) {
     }
 

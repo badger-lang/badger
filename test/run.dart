@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 import "package:badger/eval.dart";
 
@@ -17,9 +18,11 @@ main() async {
     StandardLibrary.import(context);
     IOLibrary.import(context);
     TestingLibrary.import(context);
+    print("[Parser Tests]");
     await env.eval(context);
+
     await context.run(() async {
-      await context.invoke("runTests", ["Parser AST"]);
+      await context.invoke("runTests", []);
     });
 
     context = new Context();
@@ -27,9 +30,9 @@ main() async {
     IOLibrary.import(context);
     TestingLibrary.import(context);
     await env.buildEvalJSON(context);
+    print("[JSON AST Tests]");
     await context.run(() async {
-      await context.invoke("runTests", ["JSON AST"]);
+      await context.invoke("runTests", []);
     });
   }
 }
-
