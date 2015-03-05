@@ -302,6 +302,16 @@ class Evaluator {
         x.add(await _resolveValue(e));
       }
       return await Context.current.invoke(expr.identifier, x);
+    } else if (expr is Access) {
+      var value = await _resolveValue(expr.reference);
+
+      if (value is BadgerObject) {
+        return value.getProperty(expr.identifier);
+      } else {
+        return BadgerUtils.getProperty(expr.identifier, value);
+      }
+
+      return value;
     } else if (expr is Negate) {
       return !(await _resolveValue(expr.expression));
     } else if (expr is RangeLiteral) {

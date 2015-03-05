@@ -159,8 +159,22 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(negate) |
     ref(expressionItem);
 
+  accessible() => ref(methodCall) |
+    ref(variableReference) |
+    ref(listDefinition) |
+    ref(mapDefinition) |
+    ref(stringLiteral) |
+    ref(integerLiteral) |
+    ref(doubleLiteral) |
+    ref(emptyListDefinition);
+
+  access() => ref(accessible) &
+    char(".") &
+    ref(identifier);
+
   expressionItem() => (
     (
+      ref(access) |
       ref(rangeLiteral) |
       ref(mapDefinition) |
       ref(hexadecimalLiteral) |

@@ -5,6 +5,9 @@ typedef BadgerFunction(List<dynamic> args);
 abstract class BadgerObject {
   bool asBoolean() => true;
   dynamic getValue() => this;
+  dynamic getProperty(String name) {
+    return BadgerUtils.getProperty(name, this);
+  }
 }
 
 class Immutable extends BadgerObject {
@@ -19,6 +22,12 @@ class Immutable extends BadgerObject {
 }
 
 class BadgerUtils {
+  static dynamic getProperty(String name, obj) {
+    var mirror = reflect(obj);
+    var field = mirror.getField(MirrorSystem.getSymbol(name));
+    return field.reflectee;
+  }
+
   static bool asBoolean(value) {
     if (value == null) {
       return false;

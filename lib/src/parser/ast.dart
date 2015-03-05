@@ -113,6 +113,13 @@ class ReturnStatement extends Statement {
   String toString() => "ReturnStatement(${expression})";
 }
 
+class Access extends Expression {
+  final Expression reference;
+  final String identifier;
+
+  Access(this.reference, this.identifier);
+}
+
 class StringLiteral extends Expression {
   final List<dynamic> components;
 
