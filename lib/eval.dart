@@ -11,3 +11,4 @@ import "package:path/path.dart" as pathlib;
 part "src/eval/evaluator.dart";
 part "src/eval/context.dart";
 part "src/eval/library.dart";
+part "src/eval/utils.dart";

@@ -286,14 +286,29 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(recordEntry) &
     whitespace().star() &
-    char("}");
+    char("}") &
+    whitespace().star();
 
   recordEntry() => (ref(identifier) &
     whitespace().plus()).optional() &
     ref(identifier) &
     char(";").optional();
 
-  character() => pattern("A-Za-z0-9{}[] ") | anyIn([".", "/", ":"]);
+  character() => ref(unicodeEscape) |
+    ref(characterEscape) |
+    pattern("A-Za-z0-9{}[] ") |
+    anyIn([".", "/", ":"]);
+
+  unicodeEscape() => (
+    string("\\u") &
+    pattern("A-Fa-f0-9").times(4)
+  ).flatten();
+
+  characterEscape() => (
+    string("\\") &
+    pattern(_decodeTable.keys.join())
+  ).flatten();
+
   identifier() => (
     pattern("A-Za-z_") | anyIn(["\$"])
   ).plus();

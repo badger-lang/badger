@@ -1,3 +1,0 @@
-let joined = args.join(", ")
-
-print(joined)

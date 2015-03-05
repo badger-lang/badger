@@ -23,3 +23,14 @@ class IndentedStringBuffer extends StringBuffer {
     level--;
   }
 }
+
+final Map<String, String> _decodeTable = const {
+  '\\': '\\',
+  '/': '/',
+  '"': '"',
+  'b': '\b',
+  'f': '\f',
+  'n': '\n',
+  'r': '\r',
+  't': '\t'
+};

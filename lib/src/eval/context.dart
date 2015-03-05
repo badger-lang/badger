@@ -49,7 +49,7 @@ class BadgerUtils {
   }
 }
 
-class Context {
+class Context extends BadgerObject {
   final Context parent;
 
   Context([this.parent]);
@@ -120,6 +120,18 @@ class Context {
     }
   }
 
+  Function getFunction(String name) {
+    if (functions.containsKey(name)) {
+      return functions[name];
+    } else if (variables.containsKey(name) && variables[name] is Function) {
+      return variables[name];
+    } else if (parent != null && parent.hasFunction(name)) {
+      return parent.getFunction(name);
+    } else {
+      throw new Exception("Method ${name} is not defined.");
+    }
+  }
+
   bool hasVariable(String name) {
     return variables.containsKey(name) || (parent != null && parent.hasVariable(name));
   }
@@ -146,34 +158,18 @@ class Context {
     }).run(c);
    }
 
-  @override
-  String toString() {
-    var buff = new StringBuffer("Context(\n  variables: [\n");
-    for (var v in variables.keys) {
-      var value = variables[v];
-
-      if (value is Immutable) {
-        value = value.value;
-      } else if (value is BadgerObject) {
-        value = value.getValue();
-      }
-
-      if (value == this) {
-        buff.writeln("    ${v}: (self)");
-      } else {
-        buff.writeln("    ${v}: ${value}");
-      }
-    }
-    buff.write("  ],\n  functions: [\n");
-    for (var m in functions.keys) {
-      buff.writeln("    ${m}: ${functions[m]}");
-    }
-    buff.write("  ]");
-    buff.write("\n)");
-    return buff.toString();
-  }
-
   static Context get current => Zone.current["context"];
+
+  @override
+  dynamic getProperty(String name) {
+    if (hasVariable(name)) {
+      return getVariable(name);
+    } else if (hasFunction(name)) {
+      return getFunction(name);
+    } else {
+      throw new Exception("Failed to get property ${name} on context.");
+    }
+  }
 
   dynamic createContext(void handler()) {
     var ctx = fork();
