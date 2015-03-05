@@ -214,7 +214,7 @@ class MapDefinition extends Expression {
   MapDefinition(this.entries);
 }
 
-class MapEntry {
+class MapEntry extends Expression {
   final Expression key;
   final Expression value;
 
@@ -226,13 +226,6 @@ class RecordEntry {
   final String name;
 
   RecordEntry(this.type, this.name);
-}
-
-class PlusOperator extends Expression {
-  final Expression left;
-  final Expression right;
-
-  PlusOperator(this.left, this.right);
 }
 
 class Program {

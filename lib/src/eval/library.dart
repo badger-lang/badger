@@ -174,10 +174,12 @@ class TestingLibrary {
     });
 
     context.define("runTests", (args) async {
+      var prefix = args.length == 0 ? null : args[0];
+
       Context.current.meta["tests.ran"] = true;
 
       if (!Context.current.meta.containsKey("__tests__")) {
-        print("No Tests Defined");
+        print("${prefix != null ? '[${prefix}] ' : ''}No Tests Defined");
       } else {
         var tests = Context.current.meta["__tests__"];
 
@@ -188,12 +190,12 @@ class TestingLibrary {
           try {
             await func([]);
           } catch (e) {
-            print("== ${name}: Failure ==");
+            print("${prefix != null ? '[${prefix}] ' : ''}${name}: Failure");
             print(e.toString());
             exit(1);
           }
 
-          print("=== ${name}: Success ==");
+          print("${prefix != null ? '[${prefix}] ' : ''}${name}: Success");
         }
       }
     });

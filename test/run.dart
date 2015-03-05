@@ -3,13 +3,8 @@ import "package:badger/eval.dart";
 
 main() async {
   var dir = new Directory("test/scripts");
-  var context = new Context();
-  StandardLibrary.import(context);
-  IOLibrary.import(context);
-  TestingLibrary.import(context);
 
   await for (File file in dir.list(recursive: true).where((it) => it is File && it.path.endsWith(".badger"))) {
-    var content = await file.readAsString();
     var name = file.path.replaceAll(dir.path + "/", "");
 
     if (name.startsWith("imports/") || name.startsWith("prototype/")) {
@@ -17,11 +12,27 @@ main() async {
     }
 
     var env = new FileEnvironment(file);
-    await env.eval(context);
-  }
+    {
+      var context = new Context();
+      StandardLibrary.import(context);
+      IOLibrary.import(context);
+      TestingLibrary.import(context);
+      await env.eval(context);
+      await context.run(() async {
+        await context.invoke("runTests", ["Parser AST"]);
+      });
+    }
 
-  await context.run(() async {
-    await context.invoke("runTests", []);
-  });
+    {
+      var context = new Context();
+      StandardLibrary.import(context);
+      IOLibrary.import(context);
+      TestingLibrary.import(context);
+      await env.buildEvalJSON(context);
+      await context.run(() async {
+        await context.invoke("runTests", ["JSON AST"]);
+      });
+    }
+  }
 }
 

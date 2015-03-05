@@ -48,7 +48,7 @@ class BadgerJsonBuilder {
     };
   }
 
-  Map _generateStatement(Statement statement) {
+  Map _generateStatement(dynamic statement) {
     if (statement is MethodCall) {
       return {
         "type": "method call",
@@ -99,7 +99,7 @@ class BadgerJsonBuilder {
         "type": "break"
       };
     } else {
-      throw new Exception("Failed to generate statement.");
+      return _generateExpression(statement);
     }
   }
 
@@ -160,14 +160,36 @@ class BadgerJsonBuilder {
         "type": "variable reference",
         "identifier": expression.identifier
       };
+    } else if (expression is MapDefinition) {
+      return {
+        "type": "map definition",
+        "entries": _generateExpressions(expression.entries)
+      };
+    } else if (expression is MapEntry) {
+      return {
+        "type": "map entry",
+        "key": _generateExpression(expression.key),
+        "value": _generateExpression(expression.value)
+      };
     } else if (expression is BracketAccess) {
       return {
         "type": "bracket access",
         "reference": _generateExpression(expression.reference),
         "index": _generateExpression(expression.index)
       };
+    } else if (expression is AnonymousFunction) {
+      return {
+        "type": "anonymous function",
+        "args": expression.args,
+        "block": _generateStatements(expression.block.statements)
+      };
+    } else if (expression is BooleanLiteral) {
+      return {
+        "type": "boolean literal",
+        "value": expression.value
+      };
     } else {
-      throw new Exception("Failed to generate expression.");
+      throw new Exception("Failed to generate expression for ${expression}");
     }
   }
 
@@ -263,10 +285,18 @@ class BadgerJsonParser {
       return new RangeLiteral(_buildExpression(it["left"]), _buildExpression(it["right"]));
     } else if (type == "hexadecimal literal") {
       return new HexadecimalLiteral(it["value"]);
+    } else if (type == "boolean literal") {
+      return new BooleanLiteral(it["value"]);
+    } else if (type == "map definition") {
+      return new MapDefinition(it["entries"].map(_buildExpression).toList());
+    } else if (type == "map entry") {
+      return new MapEntry(_buildExpression(it["key"]), _buildExpression(it["value"]));
     } else if (type == "list definition") {
       return new ListDefinition(it["elements"].map(_buildExpression).toList());
     } else if (type == "bracket access") {
       return new BracketAccess(_buildExpression(it["reference"]), _buildExpression(it["index"]));
+    } else if (type == "anonymous function") {
+      return new AnonymousFunction(it["args"], new Block(it["block"].map(_buildStatement).toList()));
     } else {
       throw new Exception("Failed to build expression.");
     }
