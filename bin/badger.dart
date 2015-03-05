@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:io";
 import "package:args/args.dart";
 import "package:badger/eval.dart";
@@ -5,6 +6,7 @@ import "package:badger/eval.dart";
 main(List<String> args) async {
   var argp = new ArgParser();
   argp.addFlag("test", negatable: false, abbr: "t", help: "Runs the script in a testing environment.");
+  argp.addFlag("generate-json", negatable: false, abbr: "j", help: "Generate JSON from the AST");
   var opts = argp.parse(args);
 
   if (opts.rest.isEmpty) {
@@ -32,6 +34,15 @@ main(List<String> args) async {
   }
 
   var env = new FileEnvironment(file);
+
+  if (opts["generate-json"]) {
+    var json = await env.generateJSON();
+    var encoder = new JsonEncoder.withIndent("  ");
+
+    print(encoder.convert(json));
+    exit(0);
+  }
+
   await env.eval(context);
 
   if (opts["test"] && !(context.meta["tests.ran"] == true)) {

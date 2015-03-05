@@ -26,6 +26,8 @@ class BadgerJsonBuilder {
     return declarations.map((it) {
       if (it is FeatureDeclaration) {
         return _generateFeatureDeclaration(it);
+      } else if (it is ImportDeclaration) {
+        return _generateImportDeclaration(it);
       } else {
         throw new Exception("Unable to generate declaration.");
       }
@@ -36,6 +38,13 @@ class BadgerJsonBuilder {
     return {
       "type": "feature declaration",
       "feature": _generateStringLiteralComponents(decl.feature.components)
+    };
+  }
+
+  Map _generateImportDeclaration(ImportDeclaration decl) {
+    return {
+      "type": "import declaration",
+      "location": _generateStringLiteralComponents(decl.location.components)
     };
   }
 
@@ -123,10 +132,28 @@ class BadgerJsonBuilder {
         "identifier": expression.identifier,
         "args": _generateExpressions(expression.args)
       };
+    } else if (expression is Operator) {
+      return {
+        "type": "operator",
+        "left": _generateExpression(expression.left),
+        "right": _generateExpression(expression.right),
+        "op": expression.op
+      };
+    } else if (expression is Negate) {
+      return {
+        "type": "negate",
+        "value": _generateExpression(expression.expression)
+      };
     } else if (expression is ListDefinition) {
       return {
         "type": "list definition",
         "elements": _generateExpressions(expression.elements)
+      };
+    } else if (expression is RangeLiteral) {
+      return {
+        "type": "range literal",
+        "left": _generateExpression(expression.left),
+        "right": _generateExpression(expression.right)
       };
     } else if (expression is VariableReference) {
       return {
@@ -174,12 +201,14 @@ class BadgerJsonParser {
 
     if (type == "feature declaration") {
       return new FeatureDeclaration(_buildStringLiteral(it["feature"]));
+    } else if (type == "import declaration") {
+      return new ImportDeclaration(_buildStringLiteral(it["location"]));
     } else {
       throw new Exception("Invalid Declaration");
     }
   }
 
-  Statement _buildStatement(Map it) {
+  dynamic _buildStatement(Map it) {
     var type = it["type"];
 
     if (type == "method call") {
@@ -209,7 +238,7 @@ class BadgerJsonParser {
     } else if (type == "break") {
       return new BreakStatement();
     } else {
-      throw new Exception("Failed to build statement.");
+      return _buildExpression(it);
     }
   }
 
@@ -226,6 +255,12 @@ class BadgerJsonParser {
       return new IntegerLiteral(it["value"]);
     } else if (type == "double literal") {
       return new DoubleLiteral(it["value"]);
+    } else if (type == "operator") {
+      return new Operator(_buildExpression(it["left"]), _buildExpression(it["right"]), it["op"]);
+    } else if (type == "negate") {
+      return new Negate(_buildExpression(it["value"]));
+    } else if (type == "range literal") {
+      return new RangeLiteral(_buildExpression(it["left"]), _buildExpression(it["right"]));
     } else if (type == "hexadecimal literal") {
       return new HexadecimalLiteral(it["value"]);
     } else if (type == "list definition") {

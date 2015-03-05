@@ -8,6 +8,8 @@ abstract class Environment {
 }
 
 class FileEnvironment extends Environment {
+  static final BadgerParser _parser = new BadgerParser();
+
   final File file;
 
   FileEnvironment(this.file);
@@ -17,8 +19,22 @@ class FileEnvironment extends Environment {
     return await new Evaluator(program, this).eval(context);
   }
 
+  Future<Program> parse() async {
+    return _parse(await file.readAsString());
+  }
+
+  Future<Map> generateJSON() async {
+    return new BadgerJsonBuilder(await parse()).build();
+  }
+
   Program _parse(String content) {
-    return new BadgerParser().parse(content).value;
+    try {
+      var json = JSON.decode(content);
+      return new BadgerJsonParser(json).build();
+    } catch (e) {
+    }
+
+    return _parser.parse(content).value;
   }
 
   @override
