@@ -1,43 +1,25 @@
 part of badger.compiler;
 
-const String JS_HEADER = """
-var Badger = {};
-
-Badger.callMethod = function (name, args) {
-};
-
-Badger.getVariable = function (name, value) {
-};
-
-Badger.asBoolean = function (value) {
-};
-
-Badger.createContext = function (parent) {
-};
-
-(function () {
-""";
-
-const String JS_FOOTER = """
-)();
-""";
-
 class JsTarget extends Target<String> {
+
   @override
   String compile(Program program) {
-    var buff = new StringBuffer(JS_HEADER);
+    var buff = new StringBuffer();
+    buff.write("(function() {");
 
+    /*
     for (var declaration in program.declarations) {
       if (declaration is FeatureDeclaration) {
         buff.writeln("Badger.usingFeature(\"" + declaration.feature.components.join() + "\");");
       }
     }
+    */
 
     for (var statement in program.statements) {
       buff.writeln(_compileStatement(statement));
     }
 
-    buff.writeln(JS_FOOTER);
+    buff.writeln("});");
 
     return buff.toString();
   }

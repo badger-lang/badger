@@ -1,12 +1,15 @@
 import "dart:convert";
 import "dart:io";
 import "package:args/args.dart";
+
+import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
+import "package:badger/parser.dart";
 
 main(List<String> args) async {
   var argp = new ArgParser();
   argp.addFlag("test", negatable: false, abbr: "t", help: "Runs the script in a testing environment.");
-  argp.addFlag("generate-json", negatable: false, abbr: "j", help: "Generate JSON from the AST");
+  argp.addOption("compile", abbr: "c", allowed: ["ast", "js"]);
   var opts = argp.parse(args);
 
   if (opts.rest.isEmpty) {
@@ -35,11 +38,16 @@ main(List<String> args) async {
 
   var env = new FileEnvironment(file);
 
-  if (opts["generate-json"]) {
-    var json = await env.generateJSON();
-    var encoder = new JsonEncoder.withIndent("  ");
+  if(opts["compile"] != null) {
+    Target<String> target;
+    if(opts["compile"] == "ast") {
+      target = Target.AST_TARGET;
+    } else if(opts["compile"] == "js") {
+      target = Target.JS_TARGET;
+    }
 
-    print(encoder.convert(json));
+    var program = await env.parse();
+    print(target.compile(program));
     exit(0);
   }
 

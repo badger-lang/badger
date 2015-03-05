@@ -2,6 +2,8 @@ library badger.compiler;
 
 import "package:badger/parser.dart";
 
+import "dart:convert";
+
 part "src/compiler/target.dart";
 part "src/compiler/js.dart";
-part "src/compiler/bytecode.dart";
+part "src/compiler/ast.dart";
