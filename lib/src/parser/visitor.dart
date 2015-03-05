@@ -77,6 +77,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitFunctionDefinition(statement);
     } else if (statement is Assignment) {
       visitAssignment(statement);
+    } else {
+      throw new Exception("Unknown Statement Type: ${statement}");
     }
   }
 
