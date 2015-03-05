@@ -191,6 +191,12 @@ class BadgerJsonBuilder {
         "args": expression.args,
         "block": _generateStatements(expression.block.statements)
       };
+    } else if (expression is Access) {
+      return {
+        "type": "access",
+        "reference": _generateExpression(expression.reference),
+        "identifier": expression.identifier
+      };
     } else if (expression is BooleanLiteral) {
       return {
         "type": "boolean literal",
@@ -306,6 +312,8 @@ class BadgerJsonParser {
         _buildExpression(it["whenTrue"]),
         _buildExpression(it["whenFalse"])
       );
+    } else if (type == "access") {
+      return new Access(_buildExpression(it["reference"]), it["identifier"]);
     } else if (type == "map definition") {
       return new MapDefinition(it["entries"].map(_buildExpression).toList());
     } else if (type == "map entry") {

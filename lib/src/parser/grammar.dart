@@ -7,7 +7,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(statement).separatedBy(whitespace().star()) &
     whitespace().star()
-  );
+  ) | failure();
 
   statement() => (
     (
@@ -296,8 +296,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   character() => ref(unicodeEscape) |
     ref(characterEscape) |
-    pattern("A-Za-z0-9{}[] ") |
-    anyIn([".", "/", ":"]);
+    pattern('^"\\');
 
   unicodeEscape() => (
     string("\\u") &

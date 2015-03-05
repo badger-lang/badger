@@ -1,0 +1,11 @@
+print("DirectMyFile Repositories:")
+
+let url = "https://api.github.com/users/DirectMyFile/repos?type=owner&sort=full_name&direction=asc"
+
+let http = make(HttpClient)
+let response = http.get(url)
+let json = JSON.parse(response.body)
+
+for repo in json {
+  print("- " + repo["name"])
+}
