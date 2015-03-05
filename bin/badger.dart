@@ -1,15 +1,14 @@
-import "dart:convert";
 import "dart:io";
 import "package:args/args.dart";
 
 import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
-import "package:badger/parser.dart";
 
 main(List<String> args) async {
   var argp = new ArgParser();
   argp.addFlag("test", negatable: false, abbr: "t", help: "Runs the script in a testing environment.");
-  argp.addOption("compile", abbr: "c", allowed: ["ast", "js"]);
+  argp.addOption("compile", abbr: "c", defaultsTo: "none", allowed: ["none", "ast", "js"]);
+
   var opts = argp.parse(args);
 
   if (opts.rest.isEmpty) {
@@ -38,9 +37,10 @@ main(List<String> args) async {
 
   var env = new FileEnvironment(file);
 
-  if(opts["compile"] != null) {
+  if (opts["compile"] != null && opts["compile"] != "none") {
     Target<String> target;
-    if(opts["compile"] == "ast") {
+
+    if (opts["compile"] == "ast") {
       target = Target.AST_TARGET;
     } else if(opts["compile"] == "js") {
       target = Target.JS_TARGET;
