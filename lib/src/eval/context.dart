@@ -46,6 +46,10 @@ class Immutable extends BadgerObject {
 
 class BadgerUtils {
   static dynamic getProperty(String name, obj) {
+    if (obj is Map) {
+      return obj[name];
+    }
+
     ObjectMirror f;
     if (obj is Type) {
       f = reflectClass(obj);
@@ -59,6 +63,11 @@ class BadgerUtils {
   }
 
   static void setProperty(String name, value, obj) {
+    if (obj is Map) {
+      obj[name] = value;
+      return;
+    }
+
     var mirror = reflect(obj);
     mirror.setField(MirrorSystem.getSymbol(name), value);
   }

@@ -2,6 +2,7 @@ part of badger.parser;
 
 class BadgerAstPrinter {
   IndentedStringBuffer _buff = new IndentedStringBuffer();
+  bool _firstAssignment = true;
 
   String generate(Program program) {
     for (var decl in program.declarations) {
@@ -34,7 +35,13 @@ class BadgerAstPrinter {
 
   void printStatement(Statement statement) {
     if (statement is MethodCall) {
-      _buff.write("${statement.identifier}(");
+      var ref = statement.reference;
+      if (ref is String) {
+        _buff.write(ref);
+      } else {
+        printExpression(ref);
+      }
+      _buff.write("(");
       var i = 0;
       for (var arg in statement.args) {
         printExpression(arg);
@@ -49,7 +56,7 @@ class BadgerAstPrinter {
     } else if (statement is ForInStatement) {
       _buff.write("for ${statement.identifier} in ");
       printExpression(statement.value);
-      _buff.write("{");
+      _buff.write(" {");
       _buff.increment();
       for (var x in statement.block.statements) {
         _buff.writeln();
@@ -57,6 +64,7 @@ class BadgerAstPrinter {
         printStatement(x);
       }
       _buff.decrement();
+      _buff.writeln("}");
     } else if (statement is IfStatement) {
       _buff.write("if ");
       printExpression(statement.condition);
@@ -101,6 +109,10 @@ class BadgerAstPrinter {
         printExpression(statement.expression);
       }
     } else if (statement is Assignment) {
+      if (!_buff.toString().endsWith("\n\n")) {
+        _buff.writeln();
+      }
+
       if (statement.isInitialDefine) {
         if (statement.immutable) {
           _buff.write("let ");
@@ -109,10 +121,13 @@ class BadgerAstPrinter {
         }
       }
 
-      _buff.write(statement.identifier);
+      if (statement.reference is String) {
+        _buff.write(statement.reference);
+      } else {
+        printExpression(statement.reference);
+      }
       _buff.write(" = ");
       printExpression(statement.value);
-      _buff.writeln();
     } else {
       throw new Exception("Failed to print statement: ${statement}");
     }
@@ -132,7 +147,13 @@ class BadgerAstPrinter {
       _buff.write("..");
       printExpression(expr.right);
     } else if (expr is MethodCall) {
-      _buff.write("${expr.identifier}(");
+      var ref = expr.reference;
+      if (ref is String) {
+        _buff.write(ref);
+      } else {
+        printExpression(ref);
+      }
+      _buff.write("(");
       var i = 0;
       for (var arg in expr.args) {
         printExpression(arg);
@@ -143,7 +164,11 @@ class BadgerAstPrinter {
 
         i++;
       }
-      _buff.write(")");
+      _buff.writeln(")");
+    } else if (expr is Access) {
+      printExpression(expr.reference);
+      _buff.write(".");
+      _buff.write(expr.identifier);
     } else if (expr is Operator) {
       printExpression(expr.left);
       _buff.write(" ${expr.op} ");

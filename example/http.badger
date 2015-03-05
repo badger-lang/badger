@@ -1,4 +1,4 @@
-print("DirectMyFile Repositories:")
+print("DirectCode Repositories:")
 
 let url = "https://api.github.com/users/DirectMyFile/repos?type=owner&sort=full_name&direction=asc"
 
@@ -7,5 +7,5 @@ let response = http.get(url)
 let json = JSON.parse(response.body)
 
 for repo in json {
-  print("- " + repo["name"])
+  print("- " + repo.name)
 }
