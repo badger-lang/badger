@@ -2,6 +2,27 @@
 
 Badger is an experimental programming language.
 
+It can be compiled to multiple languages or can be interpreted by the reference interpreter.
+
+## Links
+
+- [Wiki](https://github.com/DirectMyFile/badger/wiki)
+
+## Features
+
+- Method Calls
+- Variables
+- Immutable Variables
+- Function Definitions
+- While Statements
+- If Then Else Statements
+- For In Statements
+
+## Links
+
+- [Wiki]()
+
+
 ## Example:
 
 ```badger
@@ -16,15 +37,19 @@ for name in names {
 }
 ```
 
-## Features
+## Getting Started
 
-- Method Calls
-- Variables
-- Immutable Variables
-- Function Definitions
-- While Statements
-- If Then Else Statements
-- For In Statements
+To install the badger interpreter, run the following command:
+
+```bash
+pub global activate -sgit git://github.com/DirectMyFile/badger.git
+```
+
+To run an example, run the following command:
+
+```bash
+badger example/greeting.badger
+```
 
 ## Reference Implementation
 
