@@ -209,12 +209,23 @@ class BadgerJsonBuilder {
 
   List<dynamic> _generateStringLiteralComponents(List<dynamic> components) {
     var cm = [];
+    var cn = [];
     for (var c in components) {
       if (c is Expression) {
+        if (cn.isNotEmpty) {
+          cm.add(cn.join());
+          cn.clear();
+        }
+
         cm.add(_generateExpression(c));
       } else {
-        cm.add(c);
+        cn.add(c);
       }
+    }
+
+    if (cn.isNotEmpty) {
+      cm.add(cn.join());
+      cn.clear();
     }
     return cm;
   }
