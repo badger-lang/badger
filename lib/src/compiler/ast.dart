@@ -11,7 +11,7 @@ class AstCompilerTarget extends CompilerTarget<String> {
 }
 
 class TinyAstCompilerTarget extends CompilerTarget<String> {
-  final Map<String, String> MAPPING = {
+  static final Map<String, String> MAPPING = {
     "type": "t",
     "immutable": "im",
     "reference": "r",
@@ -39,6 +39,20 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     "anonymous function": "af"
   };
 
+  static String demap(String key) {
+    if (MAPPING.values.contains(key)) {
+      return MAPPING.keys.firstWhere((it) => MAPPING[it] == key);
+    } else {
+      return key;
+    }
+  }
+
+  static Map expand(Map it) {
+    return transformMapStrings(it, (key) {
+      return demap(key);
+    });
+  }
+
   @override
   String compile(Program program) {
     var ast = new BadgerJsonBuilder(program);
@@ -52,7 +66,7 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     }));
   }
 
-  dynamic transformMapStrings(it, dynamic transformer(x)) {
+  static dynamic transformMapStrings(it, dynamic transformer(x)) {
     if (it is Map) {
       var r = {};
       for (var x in it.keys) {

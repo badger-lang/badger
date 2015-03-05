@@ -232,11 +232,11 @@ class BadgerJsonBuilder {
 }
 
 class BadgerJsonParser {
-  final Map<String, dynamic> input;
+  Program build(Map input) {
+    if (!input.containsKey("statements") && input.containsKey("s")) {
+      input = TinyAstCompilerTarget.expand(input);
+    }
 
-  BadgerJsonParser(this.input);
-
-  Program build() {
     var declarations = input["declarations"].map(_buildDeclaration).toList();
     var statements = input["statements"].map(_buildStatement).toList();
 
