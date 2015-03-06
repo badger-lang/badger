@@ -13,7 +13,8 @@ main(List<String> args) async {
     "ast",
     "js",
     "badger",
-    "snapshot"
+    "snapshot",
+    "dart"
   ], help: "Compiles Badger Code");
 
   var opts = argp.parse(args);
@@ -58,6 +59,8 @@ main(List<String> args) async {
       target = CompilerTarget.TINY_AST;
     } else if (name == "snapshot") {
       target = new SnapshotCompilerTarget(env);
+    } else if (name == "dart") {
+      target = new DartCompilerTarget();
     } else {
       print("Unknown Compiler Target: ${name}");
       exit(1);

@@ -41,13 +41,7 @@ abstract class AstVisitor extends AstVisitorBase {
       visitDeclaration(declaration);
     }
 
-    for (var statement in program.statements) {
-      if (statement is Statement) {
-        visitStatement(statement);
-      } else {
-        visitExpression(statement);
-      }
-    }
+    visitStatements(program.statements);
   }
 
   @override
@@ -58,6 +52,12 @@ abstract class AstVisitor extends AstVisitorBase {
       visitImportDeclaration(declaration);
     } else {
       throw new Exception("Unknown Declaration Type: ${declaration}");
+    }
+  }
+
+  void visitStatements(List<Statement> statements) {
+    for (var statement in statements) {
+      visitStatement(statement);
     }
   }
 
