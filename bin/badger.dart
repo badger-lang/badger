@@ -8,8 +8,7 @@ import "package:badger/eval.dart";
 main(List<String> args) async {
   var argp = new ArgParser();
   argp.addFlag("test", negatable: false, abbr: "t", help: "Runs the script in a testing environment.");
-  argp.addOption("compile", abbr: "c", defaultsTo: "none", allowed: [
-    "none",
+  argp.addOption("compile", abbr: "c", allowed: [
     "tiny-ast",
     "ast",
     "js",
@@ -45,7 +44,7 @@ main(List<String> args) async {
 
   var env = new FileEnvironment(file);
 
-  if (opts["compile"] != null && opts["compile"] != "none") {
+  if (opts["compile"] != null) {
     var name = opts["compile"];
     CompilerTarget target;
 

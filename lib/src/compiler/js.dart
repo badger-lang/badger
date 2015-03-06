@@ -71,7 +71,6 @@ class JsAstVisitor extends AstVisitor {
   void visitReturnStatement(ReturnStatement statement) {
     this.buff.write("return ");
     this.visitExpression(statement.expression);
-    this.buff.write(";");
   }
 
   void visitBreakStatement(BreakStatement statement) {
@@ -91,8 +90,6 @@ class JsAstVisitor extends AstVisitor {
       } else {
         this.buff.write("null");
       }
-
-      this.buff.write(";");
     }
   }
 
@@ -281,11 +278,7 @@ class JsAstVisitor extends AstVisitor {
     this.buff.write("){var λ = {${m}};");
 
     for(var statement in function.block.statements) {
-      this.visitStatement(statement);
-
-      if (function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
-        this.buff.write(";");
-      }
+      visitStatement(statement);
     }
 
     this.buff.write("}");
@@ -300,11 +293,7 @@ class JsAstVisitor extends AstVisitor {
     this.buff.write("){");
 
     for(var statement in function.block.statements) {
-      this.visitStatement(statement);
-
-      if (function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
-        this.buff.write(";");
-      }
+      visitStatement(statement);
     }
 
     this.buff.write("}.bind(this)");
@@ -338,8 +327,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
     addGlobal("λfor", """
       function(block, value) {
         for (var i in value) {
-          var v = value[i];
-          block(v);
+          if (value.hasOwnProperty(i)) {
+            block(v);
+          }
         }
       }
     """);
@@ -424,7 +414,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     writePostlude();
 
-    return buff.toString();
+    return minify(buff.toString());
   }
 
   void addGlobal(String name, String body) {
@@ -451,7 +441,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
   String minify(String input) {
     input = input.trim();
     input = input.replaceAll(_WHITESPACE, "");
-    return input.trim().replaceAll("\n", "");
+    input = input.replaceAll("\n", "");
+    input = input.replaceAll(";;", ";");
+    return input;
   }
 
   void writePostlude() {
