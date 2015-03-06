@@ -6,7 +6,6 @@ class JsAstVisitor extends AstVisitor {
   JsAstVisitor(this.buff);
 
   void visitForInStatement(ForInStatement statement) {
-
   }
 
   void visitImportDeclaration(ImportDeclaration declaration) {
@@ -26,7 +25,9 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitReturnStatement(ReturnStatement statement) {
-
+    this.buff.write("return ");
+    this.visitExpression(statement.expression);
+    this.buff.write(";");
   }
 
   void visitBreakStatement(BreakStatement statement) {
@@ -34,11 +35,21 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitAssignment(Assignment assignment) {
+    if(assignment.immutable) {
+      this.buff.write("λlet(λ, '${assignment.reference}',");
+      this.visitExpression(assignment.value);
+      this.buff.write(");");
+    } else {
+      this.buff.write("λ.${assignment.reference} =");
 
-  }
+      if(assignment.value != null) {
+        this.visitExpression(assignment.value);
+      } else {
+        this.buff.write("null");
+      }
 
-  void visitFunctionDefinition(FunctionDefinition definition) {
-
+      this.buff.write(";");
+    }
   }
 
   void visitMethodCall(MethodCall call) {
@@ -62,7 +73,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitIntegerLiteral(IntegerLiteral literal) {
-
+    this.buff.write(literal.value.toString());
   }
 
   void visitDoubleLiteral(DoubleLiteral literal) {
@@ -74,11 +85,21 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitVariableReference(VariableReference reference) {
-
+    this.buff.write("λ.${reference.identifier}");
   }
 
   void visitListDefinition(ListDefinition definition) {
+    this.buff.write("[");
 
+    for(var exp in definition.elements) {
+      this.visitExpression(exp);
+
+      if(definition.elements.indexOf(exp) != definition.elements.length - 1) {
+        this.buff.write(",");
+      }
+    }
+
+    this.buff.write("]");
   }
 
   void visitMapDefinition(MapDefinition definition) {
@@ -113,6 +134,25 @@ class JsAstVisitor extends AstVisitor {
 
   }
 
+  void visitFunctionDefinition(FunctionDefinition function) {
+    this.buff.write("function ${function.name}(");
+
+    if(function.args != null)
+      this.buff.write(function.args.join(","));
+
+    this.buff.write("){var λ = {};");
+
+    for(var statement in function.block.statements) {
+      this.visitStatement(statement);
+
+      if(function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
+        this.buff.write(",");
+      }
+    }
+
+    this.buff.write("}");
+  }
+
   void visitAnonymousFunction(AnonymousFunction function) {
     this.buff.write("function(");
 
@@ -143,6 +183,20 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
   @override
   String compile(Program program) {
+    addGlobal("λlet", """
+      function(context, name, value) {
+        Object.defineProperty(context, name, {
+          enumerable: true,
+          get: function() {
+            return value;
+          },
+          set: function() {
+            throw new Error('Unable to set ' + name + ', it is immutable.');
+          }
+        });
+      }
+    """);
+
     addGlobal("print", "function(obj) { console.log(obj.toString()); }");
     addGlobal("async", "function(cb) { setTimeout(cb, 0); }");
 
@@ -159,7 +213,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
   }
 
   void writePrelude() {
-    buff.write("(function(${_names.join(",")}){");
+    buff.write("(function(${_names.join(",")}){var λ = {};");
   }
 
   void writePostlude() {
