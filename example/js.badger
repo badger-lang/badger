@@ -1,0 +1,4 @@
+let msgs = [ "Hello!", "Goodbye!" ]
+
+window.alert(msgs[0])
+window.alert(msgs[1])

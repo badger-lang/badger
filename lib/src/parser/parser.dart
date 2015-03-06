@@ -141,7 +141,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   listDefinition() => super.listDefinition().map((it) {
-    return new ListDefinition(it[1]);
+    return new ListDefinition(it[2]);
   });
 
   @override
