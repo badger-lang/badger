@@ -59,6 +59,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   listDefinition() => char("[") &
     ref(arguments) &
+    char(",").optional() &
     char("]");
 
   ternaryOperator() => ref(expressionItem) &
@@ -264,6 +265,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   mapDefinition() => char("{") &
     whitespace().star() &
     ref(mapEntry).separatedBy(char(",").trim()).optional() &
+    char(",").optional() &
     whitespace().star() &
     char("}");
 

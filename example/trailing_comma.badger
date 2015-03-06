@@ -1,0 +1,7 @@
+let list = ["Hello"]
+let map = {
+  "Alex": "Awesome"
+}
+
+print(list)
+print(map)
