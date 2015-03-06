@@ -35,14 +35,14 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitAssignment(Assignment assignment) {
-    if(assignment.immutable) {
+    if (assignment.immutable) {
       this.buff.write("λlet(λ, '${assignment.reference}',");
       this.visitExpression(assignment.value);
       this.buff.write(");");
     } else {
       this.buff.write("λ.${assignment.reference} =");
 
-      if(assignment.value != null) {
+      if (assignment.value != null) {
         this.visitExpression(assignment.value);
       } else {
         this.buff.write("null");
@@ -53,14 +53,14 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitMethodCall(MethodCall call) {
-    if(call.reference is String) {
+    if (call.reference is String) {
       this.buff.write("${call.reference}(");
     }
 
-    for(var exp in call.args) {
+    for (var exp in call.args) {
       this.visitExpression(exp);
 
-      if(call.args.indexOf(exp) != call.args.length - 1) {
+      if (call.args.indexOf(exp) != call.args.length - 1) {
         this.buff.write(",");
       }
     }
@@ -69,7 +69,28 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitStringLiteral(StringLiteral literal) {
-    this.buff.write("'${literal.components.join()}'");
+    buff.write('"');
+    var i = 0;
+    for (var c in literal.components) {
+      if (c is String) {
+        buff.write(c);
+
+        if (i == literal.components.length - 1) {
+          buff.write('"');
+        }
+      } else {
+        if (i != 0) {
+          buff.write('" + ');
+        }
+
+        visitExpression(c);
+
+        if (i != literal.components.length - 1) {
+          buff.write('"');
+        }
+      }
+      i++;
+    }
   }
 
   void visitIntegerLiteral(IntegerLiteral literal) {
@@ -77,7 +98,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitDoubleLiteral(DoubleLiteral literal) {
-
+    buff.write(literal.value);
   }
 
   void visitRangeLiteral(RangeLiteral literal) {
@@ -111,15 +132,19 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitBooleanLiteral(BooleanLiteral literal) {
-
+    buff.write(literal.value);
   }
 
   void visitHexadecimalLiteral(HexadecimalLiteral literal) {
-
+    buff.write(literal.asHex());
   }
 
   void visitOperator(Operator operator) {
-
+    visitExpression(operator.left);
+    buff.write(" ");
+    buff.write(operator.op);
+    buff.write(" ");
+    visitExpression(operator.right);
   }
 
   void visitAccess(Access access) {

@@ -150,6 +150,8 @@ class DoubleLiteral extends Expression {
 class HexadecimalLiteral extends Expression {
   final int value;
 
+  String asHex() => "0x${value.toRadixString(16)}";
+
   HexadecimalLiteral(this.value);
 }
 
