@@ -328,7 +328,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       function(block, value) {
         for (var i in value) {
           if (value.hasOwnProperty(i)) {
-            block(v);
+            block(value[i]);
           }
         }
       }
@@ -403,7 +403,6 @@ class JsCompilerTarget extends CompilerTarget<String> {
       """);
     }
 
-    writePrelude();
     var visitor = new JsAstVisitor(buff);
     visitor.visit(program);
 
@@ -412,9 +411,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       visitor.visitStatement(new MethodCall("runTests", []));
     }
 
-    writePostlude();
-
-    return minify(buff.toString());
+    return minify(generatePrelude() + buff.toString() + generatePostlude());
   }
 
   void addGlobal(String name, String body) {
@@ -422,18 +419,28 @@ class JsCompilerTarget extends CompilerTarget<String> {
     _bodies.add(minify(body));
   }
 
-  void addTopLevel(String name, String body) {
-    _topLevel.add("var ${name} = ${body}");
+  void addTopLevel(String a, [String b]) {
+    if (b == null) {
+      _topLevel.add(a);
+    } else {
+      addTopLevel("var ${a} = ${b}");
+    }
   }
 
   List<String> _topLevel = [];
+  List<String> _includes = [];
 
-  void writePrelude() {
+  String generatePrelude() {
+    var x = buff.toString();
+    _includes = _names.where((it) => x.contains(it)).toList();
+
+    var b = new StringBuffer();
     if (_topLevel.isNotEmpty) {
-      buff.write(_topLevel.join(";"));
-      buff.write(";");
+      b.write(_topLevel.join(";"));
+      b.write(";");
     }
-    buff.write('(function(${_names.join(",")}){var λ = {"args": args};');
+    b.write('(function(${_includes.join(",")}){var λ = {${_includes.contains("args") ? '"args": args' : ''}};');
+    return b.toString();
   }
 
   final RegExp _WHITESPACE = new RegExp(r'''\s{2,}(?=([^"]*("|')[^"']*("|'))*[^"']*$)''');
@@ -446,7 +453,17 @@ class JsCompilerTarget extends CompilerTarget<String> {
     return input;
   }
 
-  void writePostlude() {
-    buff.write("})(${_bodies.join(",")});");
+  String generatePostlude() {
+    var map = {};
+
+    var i = 0;
+    for (var n in _names) {
+      if (_includes.contains(n)) {
+        map[n] = _bodies[i];
+      }
+      i++;
+    }
+
+    return "})(${_bodies.where((it) => map.values.contains(it)).join(",")});";
   }
 }
