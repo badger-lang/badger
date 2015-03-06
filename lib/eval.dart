@@ -5,6 +5,7 @@ import "dart:io";
 import "dart:convert";
 import "dart:mirrors";
 import "package:badger/parser.dart";
+import "package:badger/compiler.dart";
 
 import "package:path/path.dart" as pathlib;
 

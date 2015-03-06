@@ -29,9 +29,44 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitIfStatement(IfStatement statement) {
+    buff.write("if (");
+    buff.write("λbool(");
+    visitExpression(statement.condition);
+    buff.write(")) {");
+    for (var s in statement.block.statements) {
+      visitStatement(s);
+
+      if (statement.block.statements.indexOf(statement) != statement.block.statements.length - 1) {
+        buff.write(";");
+      }
+    }
+    buff.write("}");
+    if (statement.elseBlock != null) {
+      buff.write(" else {");
+      for (var s in statement.elseBlock.statements) {
+        visitStatement(s);
+
+        if (statement.elseBlock.statements.indexOf(statement) != statement.elseBlock.statements.length - 1) {
+          buff.write(";");
+        }
+      }
+      buff.write("}");
+    }
   }
 
   void visitWhileStatement(WhileStatement statement) {
+    buff.write("while (");
+    buff.write("λbool(");
+    visitExpression(statement.condition);
+    buff.write(")) {");
+    for (var s in statement.block.statements) {
+      visitStatement(s);
+
+      if (statement.block.statements.indexOf(statement) != statement.block.statements.length - 1) {
+        buff.write(";");
+      }
+    }
+    buff.write("}");
   }
 
   void visitReturnStatement(ReturnStatement statement) {
@@ -41,6 +76,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitBreakStatement(BreakStatement statement) {
+    buff.write("break");
   }
 
   void visitAssignment(Assignment assignment) {
@@ -58,6 +94,14 @@ class JsAstVisitor extends AstVisitor {
       }
 
       this.buff.write(";");
+    }
+  }
+
+  @override
+  void visitStatement(Statement statement) {
+    super.visitStatement(statement);
+    if (buff.toString()[buff.length - 1] != ";") {
+      buff.write(";");
     }
   }
 
@@ -137,9 +181,26 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitMapDefinition(MapDefinition definition) {
+    buff.write("{");
+    var i = 0;
+    for (var entry in definition.entries) {
+      visitExpression(entry.key);
+      buff.write(":");
+      visitExpression(entry.value);
+
+      if (i != definition.entries.length - 1) {
+        buff.write(",");
+      }
+
+      i++;
+    }
+    buff.write("}");
   }
 
   void visitNegate(Negate negate) {
+    buff.write("!(");
+    visitExpression(negate.expression);
+    buff.write(")");
   }
 
   void visitBooleanLiteral(BooleanLiteral literal) {
@@ -151,20 +212,54 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitOperator(Operator operator) {
+    if (operator.op == "~/") {
+      buff.write("~~(");
+    }
+
     visitExpression(operator.left);
     buff.write(" ");
-    buff.write(operator.op);
+    buff.write(makeOperator(operator.op));
     buff.write(" ");
+
     visitExpression(operator.right);
+
+    if (operator.op == "~/") {
+      buff.write(")");
+    }
+  }
+
+  String makeOperator(String op) {
+    if (op == "==") {
+      return "===";
+    } else if (op == "!=") {
+      return "!==";
+    } else if (op == "~/") {
+      return "/";
+    } else {
+      return op;
+    }
   }
 
   void visitAccess(Access access) {
+    visitExpression(access.reference);
+    buff.write(".");
+    buff.write(access.identifier);
   }
 
   void visitBracketAccess(BracketAccess access) {
+    visitExpression(access.reference);
+    buff.write("[");
+    visitExpression(access.index);
+    buff.write("]");
   }
 
   void visitTernaryOperator(TernaryOperator operator) {
+    buff.write("λbool(");
+    visitExpression(operator.condition);
+    buff.write(") ? ");
+    visitExpression(operator.whenTrue);
+    buff.write(" : ");
+    visitExpression(operator.whenFalse);
   }
 
   void visitFunctionDefinition(FunctionDefinition function) {
@@ -198,8 +293,8 @@ class JsAstVisitor extends AstVisitor {
     for(var statement in function.block.statements) {
       this.visitStatement(statement);
 
-      if(function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
-        this.buff.write(",");
+      if (function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
+        this.buff.write(";");
       }
     }
 
@@ -250,11 +345,77 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
+    addGlobal("λbool", """
+      function(value) {
+        if (value === null || typeof value === "undefined") {
+          return false;
+        } else if (typeof value === "number") {
+          return value !== 0.0 && value !== 0;
+        } else if (typeof value === "string") {
+          return value.length !== 0;
+        } else if (typeof value === "boolean") {
+          return value === true;
+        } else {
+          return true;
+        }
+      }
+    """);
+
     addGlobal("print", "function(obj) {console.log(obj.toString());}");
     addGlobal("async", "function(cb) {setTimeout(cb, 0);}");
 
+    if (isTestSuite) {
+      addTopLevel("__tests__", "[]");
+
+      addGlobal("test", """
+        function(name, func) {
+          __tests__.push([name, func]);
+        }
+      """);
+
+      addGlobal("runTests", """
+        function() {
+          for (var i in __tests__) {
+            var t = __tests__[i];
+
+            var name = t[0];
+            var func = t[1];
+
+            try {
+              func();
+            } catch (e) {
+              console.log(name + ": Failed");
+              console.log(e);
+              continue;
+            }
+
+            console.log(name + ": Success");
+          }
+        }
+      """);
+
+      addGlobal("testEqual", """
+        function(a, b) {
+          if (a !== b) {
+            throw "Test Error: " + a + " != " + b;
+          }
+        }
+      """);
+
+      addGlobal("args", """
+        typeof process !== "undefined" ? process.argv : []
+      """);
+    }
+
     writePrelude();
-    new JsAstVisitor(buff).visit(program);
+    var visitor = new JsAstVisitor(buff);
+    visitor.visit(program);
+
+    if (isTestSuite) {
+      buff.write(";");
+      visitor.visitStatement(new MethodCall("runTests", []));
+    }
+
     writePostlude();
 
     return buff.toString();
@@ -265,7 +426,17 @@ class JsCompilerTarget extends CompilerTarget<String> {
     _bodies.add(minify(body));
   }
 
+  void addTopLevel(String name, String body) {
+    _topLevel.add("var ${name} = ${body}");
+  }
+
+  List<String> _topLevel = [];
+
   void writePrelude() {
+    if (_topLevel.isNotEmpty) {
+      buff.write(_topLevel.join(";"));
+      buff.write(";");
+    }
     buff.write("(function(${_names.join(",")}){var λ = {};");
   }
 

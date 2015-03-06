@@ -1,5 +1,6 @@
 import "dart:io";
 import "package:badger/eval.dart";
+import "package:badger/compiler.dart";
 
 main() async {
   var dir = new Directory("test/scripts");
@@ -33,5 +34,14 @@ main() async {
     await context.run(() async {
       await context.invoke("runTests", []);
     });
+
+    print("[JS Compiler Tests]");
+    var target = new JsCompilerTarget();
+    target.isTestSuite = true;
+    var js = await env.compile(target);
+    var proc = await Process.start("node", ["-e", js]);
+    proc.stdout.listen((data) => stdout.add(data));
+    proc.stderr.listen((data) => stderr.add(data));
+    await proc.exitCode;
   }
 }

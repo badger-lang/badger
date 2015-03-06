@@ -1,3 +1,0 @@
-import "imports/liba.badger"
-
-testEqual(greet("Alex"), "Hello Alex")

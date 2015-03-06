@@ -1,4 +1,5 @@
 import "dart:io";
+import "dart:async";
 import "package:args/args.dart";
 
 import "package:badger/compiler.dart";
@@ -62,6 +63,8 @@ main(List<String> args) async {
       print("Unknown Compiler Target: ${name}");
       exit(1);
     }
+
+    target.isTestSuite = opts["test"];
 
     var program = await env.parse();
     print(await target.compile(program));

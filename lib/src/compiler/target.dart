@@ -7,4 +7,6 @@ abstract class CompilerTarget<T> {
   static final CompilerTarget<String> BADGER = new BadgerCompilerTarget();
 
   T compile(Program program);
+
+  bool isTestSuite = false;
 }

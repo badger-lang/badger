@@ -14,6 +14,10 @@ class FileEnvironment extends Environment {
     _e = this;
   }
 
+  Future compile(CompilerTarget target) async {
+    return target.compile(await parse());
+  }
+
   eval(Context context) async {
     var program = _parse(await file.readAsString());
     return await new Evaluator(program, _e).eval(context);
