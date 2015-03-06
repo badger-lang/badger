@@ -1,0 +1,3 @@
+let input = "{ \"Hello\": \"World\" }"
+let json = JSON.parse(input)
+print(json)

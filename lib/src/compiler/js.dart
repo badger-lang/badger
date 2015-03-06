@@ -6,7 +6,6 @@ class JsAstVisitor extends AstVisitor {
   JsAstVisitor(this.buff);
 
   void visitForInStatement(ForInStatement statement) {
-
     this.buff.write('λfor(function(${statement.identifier}){var λ = {"${statement.identifier}":${statement.identifier}};');
 
     for (var s in statement.block.statements) {
@@ -81,9 +80,9 @@ class JsAstVisitor extends AstVisitor {
 
   void visitAssignment(Assignment assignment) {
     if (assignment.immutable) {
-      this.buff.write("λlet(λ, '${assignment.reference}',");
-      this.visitExpression(assignment.value);
-      this.buff.write(");");
+      buff.write('λlet(λ,"${assignment.reference}",');
+      visitExpression(assignment.value);
+      buff.write(")");
     } else {
       this.buff.write("λ.${assignment.reference} =");
 
@@ -107,18 +106,21 @@ class JsAstVisitor extends AstVisitor {
 
   void visitMethodCall(MethodCall call) {
     if (call.reference is String) {
-      this.buff.write("${call.reference}(");
+      buff.write("${call.reference}(");
+    } else {
+      visitExpression(call.reference);
+      buff.write("(");
     }
 
     for (var exp in call.args) {
-      this.visitExpression(exp);
+      visitExpression(exp);
 
       if (call.args.indexOf(exp) != call.args.length - 1) {
-        this.buff.write(",");
+        buff.write(",");
       }
     }
 
-    this.buff.write(")");
+    buff.write(")");
   }
 
   void visitStringLiteral(StringLiteral literal) {
@@ -162,8 +164,11 @@ class JsAstVisitor extends AstVisitor {
     buff.write(")");
   }
 
-  void visitVariableReference(VariableReference reference) {
-    this.buff.write("λ.${reference.identifier}");
+  void visitVariableReference(VariableReference reference, [bool isAccess = false]) {
+    if (!isAccess) {
+      buff.write("λ.");
+    }
+    buff.write("${reference.identifier}");
   }
 
   void visitListDefinition(ListDefinition definition) {
@@ -241,7 +246,11 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitAccess(Access access) {
-    visitExpression(access.reference);
+    if (access.reference is VariableReference) {
+      visitVariableReference(access.reference, true);
+    } else {
+      visitExpression(access.reference);
+    }
     buff.write(".");
     buff.write(access.identifier);
   }
@@ -363,6 +372,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     addGlobal("print", "function(obj) {console.log(obj.toString());}");
     addGlobal("async", "function(cb) {setTimeout(cb, 0);}");
+    addGlobal("args", 'typeof process === "undefined" ? [] : process.argv.slice(2)');
 
     if (isTestSuite) {
       addTopLevel("__tests__", "[]");
@@ -401,10 +411,6 @@ class JsCompilerTarget extends CompilerTarget<String> {
           }
         }
       """);
-
-      addGlobal("args", """
-        typeof process !== "undefined" ? process.argv : []
-      """);
     }
 
     writePrelude();
@@ -437,7 +443,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       buff.write(_topLevel.join(";"));
       buff.write(";");
     }
-    buff.write("(function(${_names.join(",")}){var λ = {};");
+    buff.write('(function(${_names.join(",")}){var λ = {"args": args};');
   }
 
   final RegExp _WHITESPACE = new RegExp(r'''\s{2,}(?=([^"]*("|')[^"']*("|'))*[^"']*$)''');

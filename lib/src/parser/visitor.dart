@@ -104,6 +104,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitBracketAccess(expression);
     } else if (expression is AnonymousFunction) {
       visitAnonymousFunction(expression);
+    } else if (expression is Access) {
+      visitAccess(expression);
     } else if (expression is ListDefinition) {
       visitListDefinition(expression);
     } else if (expression is MapDefinition) {

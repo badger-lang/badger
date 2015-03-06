@@ -1,7 +1,6 @@
 part of badger.eval;
 
 final RegExp _unicodeEscapeSequence = new RegExp(r"\\u([0-9a-fA-F]{4})");
-final RegExp _escapeSequence = new RegExp(r"\\([bfnrt\\])");
 final RegExp _unicodeEscape = new RegExp(r"[^\x20-\x7E]+");
 
 final Map<String, String> _decodeTable = const {
@@ -36,8 +35,10 @@ String _escapeUnicode(String input) {
 }
 
 String _unescape(String input) {
-  if (_escapeSequence.hasMatch(input)) {
-    input = input.replaceAllMapped(_escapeSequence, (match) => _decodeTable[match[1]]);
+  for (var code in _decodeTable.keys) {
+    if (input.contains("\\${code}")) {
+      input = input.replaceAll("\\${code}", _decodeTable[code]);
+    }
   }
 
   if (_unicodeEscapeSequence.hasMatch(input)) {

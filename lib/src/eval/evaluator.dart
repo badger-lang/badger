@@ -293,13 +293,11 @@ class Evaluator {
       for (var it in expr.components) {
         if (it is Expression) {
           components.add(await _resolveValue(it));
-        } else if (it.startsWith("\\")) {
-          components.add(_unescape(it));
         } else {
           components.add(it);
         }
       }
-      return components.join();
+      return _unescape(components.join());
     } else if (expr is IntegerLiteral) {
       return expr.value;
     } else if (expr is DoubleLiteral) {
