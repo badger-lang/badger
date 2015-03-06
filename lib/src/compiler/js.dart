@@ -6,22 +6,32 @@ class JsAstVisitor extends AstVisitor {
   JsAstVisitor(this.buff);
 
   void visitForInStatement(ForInStatement statement) {
+
+    this.buff.write('λfor(function(${statement.identifier}){var λ = {"${statement.identifier}":${statement.identifier}};');
+
+    for (var s in statement.block.statements) {
+      visitStatement(s);
+
+      if (statement.block.statements.indexOf(statement) != statement.block.statements.length - 1) {
+        buff.write(";");
+      }
+    }
+
+    buff.write("},");
+    visitExpression(statement.value);
+    buff.write(")");
   }
 
   void visitImportDeclaration(ImportDeclaration declaration) {
-
   }
 
   void visitFeatureDeclaration(FeatureDeclaration declaration) {
-
   }
 
   void visitIfStatement(IfStatement statement) {
-
   }
 
   void visitWhileStatement(WhileStatement statement) {
-
   }
 
   void visitReturnStatement(ReturnStatement statement) {
@@ -31,7 +41,6 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitBreakStatement(BreakStatement statement) {
-
   }
 
   void visitAssignment(Assignment assignment) {
@@ -65,7 +74,7 @@ class JsAstVisitor extends AstVisitor {
       }
     }
 
-    this.buff.write(");");
+    this.buff.write(")");
   }
 
   void visitStringLiteral(StringLiteral literal) {
@@ -80,7 +89,7 @@ class JsAstVisitor extends AstVisitor {
         }
       } else {
         if (i != 0) {
-          buff.write('" + ');
+          buff.write('"+');
         }
 
         visitExpression(c);
@@ -102,7 +111,11 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitRangeLiteral(RangeLiteral literal) {
-
+    buff.write("λrange(");
+    visitExpression(literal.left);
+    buff.write(", ");
+    visitExpression(literal.right);
+    buff.write(")");
   }
 
   void visitVariableReference(VariableReference reference) {
@@ -124,11 +137,9 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitMapDefinition(MapDefinition definition) {
-
   }
 
   void visitNegate(Negate negate) {
-
   }
 
   void visitBooleanLiteral(BooleanLiteral literal) {
@@ -148,30 +159,28 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitAccess(Access access) {
-
   }
 
   void visitBracketAccess(BracketAccess access) {
-
   }
 
   void visitTernaryOperator(TernaryOperator operator) {
-
   }
 
   void visitFunctionDefinition(FunctionDefinition function) {
     this.buff.write("function ${function.name}(");
 
-    if(function.args != null)
+    if (function.args != null)
       this.buff.write(function.args.join(","));
 
-    this.buff.write("){var λ = {};");
+    var m = ((function.args == null ? [] : function.args) as List).map((it) => '"${it}": ${it}').join(",");
+    this.buff.write("){var λ = {${m}};");
 
     for(var statement in function.block.statements) {
       this.visitStatement(statement);
 
-      if(function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
-        this.buff.write(",");
+      if (function.block.statements.indexOf(statement) != function.block.statements.length - 1) {
+        this.buff.write(";");
       }
     }
 
@@ -222,8 +231,27 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
-    addGlobal("print", "function(obj) { console.log(obj.toString()); }");
-    addGlobal("async", "function(cb) { setTimeout(cb, 0); }");
+    addGlobal("λfor", """
+      function(block, value) {
+        for (var i in value) {
+          var v = value[i];
+          block(v);
+        }
+      }
+    """);
+
+    addGlobal("λrange", """
+      function(lower, upper) {
+        var list = [];
+        for (var i = lower; i <= upper; i++) {
+          list.push(i);
+        }
+        return list;
+      }
+    """);
+
+    addGlobal("print", "function(obj) {console.log(obj.toString());}");
+    addGlobal("async", "function(cb) {setTimeout(cb, 0);}");
 
     writePrelude();
     new JsAstVisitor(buff).visit(program);
@@ -234,11 +262,19 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
   void addGlobal(String name, String body) {
     _names.add(name);
-    _bodies.add(body);
+    _bodies.add(minify(body));
   }
 
   void writePrelude() {
     buff.write("(function(${_names.join(",")}){var λ = {};");
+  }
+
+  final RegExp _WHITESPACE = new RegExp(r'''\s{2,}(?=([^"]*("|')[^"']*("|'))*[^"']*$)''');
+
+  String minify(String input) {
+    input = input.trim();
+    input = input.replaceAll(_WHITESPACE, "");
+    return input.trim().replaceAll("\n", "");
   }
 
   void writePostlude() {

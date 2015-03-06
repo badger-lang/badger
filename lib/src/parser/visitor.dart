@@ -112,6 +112,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitVariableReference(expression);
     } else if (expression is Negate) {
       visitNegate(expression);
+    } else if (expression is MethodCall) {
+      visitMethodCall(expression);
     } else if (expression is TernaryOperator) {
       visitTernaryOperator(expression);
     } else {
