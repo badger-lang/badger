@@ -2,7 +2,6 @@ part of badger.parser;
 
 class BadgerAstPrinter {
   IndentedStringBuffer _buff = new IndentedStringBuffer();
-  bool _firstAssignment = true;
 
   String generate(Program program) {
     for (var decl in program.declarations) {
@@ -78,7 +77,7 @@ class BadgerAstPrinter {
       _buff.decrement();
       _buff.writeln("}");
     } else if (statement is FunctionDefinition) {
-      _buff.writeln("func ${statement.identifier}(${statement.args.join(", ")}) {");
+      _buff.writeln("func ${statement.name}(${statement.args.join(", ")}) {");
       _buff.increment();
       var i = 0;
       for (var x in statement.block.statements) {
