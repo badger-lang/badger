@@ -23,7 +23,7 @@ main(List<String> args) async {
             print("##teamcity[testFailed name='${result.name}' message='${result.message}' details='${result.message}']");
           }
 
-          print("##teamcity[testFinished name='${result.name}']");
+          print("##teamcity[testFinished name='${result.name}' duration='${result.duration}']");
         }, handleTestsBegin: () {
           print("##teamcity[testSuiteStarted name='${name}']");
         }, handleTestsEnd: () {

@@ -84,8 +84,9 @@ class TestResult {
   final String name;
   final TestResultType type;
   final String message;
+  final int duration;
 
-  TestResult(this.name, this.type, [this.message]);
+  TestResult(this.name, this.type, this.duration, [this.message]);
 }
 
 class TestingLibrary {
@@ -155,14 +156,18 @@ class TestingLibrary {
             handleTestStarted(name);
           }
 
+          var stopwatch = new Stopwatch();
           try {
+            stopwatch.start();
             await func([]);
           } catch (e) {
-            handleTestResult(new TestResult(name, TestResultType.FAILURE, e.toString()));
+            stopwatch.stop();
+            handleTestResult(new TestResult(name, TestResultType.FAILURE, e.toString(), stopwatch.elapsedMilliseconds));
             continue;
           }
+          stopwatch.stop();
 
-          handleTestResult(new TestResult(name, TestResultType.SUCCESS));
+          handleTestResult(new TestResult(name, TestResultType.SUCCESS, stopwatch.elapsedMilliseconds));
         }
 
         if (handleTestsEnd != null) {
