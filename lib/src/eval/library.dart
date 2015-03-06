@@ -97,7 +97,12 @@ class TestingLibrary {
     }
   }
 
-  static void import(Context context, {void handleTestResult(TestResult result): _defaultResultHandler}) {
+  static void import(Context context, {
+    void handleTestStarted(String name),
+    void handleTestResult(TestResult result): _defaultResultHandler,
+    void handleTestsBegin(),
+    void handleTestsEnd()
+  }) {
     context.define("test", (name, func) {
       if (!Context.current.meta.containsKey("__tests__")) {
         Context.current.meta["__tests__"] = [];
@@ -138,9 +143,17 @@ class TestingLibrary {
       } else {
         var tests = Context.current.meta["__tests__"];
 
+        if (handleTestsBegin != null) {
+          handleTestsBegin();
+        }
+
         for (var test in tests) {
           var name = test[0];
           var func = test[1];
+
+          if (handleTestStarted != null) {
+            handleTestStarted(name);
+          }
 
           try {
             await func([]);
@@ -151,6 +164,11 @@ class TestingLibrary {
 
           handleTestResult(new TestResult(name, TestResultType.SUCCESS));
         }
+
+        if (handleTestsEnd != null) {
+          handleTestsEnd();
+        }
+
         return true;
       }
     });
