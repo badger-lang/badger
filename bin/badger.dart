@@ -1,13 +1,17 @@
-import "dart:io";
 import "dart:async";
-import "package:args/args.dart";
+import "dart:convert";
+import "dart:io";
 
+import "package:args/args.dart";
 import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
+
+Directory tmpDir;
 
 main(List<String> args) async {
   var argp = new ArgParser();
   argp.addFlag("test", negatable: false, abbr: "t", help: "Runs the script in a testing environment.");
+
   argp.addOption("compile", abbr: "c", allowed: [
     "tiny-ast",
     "ast",
@@ -36,7 +40,22 @@ main(List<String> args) async {
   var argz = opts.rest.skip(1).toList();
   context.setVariable("args", argz);
 
-  var file = new File(opts.rest[0]);
+  var p = opts.rest[0];
+
+  if (p == "-") {
+    var buff = new StringBuffer();
+    stdin.lineMode = false;
+    await for (var data in stdin) {
+      buff.write(UTF8.decode(data));
+    }
+    stdin.lineMode = true;
+    tmpDir = await Directory.systemTemp.createTemp("badger");
+    var f = new File("${tmpDir.path}/script");
+    await f.writeAsString(buff.toString());
+    p = f.path;
+  }
+
+  var file = new File(p);
 
   if (!await file.exists()) {
     print("ERROR: Unable to find script file '${file.path}'");
@@ -79,5 +98,9 @@ main(List<String> args) async {
     await context.run(() async {
       await context.invoke("runTests", []);
     });
+  }
+
+  if (tmpDir != null) {
+    await tmpDir.delete(recursive: true);
   }
 }
