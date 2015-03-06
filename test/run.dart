@@ -38,7 +38,7 @@ main(List<String> args) async {
     var context = new Context();
     StandardLibrary.import(context);
     IOLibrary.import(context);
-    importTesting(context, "Evaluation Tests");
+    importTesting(context, "Evaluator");
     await env.eval(context);
 
     await context.run(() async {
@@ -48,7 +48,7 @@ main(List<String> args) async {
     context = new Context();
     StandardLibrary.import(context);
     IOLibrary.import(context);
-    importTesting(context, "JSON AST");
+    importTesting(context, "JSON AST Compiler");
     await env.buildEvalJSON(context);
     await context.run(() async {
       await context.invoke("runTests", []);
@@ -62,6 +62,7 @@ main(List<String> args) async {
     }
 
     var js = await env.compile(target);
+    print("##teamcity[testSuiteStarted name='JavaScript Compiler']");
     var proc = await Process.start("node", ["-e", js]);
     proc.stdout.listen((data) {
       stdout.add(data);
@@ -79,5 +80,7 @@ main(List<String> args) async {
         print("JavaScript Generation failed for script ${name}");
       }
     }
+
+    print("##teamcity[testSuiteFinished name='JavaScript Compiler']");
   }
 }
