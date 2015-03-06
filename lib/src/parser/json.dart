@@ -25,19 +25,27 @@ class BadgerSnapshotParser {
   }
 
   Map<String, Program> go(String name, Map it) {
-    if (!it.containsKey("statements")) {
+    if (!it.containsKey("statements") && !it.containsKey("g")) {
       var map = {};
       for (var key in it.keys) {
         var x = go(key, it[key]);
         map[key] = x;
       }
-      var c = map["_"]["_"];
+      var c = null;
+
+      if (map["_"].containsKey("_")) {
+        c = map["_"]["_"];
+      } else {
+        c = map["_"];
+      }
+
       map.remove("_");
+
       map[name] = c;
       return map;
     } else {
       return {
-        name: new BadgerJsonParser().build(it)
+        (name): new BadgerJsonParser().build(it)
       };
     }
   }
@@ -276,7 +284,7 @@ class BadgerJsonBuilder {
 
 class BadgerJsonParser {
   Program build(Map input) {
-    if (!input.containsKey("statements") && input.containsKey("s")) {
+    if (!input.containsKey("statements") && input.containsKey("g")) {
       input = TinyAstCompilerTarget.expand(input);
     }
 
@@ -379,7 +387,7 @@ class BadgerJsonParser {
     } else if (type == "anonymous function") {
       return new AnonymousFunction(it["args"], new Block(it["block"].map(_buildStatement).toList()));
     } else {
-      throw new Exception("Failed to build expression.");
+      throw new Exception("Failed to build expression for ${it}");
     }
   }
 

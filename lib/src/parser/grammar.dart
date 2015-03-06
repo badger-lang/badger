@@ -7,14 +7,14 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(statement).separatedBy(whitespace().star()) &
     whitespace().star()
-  ) | failure();
+  );
 
   statement() => (
     (
+      ref(functionDefinition) |
       ref(accessAssignment) |
       ref(assignment) |
       ref(methodCall) |
-      ref(functionDefinition) |
       ref(whileStatement) |
       ref(breakStatement) |
       ref(forInStatement) |

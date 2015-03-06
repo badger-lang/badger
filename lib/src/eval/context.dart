@@ -119,10 +119,10 @@ class Context extends BadgerObject {
     }
   }
 
-  void define(String name, Function function) {
-    functions[name] = (args) {
+  void define(String name, Function function, {bool wrap: true}) {
+    functions[name] = wrap ? ((args) {
       return Function.apply(function, args);
-    };
+    }) : function;
   }
 
   void proxy(String name, dynamic value) {

@@ -51,9 +51,8 @@ class FileEnvironment extends Environment {
       }
 
       return new BadgerJsonParser().build(json);
-    } catch (e) {
+    } on FormatException catch (e) {
     }
-
     _e = this;
 
     return _parser.parse(content).value;
@@ -274,7 +273,7 @@ class Evaluator {
 
           return await _evaluateBlock(block.statements);
         });
-      });
+      }, wrap: false);
     } else if (statement is BreakStatement) {
       return _BREAK_NOW;
     } else {

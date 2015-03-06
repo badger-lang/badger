@@ -30,7 +30,7 @@ class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
       out[location] = m;
     }
 
-    out["_"] = JSON.decode(new AstCompilerTarget().compile(program));
+    out["_"] = JSON.decode(new TinyAstCompilerTarget().compile(program));
 
     return JSON.encode(out);
   }
@@ -38,31 +38,38 @@ class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
 
 class TinyAstCompilerTarget extends CompilerTarget<String> {
   static final Map<String, String> MAPPING = {
-    "type": "t",
-    "immutable": "im",
-    "reference": "r",
-    "identifier": "i",
-    "value": "v",
-    "declarations": "d",
-    "statements": "s",
-    "isInitialDefine": "ind",
-    "op": "o",
-    "components": "c",
-    "args": "a",
-    "method call": "m",
-    "access": "ac",
-    "block": "b",
-    "operator": "op",
-    "assignment": "as",
-    "string literal": "st",
-    "left": "l",
-    "right": "r",
-    "variable reference": "va",
-    "for in": "f",
-    "if": "if",
+    "type": "a",
+    "immutable": "b",
+    "reference": "c",
+    "identifier": "d",
+    "value": "e",
+    "declarations": "f",
+    "statements": "g",
+    "isInitialDefine": "h",
+    "op": "i",
+    "components": "j",
+    "args": "k",
+    "method call": "l",
+    "access": "m",
+    "block": "n",
+    "operator": "o",
+    "assignment": "p",
+    "string literal": "q",
+    "left": "r",
+    "right": "s",
+    "variable reference": "t",
+    "for in": "u",
+    "if": "v",
     "while": "w",
-    "function definition": "fd",
-    "anonymous function": "af"
+    "function definition": "x",
+    "anonymous function": "y",
+    "import declaration": "z",
+    "integer literal": "+",
+    "double literal": "-",
+    "hexadecimal literal": "@",
+    "ternary operator": ">",
+    "boolean literal": ">",
+    "range literal": "."
   };
 
   static String demap(String key) {
@@ -97,8 +104,8 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
       var r = {};
       for (var x in it.keys) {
         var v = it[x];
-        if (x == "type") {
-          v = MAPPING.containsKey(v) ? MAPPING[v] : v;
+        if (x == "type" || x == MAPPING["type"]) {
+          v = x == "type" ? (MAPPING.containsKey(v) ? MAPPING[v] : v) : demap(v);
         }
         r[transformer(x)] = transformMapStrings(v, transformer);
       }
