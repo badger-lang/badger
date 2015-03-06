@@ -162,7 +162,7 @@ class TestingLibrary {
             await func([]);
           } catch (e) {
             stopwatch.stop();
-            handleTestResult(new TestResult(name, TestResultType.FAILURE, e.toString(), stopwatch.elapsedMilliseconds));
+            handleTestResult(new TestResult(name, TestResultType.FAILURE, stopwatch.elapsedMilliseconds, e.toString()));
             continue;
           }
           stopwatch.stop();
