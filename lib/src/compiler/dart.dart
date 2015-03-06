@@ -12,29 +12,33 @@ class DartCompilerTarget extends CompilerTarget<String> {
   }
 
   void writeHeader(StringBuffer buff) {
-    buff.write("""
-    bool \$boolean(value) {
-      if (value == null) {
-        return false;
-      } else if (value is int) {
-        return value != 0;
-      } else if (value is double) {
-        return value != 0.0;
-      } else if (value is String) {
-        return value.isNotEmpty;
-      } else if (value is bool) {
-        return value;
-      } else {
-        return true;
-      }
-    }
-    """.split("\n").map((it) => it.trim()).join("").trim());
-
-    buff.write("void main(List<String> args) {");
+    buff.write("main(args) async {");
   }
 
   void writeFooter(StringBuffer buff) {
     buff.write("}");
+
+    var str = buff.toString();
+
+    if (str.contains("\$boolean")) {
+      buff.write("""
+      \$boolean(value) {
+        if (value == null) {
+          return false;
+        } else if (value is int) {
+          return value != 0;
+        } else if (value is double) {
+          return value != 0.0;
+        } else if (value is String) {
+          return value.isNotEmpty;
+        } else if (value is bool) {
+          return value;
+        } else {
+          return true;
+        }
+      }
+      """.split("\n").map((it) => it.trim()).join("").trim());
+    }
   }
 }
 
@@ -62,14 +66,8 @@ class DartAstVisitor extends AstVisitor {
     var i = 0;
     for (var s in statements) {
       visitStatement(s);
-      if (i != statements.length - 1) {
-        buff.write(";");
-      }
-      i++;
-    }
-
-    if (statements.length == 1) {
       buff.write(";");
+      i++;
     }
   }
 
@@ -301,5 +299,10 @@ class DartAstVisitor extends AstVisitor {
     buff.write(")) {");
     visitStatements(statement.block.statements);
     buff.write("}");
+  }
+
+  @override
+  void visitNativeCode(NativeCode code) {
+    buff.write(code.code);
   }
 }

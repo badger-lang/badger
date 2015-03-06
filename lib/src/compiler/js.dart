@@ -29,7 +29,7 @@ class JsAstVisitor extends AstVisitor {
 
   void visitIfStatement(IfStatement statement) {
     if (
-      (statement.condition is BooleanLiteral && statement.condition.value == false) ||
+      (statement.condition is BooleanLiteral && (statement.condition as BooleanLiteral).value == false) ||
       statement.block == null ||
       statement.block.statements.isEmpty
     ) {
@@ -63,7 +63,7 @@ class JsAstVisitor extends AstVisitor {
 
   void visitWhileStatement(WhileStatement statement) {
     if (
-      (statement.condition is BooleanLiteral && statement.condition.value == false) ||
+      (statement.condition is BooleanLiteral && (statement.condition as BooleanLiteral).value == false) ||
       statement.block == null ||
       statement.block.statements.isEmpty
     ) {
@@ -282,7 +282,7 @@ class JsAstVisitor extends AstVisitor {
 
   void visitTernaryOperator(TernaryOperator operator) {
     if (operator.condition is BooleanLiteral) {
-      if (operator.condition.value) {
+      if ((operator.condition as BooleanLiteral).value) {
         visitExpression(operator.whenTrue);
       } else {
         visitExpression(operator.whenFalse);
@@ -328,6 +328,12 @@ class JsAstVisitor extends AstVisitor {
     }
 
     this.buff.write("}.bind(this)");
+  }
+
+  @override
+  void visitNativeCode(NativeCode code) {
+    // TODO(kaendfinger): Look into a safer way to do this.
+    buff.write(code.code);
   }
 }
 

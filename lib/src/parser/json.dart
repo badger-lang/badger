@@ -253,6 +253,11 @@ class BadgerJsonBuilder {
         "type": "boolean literal",
         "value": expression.value
       };
+    } else if (expression is NativeCode) {
+      return {
+        "type": "native code",
+        "code": expression.code
+      };
     } else {
       throw new Exception("Failed to generate expression for ${expression}");
     }
@@ -386,6 +391,8 @@ class BadgerJsonParser {
       return new BracketAccess(_buildExpression(it["reference"]), _buildExpression(it["index"]));
     } else if (type == "anonymous function") {
       return new AnonymousFunction(it["args"], new Block(it["block"].map(_buildStatement).toList()));
+    } else if (type == "native code") {
+      return new NativeCode(it["code"]);
     } else {
       throw new Exception("Failed to build expression for ${it}");
     }

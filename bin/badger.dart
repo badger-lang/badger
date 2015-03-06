@@ -68,13 +68,13 @@ main(List<String> args) async {
     CompilerTarget target;
 
     if (name == "ast") {
-      target = CompilerTarget.AST;
+      target = new AstCompilerTarget();
     } else if (name == "js") {
-      target = CompilerTarget.JS;
+      target = new JsCompilerTarget();
     } else if (name == "badger") {
-      target = CompilerTarget.BADGER;
+      target = new BadgerCompilerTarget();
     } else if (name == "tiny-ast") {
-      target = CompilerTarget.TINY_AST;
+      target = new TinyAstCompilerTarget();
     } else if (name == "snapshot") {
       target = new SnapshotCompilerTarget(env);
     } else if (name == "dart") {

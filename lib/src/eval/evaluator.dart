@@ -360,6 +360,8 @@ class Evaluator {
 
         return await Function.apply(await BadgerUtils.getProperty(l, v), args);
       }
+    } else if (expr is NativeCode) {
+      throw new Exception("Native Code is not supported on the evaluator.");
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 

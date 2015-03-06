@@ -29,6 +29,7 @@ abstract class AstVisitorBase {
   void visitHexadecimalLiteral(HexadecimalLiteral literal);
   void visitOperator(Operator operator);
   void visitAccess(Access access);
+  void visitNativeCode(NativeCode code);
   void visitBracketAccess(BracketAccess access);
   void visitTernaryOperator(TernaryOperator operator);
   void visitAnonymousFunction(AnonymousFunction function);
@@ -118,6 +119,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitMethodCall(expression);
     } else if (expression is TernaryOperator) {
       visitTernaryOperator(expression);
+    } else if (expression is NativeCode) {
+      visitNativeCode(expression);
     } else {
       throw new Exception("Unknown Expression Type: ${expression}");
     }

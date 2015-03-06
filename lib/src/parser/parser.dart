@@ -150,6 +150,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  nativeCode() => super.nativeCode().map((it) {
+    return new NativeCode(it[1]);
+  });
+
+  @override
   featureDeclaration() => super.featureDeclaration().map((it) {
     return new FeatureDeclaration(it[1]);
   });

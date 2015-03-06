@@ -176,6 +176,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(nativeCode) |
       ref(methodCall) |
       ref(access) |
       ref(rangeLiteral) |
@@ -270,6 +271,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     char(",").optional() &
     whitespace().star() &
     char("}");
+
+  nativeCode() => string("```") &
+    pattern("^```").star().flatten() &
+    string("```");
 
   mapEntry() => ref(expressionItem) &
     whitespace().star() &

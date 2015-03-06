@@ -129,6 +129,12 @@ class StringLiteral extends Expression {
   String toString() => "StringLiteral(${components})";
 }
 
+class NativeCode extends Expression {
+  final String code;
+
+  NativeCode(this.code);
+}
+
 class IntegerLiteral extends Expression {
   final int value;
 
