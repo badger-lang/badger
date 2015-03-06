@@ -1,5 +1,48 @@
 part of badger.parser;
 
+class ImportMapEnvironment extends Environment {
+  final Map<String, Program> programs;
+
+  ImportMapEnvironment(this.programs);
+
+  @override
+  Future<Program> import(String location) async => programs[location];
+}
+
+class BadgerSnapshotParser {
+  final Map input;
+
+  BadgerSnapshotParser(this.input);
+
+  Map<String, Program> parse() {
+    var progs = {};
+
+    for (var loc in input.keys) {
+      progs.addAll(go(loc, input[loc]));
+    }
+
+    return progs;
+  }
+
+  Map<String, Program> go(String name, Map it) {
+    if (!it.containsKey("statements")) {
+      var map = {};
+      for (var key in it.keys) {
+        var x = go(key, it[key]);
+        map[key] = x;
+      }
+      var c = map["_"]["_"];
+      map.remove("_");
+      map[name] = c;
+      return map;
+    } else {
+      return {
+        name: new BadgerJsonParser().build(it)
+      };
+    }
+  }
+}
+
 class BadgerJsonBuilder {
   final Program program;
 

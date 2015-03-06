@@ -1,7 +1,1 @@
-func greet(user) {
-  return "Hello $(user)"
-}
-
-func _sayHi() {
-  print("Hello")
-}
+let x = 0

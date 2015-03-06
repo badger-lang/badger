@@ -3,20 +3,20 @@ part of badger.eval;
 final Object VOID = new Object();
 final Object _BREAK_NOW = new Object();
 
-abstract class Environment {
-  Future<Program> import(String location);
-}
-
 class FileEnvironment extends Environment {
   static final BadgerParser _parser = new BadgerParser();
 
   final File file;
 
-  FileEnvironment(this.file);
+  Environment _e;
+
+  FileEnvironment(this.file) {
+    _e = this;
+  }
 
   eval(Context context) async {
     var program = _parse(await file.readAsString());
-    return await new Evaluator(program, this).eval(context);
+    return await new Evaluator(program, _e).eval(context);
   }
 
   Future<Program> parse() async {
@@ -36,15 +36,25 @@ class FileEnvironment extends Environment {
   }
 
   buildEvalJSON(Context ctx) async {
-    return await new Evaluator(await _parseJSON(JSON.encode(await generateJSON())), this).eval(ctx);
+    return await new Evaluator(await _parseJSON(JSON.encode(await generateJSON())), _e).eval(ctx);
   }
 
   Program _parse(String content) {
     try {
       var json = JSON.decode(content);
+
+      if (json.containsKey("_")) {
+        var p = new BadgerSnapshotParser(json);
+        var m = p.parse();
+        _e = new ImportMapEnvironment(m);
+        return m["_"];
+      }
+
       return new BadgerJsonParser().build(json);
     } catch (e) {
     }
+
+    _e = this;
 
     return _parser.parse(content).value;
   }

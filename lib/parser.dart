@@ -1,5 +1,7 @@
 library badger.parser;
 
+import "dart:async";
+
 import "package:petitparser/petitparser.dart";
 import "package:badger/compiler.dart" show TinyAstCompilerTarget;
 

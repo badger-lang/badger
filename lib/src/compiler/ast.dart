@@ -10,6 +10,32 @@ class AstCompilerTarget extends CompilerTarget<String> {
   }
 }
 
+class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
+  final Environment env;
+
+  SnapshotCompilerTarget(this.env);
+
+  @override
+  Future<String> compile(Program program) async {
+    var out = {};
+    var locations = [];
+
+    for (ImportDeclaration import in program.declarations.where((it) => it is ImportDeclaration)) {
+      locations.add(import.location.components.join());
+    }
+
+    for (var location in locations) {
+      var p = await env.import(location);
+      var m = JSON.decode(await compile(p));
+      out[location] = m;
+    }
+
+    out["_"] = JSON.decode(new AstCompilerTarget().compile(program));
+
+    return JSON.encode(out);
+  }
+}
+
 class TinyAstCompilerTarget extends CompilerTarget<String> {
   static final Map<String, String> MAPPING = {
     "type": "t",

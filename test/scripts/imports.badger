@@ -1,0 +1,3 @@
+import "imports/liba.badger"
+
+testEqual(x, 0)
