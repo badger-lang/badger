@@ -5,7 +5,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   start() => (
     ref(declarations).optional() &
     whitespace().star() &
-    ref(statement).separatedBy(whitespace().star()).optional() &
+    ref(statement).separatedBy(whitespace().star() & (char("\n") | char(";")) & whitespace().star()) &
     whitespace().star()
   ).end();
 
@@ -123,7 +123,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       whitespace().star() &
       char(",") &
       whitespace().star()
-    ) &
+    ).optional() &
     char(")") &
     ref(block);
 

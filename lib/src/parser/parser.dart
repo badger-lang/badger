@@ -172,13 +172,13 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   functionDefinition() => super.functionDefinition().map((it) {
-    var argnames = it[3].where((it) => it is String).toList();
+    var argnames = it[3] != null ? it[3].where((it) => it is String).toList() : [];
     return new FunctionDefinition(it[1], argnames, it[5]);
   });
 
   @override
   block() => super.block().map((it) {
-    return new Block(it[3].where((it) => it is Statement).toList());
+    return new Block(it[3] == null ? [] : it[3].where((it) => it is Statement).toList());
   });
 
   @override
