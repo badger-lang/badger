@@ -397,7 +397,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
-    addGlobal("print", "function(obj) {console.log(obj.toString());}");
+    addGlobal("print", 'function(obj) {(typeof badgerPrint !== "undefined" ? badgerPrint : console.log)(obj.toString());}');
     addGlobal("async", "function(cb) {setTimeout(cb, 0);}");
     addGlobal("args", 'typeof process === "undefined" ? [] : process.argv.slice(2)');
 
