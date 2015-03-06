@@ -20,6 +20,9 @@ main(List<String> args) async {
     "dart"
   ], help: "Compiles Badger Code");
 
+  argp.addOption("compiler-opt", abbr: "O", help: "Specifies a Compiler Option", allowMultiple: true);
+
+
   var opts = argp.parse(args);
 
   if (opts.rest.isEmpty) {
@@ -84,7 +87,37 @@ main(List<String> args) async {
       exit(1);
     }
 
-    target.isTestSuite = opts["test"];
+    var o = opts["compiler-opt"];
+    var optz = {};
+
+    for (var i in o) {
+      var split = i.split("=");
+
+      if (split.length == 1) {
+        optz[split[0]] = true;
+      } else {
+        var key = split[0];
+        var value = split.skip(1).join("=");
+
+        if (value == "true" || value == "false") {
+          optz[key] = value == "true";
+          continue;
+        }
+
+        try {
+          value = num.parse(value);
+
+          optz[key] = value;
+        } catch (e) {
+        }
+
+        optz[key] = value;
+      }
+    }
+
+    target.options = optz;
+
+    target.options.putIfAbsent("isTestSuite", () => opts["test"]);
 
     var program = await env.parse();
     print(await target.compile(program));

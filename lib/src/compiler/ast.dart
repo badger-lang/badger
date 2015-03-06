@@ -4,7 +4,7 @@ class AstCompilerTarget extends CompilerTarget<String> {
   @override
   String compile(Program program) {
     var ast = new BadgerJsonBuilder(program);
-    var encoder = new JsonEncoder.withIndent("  ");
+    var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
 
     return encoder.convert(ast.build());
   }
@@ -17,6 +17,7 @@ class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
 
   @override
   Future<String> compile(Program program) async {
+    var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
     var out = {};
     var locations = [];
 
@@ -32,7 +33,7 @@ class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
 
     out["_"] = JSON.decode(new TinyAstCompilerTarget().compile(program));
 
-    return JSON.encode(out);
+    return encoder.convert(out);
   }
 }
 
@@ -95,9 +96,10 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
 
   @override
   String compile(Program program) {
+    var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
     var ast = new BadgerJsonBuilder(program);
     var result = ast.build();
-    return JSON.encode(transformMapStrings(result, (x) {
+    return encoder.convert(transformMapStrings(result, (x) {
       if (MAPPING.containsKey(x)) {
         return MAPPING[x];
       } else {

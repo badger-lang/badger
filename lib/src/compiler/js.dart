@@ -347,6 +347,10 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
   @override
   String compile(Program program) {
+    var isTestSuite = options["isTestSuite"] == true;
+    var addHooks = options["hooks"] == true;
+    var generateTeamCityTests = options["teamcity"] == true;
+
     addGlobal("λlet", """
       function(context, name, value) {
         Object.defineProperty(context, name, {
@@ -397,7 +401,11 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
-    addGlobal("print", 'function(obj) {(typeof badgerPrint !== "undefined" ? badgerPrint : console.log)(obj.toString());}');
+    if (addHooks) {
+      addGlobal("print", 'function(obj) {(typeof badgerPrint !== "undefined" ? badgerPrint : console.log)(obj.toString());}');
+    } else {
+      addGlobal("print", 'function(obj) {console.log(obj.toString());}');
+    }
     addGlobal("async", "function(cb) {setTimeout(cb, 0);}");
     addGlobal("args", 'typeof process === "undefined" ? [] : process.argv.slice(2)');
 
@@ -479,8 +487,6 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     return minify(generatePrelude() + buff.toString() + generatePostlude());
   }
-
-  bool generateTeamCityTests = false;
 
   void addGlobal(String name, String body) {
     _names.add(name);

@@ -55,14 +55,19 @@ main(List<String> args) async {
     });
 
     var target = new JsCompilerTarget();
-    target.isTestSuite = true;
-
-    if (args.contains("--teamcity")) {
-      target.generateTeamCityTests = true;
-    }
+    target.options.addAll({
+      "isTestSuite": true,
+      "teamcity": args.contains("--teamcity")
+    });
 
     var js = await env.compile(target);
-    print("##teamcity[testSuiteStarted name='JavaScript Compiler']");
+
+    if (args.contains("--teamcity")) {
+      print("##teamcity[testSuiteStarted name='JavaScript Compiler']");
+    } else {
+      print("[JavaScript Compiler]");
+    }
+
     var proc = await Process.start("node", ["-e", js]);
     proc.stdout.listen((data) {
       stdout.add(data);
@@ -81,6 +86,8 @@ main(List<String> args) async {
       }
     }
 
-    print("##teamcity[testSuiteFinished name='JavaScript Compiler']");
+    if (args.contains("--teamcity")) {
+      print("##teamcity[testSuiteFinished name='JavaScript Compiler']");
+    }
   }
 }
