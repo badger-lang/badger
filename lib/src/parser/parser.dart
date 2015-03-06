@@ -110,7 +110,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   access() => super.access().map((it) {
-    return new Access(it[0], it[2]);
+    var ids = it[2].where((it) => it != ".").toList();
+    return new Access(it[0], ids);
   });
 
   @override
@@ -171,7 +172,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   functionDefinition() => super.functionDefinition().map((it) {
-    return new FunctionDefinition(it[1], it[3], it[5]);
+    var argnames = it[3].where((it) => it is String).toList();
+    return new FunctionDefinition(it[1], argnames, it[5]);
   });
 
   @override

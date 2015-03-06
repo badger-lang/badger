@@ -1,0 +1,8 @@
+test("Functions return correct values", () -> {
+  func calc(x, y) {
+    return x + y
+  }
+
+  let result = calc(1, 5)
+  testEqual(result, 6)
+})

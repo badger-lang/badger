@@ -7,7 +7,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(statement).separatedBy(whitespace().star()) &
     whitespace().star()
-  );
+  ).end();
 
   statement() => (
     (
@@ -167,10 +167,9 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(negate) |
     ref(expressionItem);
 
-  accessible() => ref(variableReference);
-
-  access() => ref(accessible) &
-    char(".") & ref(identifier);
+  access() => ref(variableReference) & char(".") & (
+    ref(identifier)
+  ).separatedBy(char(".")).optional();
 
   expressionItem() => (
     (

@@ -167,7 +167,7 @@ class BadgerAstPrinter {
     } else if (expr is Access) {
       printExpression(expr.reference);
       _buff.write(".");
-      _buff.write(expr.identifier);
+      _buff.write(expr.identifiers.join("."));
     } else if (expr is Operator) {
       printExpression(expr.left);
       _buff.write(" ${expr.op} ");

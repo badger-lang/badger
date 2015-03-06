@@ -69,7 +69,8 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     "hexadecimal literal": "@",
     "ternary operator": ">",
     "boolean literal": ">",
-    "range literal": "."
+    "range literal": ".",
+    "identifiers": "?"
   };
 
   static String demap(String key) {

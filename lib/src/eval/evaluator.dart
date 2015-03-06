@@ -348,17 +348,27 @@ class Evaluator {
         return await Context.current.invoke(ref, args);
       } else {
         var v = await _resolveValue(ref.reference);
-        var n = ref.identifier;
+        List<String> n = ref.identifiers;
+        List<String> ids = new List<String>.from(n);
+        ids.removeLast();
 
-        return await Function.apply(await BadgerUtils.getProperty(n, v), args);
+        for (var id in ids) {
+          v = await BadgerUtils.getProperty(id, v);
+        }
+
+        var l = n.last;
+
+        return await Function.apply(await BadgerUtils.getProperty(l, v), args);
       }
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 
-      if (value is BadgerObject) {
-        return await value.getProperty(expr.identifier);
-      } else {
-        return await BadgerUtils.getProperty(expr.identifier, value);
+      for (var id in expr.identifiers) {
+        if (value is BadgerObject) {
+          value = await value.getProperty(id);
+        } else {
+          value = await BadgerUtils.getProperty(id, value);
+        }
       }
 
       return value;

@@ -115,9 +115,9 @@ class ReturnStatement extends Statement {
 
 class Access extends Expression {
   final Expression reference;
-  final String identifier;
+  final List<String> identifiers;
 
-  Access(this.reference, this.identifier);
+  Access(this.reference, this.identifiers);
 }
 
 class StringLiteral extends Expression {

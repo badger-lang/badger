@@ -246,7 +246,7 @@ class BadgerJsonBuilder {
       return {
         "type": "access",
         "reference": _generateExpression(expression.reference),
-        "identifier": expression.identifier
+        "identifiers": expression.identifiers
       };
     } else if (expression is BooleanLiteral) {
       return {
@@ -375,7 +375,7 @@ class BadgerJsonParser {
         _buildExpression(it["whenFalse"])
       );
     } else if (type == "access") {
-      return new Access(_buildExpression(it["reference"]), it["identifier"]);
+      return new Access(_buildExpression(it["reference"]), it["identifiers"]);
     } else if (type == "map definition") {
       return new MapDefinition(it["entries"].map(_buildExpression).toList());
     } else if (type == "map entry") {

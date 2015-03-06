@@ -249,7 +249,7 @@ class JsAstVisitor extends AstVisitor {
       visitExpression(access.reference);
     }
     buff.write(".");
-    buff.write(access.identifier);
+    buff.write(access.identifiers.join("."));
   }
 
   void visitBracketAccess(BracketAccess access) {
