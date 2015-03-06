@@ -54,13 +54,30 @@ main(List<String> args) async {
       await context.invoke("runTests", []);
     });
 
-    print("[JS Compiler Tests]");
     var target = new JsCompilerTarget();
     target.isTestSuite = true;
+
+    if (args.contains("--teamcity")) {
+      target.generateTeamCityTests = true;
+    }
+
     var js = await env.compile(target);
     var proc = await Process.start("node", ["-e", js]);
-    proc.stdout.listen((data) => stdout.add(data));
-    proc.stderr.listen((data) => stderr.add(data));
-    await proc.exitCode;
+    proc.stdout.listen((data) {
+      stdout.add(data);
+    });
+
+    proc.stderr.listen((data) {
+      stderr.add(data);
+    });
+    var code = await proc.exitCode;
+
+    if (code != 0) {
+      if (args.contains("--teamcity")) {
+        print("##teamcity[buildProblem description='JavaScript Generation Failed']");
+      } else {
+        print("JavaScript Generation failed for script ${name}");
+      }
+    }
   }
 }

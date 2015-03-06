@@ -373,7 +373,8 @@ class JsCompilerTarget extends CompilerTarget<String> {
         }
       """);
 
-      addGlobal("runTests", """
+      if (!generateTeamCityTests) {
+        addGlobal("runTests", """
         function() {
           for (var i in __tests__) {
             var t = __tests__[i];
@@ -393,6 +394,34 @@ class JsCompilerTarget extends CompilerTarget<String> {
           }
         }
       """);
+      } else {
+        addGlobal("runTests", """
+          function() {
+            for (var i in __tests__) {
+              var t = __tests__[i];
+
+              var name = t[0];
+              var func = t[1];
+
+              var begin = Date.now();
+              var end;
+
+              try {
+                console.log("##teamcity[testStarted name='" + name + "]");
+                func();
+                end = Date.now();
+              } catch (e) {
+                end = Date.now();
+                console.log("##teamcity[testFailed name='" + name + " message='" + e.toString() + "' details='" + e.toString() + "]");
+                console.log("##teamcity[testFinished name='" + name + "' duration='" + (end - begin) + "']");
+                continue;
+              }
+
+              console.log("##teamcity[testFinished name='" + name + "' duration='" + (end - begin) + "']");
+            }
+          }
+        """);
+      }
 
       addGlobal("testEqual", """
         function(a, b) {
@@ -413,6 +442,8 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     return minify(generatePrelude() + buff.toString() + generatePostlude());
   }
+
+  bool generateTeamCityTests = false;
 
   void addGlobal(String name, String body) {
     _names.add(name);
