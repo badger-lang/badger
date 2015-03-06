@@ -70,7 +70,9 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     "ternary operator": ">",
     "boolean literal": ">",
     "range literal": ".",
-    "identifiers": "?"
+    "identifiers": "?",
+    "list definition": "|",
+    "map definition": "["
   };
 
   static String demap(String key) {
