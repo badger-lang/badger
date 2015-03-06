@@ -30,7 +30,7 @@ func greet(name) {
   return "Hello $(name)"
 }
 
-let names = ["Kenneth", "Logan", "Sam"]
+let names = ["Kenneth", "Logan", "Sam", "Mike"]
 
 for name in names {
   print(greet(name))
