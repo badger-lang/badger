@@ -28,7 +28,11 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitIfStatement(IfStatement statement) {
-    if (statement.condition is BooleanLiteral && statement.condition.value == false) {
+    if (
+      (statement.condition is BooleanLiteral && statement.condition.value == false) ||
+      statement.block == null ||
+      statement.block.statements.isEmpty
+    ) {
       return;
     }
 
@@ -58,7 +62,11 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitWhileStatement(WhileStatement statement) {
-    if (statement.condition is BooleanLiteral && statement.condition.value == false) {
+    if (
+      (statement.condition is BooleanLiteral && statement.condition.value == false) ||
+      statement.block == null ||
+      statement.block.statements.isEmpty
+    ) {
       return;
     }
 
@@ -273,6 +281,16 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitTernaryOperator(TernaryOperator operator) {
+    if (operator.condition is BooleanLiteral) {
+      if (operator.condition.value) {
+        visitExpression(operator.whenTrue);
+      } else {
+        visitExpression(operator.whenFalse);
+      }
+
+      return;
+    }
+
     buff.write("λbool(");
     visitExpression(operator.condition);
     buff.write(") ? ");

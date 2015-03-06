@@ -1,4 +1,3 @@
-let msgs = [ "Hello!", "Goodbye!" ]
+let x = true
 
-window.alert(msgs[0])
-window.alert(msgs[1])
+print(x)
