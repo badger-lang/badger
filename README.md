@@ -10,6 +10,8 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 
 ## Features
 
+### Language
+
 - Method Calls
 - Variables
 - Immutable Variables
@@ -17,6 +19,14 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 - While Statements
 - If Then Else Statements
 - For In Statements
+
+### Implementation
+
+- JavaScript Compiler
+- Dart Compiler
+- Compiler API
+- Generate JSON from AST
+- Generate AST from JSON
 
 ## Links
 
@@ -51,13 +61,8 @@ To run an example, run the following command:
 badger example/greeting.badger
 ```
 
-## Reference Implementation
+To compile to JavaScript, run the following command:
 
-This repository contains a reference implementation of a Badger evaluator, compiler, and parser.
-
-### Features
-
-- Generate JSON from AST
-- Generate AST from JSON
-- JavaScript Compiler
-- Compiler API
+```bash
+badger --compile=js example/greeting.badger > hello.js
+```
