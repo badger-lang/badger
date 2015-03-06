@@ -6,7 +6,7 @@ class JsAstVisitor extends AstVisitor {
   JsAstVisitor(this.buff);
 
   void visitForInStatement(ForInStatement statement) {
-    this.buff.write('λfor(function(${statement.identifier}){var λ = {"${statement.identifier}":${statement.identifier}};');
+    buff.write('λfor(function(${statement.identifier}){var λ = {"${statement.identifier}":${statement.identifier}};');
 
     for (var s in statement.block.statements) {
       visitStatement(s);
@@ -428,11 +428,11 @@ class JsCompilerTarget extends CompilerTarget<String> {
   }
 
   List<String> _topLevel = [];
-  List<String> _includes = [];
+  Set<String> _includes = new Set<String>();
 
   String generatePrelude() {
     var x = buff.toString();
-    _includes = _names.where((it) => x.contains(it)).toList();
+    _includes = _names.where((it) => x.contains(it)).toSet();
 
     var b = new StringBuffer();
     if (_topLevel.isNotEmpty) {

@@ -7,6 +7,7 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 ## Links
 
 - [Wiki](https://github.com/DirectMyFile/badger/wiki)
+- [Compiler Demo](http://directmyfile.github.io/badger-site/compiler.html)
 
 ## Features
 
