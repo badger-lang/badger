@@ -1,0 +1,25 @@
+print("DirectCode Repositories:")
+
+let url = "https://api.github.com/users/DirectMyFile/repos?type=owner&sort=full_name&direction=asc"
+
+let http = make(HttpClient)
+let response = http.get(url)
+var json = JSON.parse(response.body)
+
+json = json.where((a) -> {
+  let stars = a.stargazers_count
+  return stars > 0
+})
+
+json = json.sort((a, b) -> {
+  let x = a.stargazers_count
+  let y = b.stargazers_count
+
+  return y.compareTo(x)
+})
+
+for repo in json {
+  let name = repo.name
+  let stars = repo.stargazers_count
+  print("- $(name): $(stars) stars")
+}

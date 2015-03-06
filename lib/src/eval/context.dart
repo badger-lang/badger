@@ -13,23 +13,108 @@ abstract class BadgerObject {
   }
 }
 
-typedef InterceptionHandler(List<dynamic> positional, Map<Symbol, dynamic> named);
+typedef InterceptionHandler(List<dynamic> positional);
+
+class _Unspecified {
+  const _Unspecified();
+}
+
+class MergeSorter {
+  Future<List> sort(List input, [compare]) async {
+    if (input.length <= 1) return new List.from(input);
+
+    if (compare == null) {
+      compare = (a, b) => a.compareTo(b);
+    }
+
+    var left = [];
+    var right = [];
+    var middle = (input.length / 2).round();
+
+    int x;
+
+    for (x = 0; x < middle; x++) {
+      left.add(input[x]);
+    }
+
+    for (; x >= middle && x < input.length; x++) {
+      right.add(input[x]);
+    }
+
+    left = await sort(left, compare);
+    right = await sort(right, compare);
+
+    return await merge(left, right, compare);
+  }
+
+  Future<List> merge(List left, List right, compare) async {
+    var result = [];
+
+    while (left.isNotEmpty && right.isNotEmpty) {
+      var a = await compare(left.first, right.first);
+      var b = await compare(right.first, left.first);
+      if (a <= b) {
+        result.add(left.first);
+        left.removeAt(0);
+      } else {
+        result.add(right.first);
+        right.removeAt(0);
+      }
+    }
+
+    while (left.isNotEmpty) {
+      result.add(left.first);
+      left.removeAt(0);
+    }
+
+    while (right.isNotEmpty) {
+      result.add(right.first);
+      right.removeAt(0);
+    }
+
+    return result;
+  }
+}
+
+const _Unspecified _UNSPECIFIED = const _Unspecified();
 
 class Interceptor {
   final InterceptionHandler handler;
 
   Interceptor(this.handler);
 
-  @override
-  noSuchMethod(inv) {
-    if (!inv.isAccessor && inv.memberName == #call) {
-      var positional = inv.positionalArguments;
-      var named = inv.namedArguments;
+  dynamic call([
+               a = _UNSPECIFIED,
+               b = _UNSPECIFIED,
+               c = _UNSPECIFIED,
+               d = _UNSPECIFIED,
+               e = _UNSPECIFIED,
+               f = _UNSPECIFIED,
+               g = _UNSPECIFIED,
+               h = _UNSPECIFIED,
+               i = _UNSPECIFIED,
+               j = _UNSPECIFIED,
+               k = _UNSPECIFIED,
+               l = _UNSPECIFIED,
+               m = _UNSPECIFIED,
+               n = _UNSPECIFIED,
+               o = _UNSPECIFIED,
+               p = _UNSPECIFIED,
+               q = _UNSPECIFIED,
+               r = _UNSPECIFIED,
+               s = _UNSPECIFIED,
+               t = _UNSPECIFIED,
+               u = _UNSPECIFIED,
+               v = _UNSPECIFIED,
+               w = _UNSPECIFIED,
+               x = _UNSPECIFIED,
+               y = _UNSPECIFIED,
+               z = _UNSPECIFIED
+               ]) {
+    var list = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z];
+    var args = list.takeWhile((it) => it != _UNSPECIFIED).toList();
 
-      return handler(positional, named);
-    } else {
-      return super.noSuchMethod(inv);
-    }
+    return handler(args);
   }
 }
 
@@ -48,6 +133,40 @@ class BadgerUtils {
   static dynamic getProperty(String name, obj) {
     if (obj is Map) {
       return obj[name];
+    }
+
+    if (obj is Iterable) {
+      if (name == "where") {
+        return (x) async {
+          var result = [];
+
+          for (var e in obj) {
+            if (await x(e)) {
+              result.add(e);
+            }
+          }
+
+          return result;
+        };
+      } else if (name == "map") {
+        return (x) async {
+          var result = [];
+          for (var e in obj) {
+            result.add(await x(e));
+          }
+          return result;
+        };
+      } else if (name == "sort") {
+        return ([comparator]) async {
+          return await new MergeSorter().sort(obj, comparator);
+        };
+      } else if (name == "each" || name == "forEach") {
+        return (function) async {
+          for (var e in obj) {
+            await function(e);
+          }
+        };
+      }
     }
 
     ObjectMirror f;

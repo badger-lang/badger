@@ -222,9 +222,11 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   anonymousFunction() => char("(") &
     ref(identifier).separatedBy(
-      whitespace().star() &
-      char(",") &
-      whitespace().star()
+      (
+        whitespace().star() &
+        char(",") &
+        whitespace().star()
+      )
     ).optional() & whitespace().star() & string(") ->") &
     ref(block);
 

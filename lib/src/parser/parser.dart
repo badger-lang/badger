@@ -160,7 +160,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   anonymousFunction() => super.anonymousFunction().map((it) {
-    return new AnonymousFunction(it[1], it[4]);
+    var x = it[1].where((it) => it is String).toList();
+    return new AnonymousFunction(x, it[4]);
   });
 
   @override

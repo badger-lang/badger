@@ -319,7 +319,7 @@ class Evaluator {
           i++;
         }
 
-        return Context.current.createContext(() async {
+        return await Context.current.createContext(() async {
           var c = Context.current;
 
           for (var n in inputs.keys) {
@@ -330,8 +330,8 @@ class Evaluator {
         });
       };
 
-      return new Interceptor((a, b) {
-        return Function.apply(func, a);
+      return new Interceptor((a) async {
+        return await func(a);
       });
     } else if (expr is MethodCall) {
       var args = [];
@@ -348,15 +348,15 @@ class Evaluator {
         var v = await _resolveValue(ref.reference);
         var n = ref.identifier;
 
-        return Function.apply(BadgerUtils.getProperty(n, v), args);
+        return await Function.apply(await BadgerUtils.getProperty(n, v), args);
       }
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 
       if (value is BadgerObject) {
-        return value.getProperty(expr.identifier);
+        return await value.getProperty(expr.identifier);
       } else {
-        return BadgerUtils.getProperty(expr.identifier, value);
+        return await BadgerUtils.getProperty(expr.identifier, value);
       }
 
       return value;
