@@ -28,6 +28,10 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitIfStatement(IfStatement statement) {
+    if (statement.condition is BooleanLiteral && statement.condition.value == false) {
+      return;
+    }
+
     buff.write("if (");
     buff.write("λbool(");
     visitExpression(statement.condition);
@@ -54,6 +58,10 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitWhileStatement(WhileStatement statement) {
+    if (statement.condition is BooleanLiteral && statement.condition.value == false) {
+      return;
+    }
+
     buff.write("while (");
     buff.write("λbool(");
     visitExpression(statement.condition);
@@ -96,7 +104,7 @@ class JsAstVisitor extends AstVisitor {
   @override
   void visitStatement(Statement statement) {
     super.visitStatement(statement);
-    if (buff.toString()[buff.length - 1] != ";") {
+    if (buff.isNotEmpty && buff.toString()[buff.length - 1] != ";") {
       buff.write(";");
     }
   }
