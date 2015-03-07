@@ -650,6 +650,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
       i++;
     }
 
-    return "})(${ctx},${_bodies.where((it) => map.values.contains(it)).join(",")});";
+    var c = [ctx];
+    c.addAll(_bodies.where((it) => map.values.contains(it)));
+
+    return "})(${c.join(",")});";
   }
 }
