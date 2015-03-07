@@ -6,7 +6,7 @@ class JsAstVisitor extends AstVisitor {
   JsAstVisitor(this.buff);
 
   void visitForInStatement(ForInStatement statement) {
-    buff.write('λfor(function(${statement.identifier}){var λ = {"${statement.identifier}":${statement.identifier}};');
+    buff.write('λfor(function(${statement.identifier}, λ){λlet(λ, "${statement.identifier}", ${statement.identifier});');
 
     for (var s in statement.block.statements) {
       visitStatement(s);
@@ -18,7 +18,7 @@ class JsAstVisitor extends AstVisitor {
 
     buff.write("},");
     visitExpression(statement.value);
-    buff.write(")");
+    buff.write(", λ)");
   }
 
   void visitImportDeclaration(ImportDeclaration declaration) {
@@ -142,10 +142,13 @@ class JsAstVisitor extends AstVisitor {
       return;
     }
 
-    buff.write('"');
     var i = 0;
     for (var c in literal.components) {
       if (c is String) {
+        if (i == 0) {
+          buff.write('"');
+        }
+
         buff.write(c);
 
         if (i == literal.components.length - 1) {
@@ -157,6 +160,10 @@ class JsAstVisitor extends AstVisitor {
         }
 
         visitExpression(c);
+
+        if (i == 0) {
+          buff.write("+");
+        }
 
         if (i != literal.components.length - 1) {
           buff.write('"');
@@ -371,10 +378,10 @@ class JsCompilerTarget extends CompilerTarget<String> {
     """);
 
     addGlobal("λfor", """
-      function(block, value) {
+      function(block, value, λ) {
         for (var i in value) {
           if (value.hasOwnProperty(i)) {
-            block(value[i]);
+            block(value[i], Object.create(λ));
           }
         }
       }
