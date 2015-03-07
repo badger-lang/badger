@@ -480,8 +480,11 @@ class JsCompilerTarget extends CompilerTarget<String> {
     } else {
       addGlobal("print", 'function(obj) {console.log(obj.toString());}');
     }
+
     addGlobal("async", "function(cb) {setTimeout(cb, 0);}");
     addGlobal("args", 'typeof process === "undefined" ? [] : process.argv.slice(2)');
+
+    addGlobal("runtime", '"javascript"');
 
     if (isTestSuite) {
       addTopLevel("__tests__", "[]");

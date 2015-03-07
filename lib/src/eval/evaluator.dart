@@ -95,6 +95,9 @@ class Evaluator {
   Evaluator(this.program, this.environment);
 
   eval(Context ctx) async {
+    if (!ctx.hasVariable("runtime")) {
+      ctx.setVariable("runtime", "badger");
+    }
     return await _evalProgram(program, ctx);
   }
 

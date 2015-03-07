@@ -39,6 +39,8 @@ class DartCompilerTarget extends CompilerTarget<String> {
       }
       """.split("\n").map((it) => it.trim()).join("").trim());
     }
+
+    buff.write('final runtime = "dart";');
   }
 }
 
