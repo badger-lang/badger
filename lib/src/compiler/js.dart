@@ -141,6 +141,23 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitStringLiteral(StringLiteral literal) {
+    if (literal.components.every((c) => c is Expression)) {
+      var i = 0;
+      for (var x in literal.components) {
+        buff.write("(");
+        visitExpression(x);
+        buff.write(")");
+        buff.write(".toString()");
+
+        if (i != literal.components.length - 1) {
+          buff.write("+");
+        }
+
+        i++;
+      }
+      return;
+    }
+
     if (literal.components.isEmpty) {
       buff.write('""');
       return;
