@@ -606,7 +606,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       b.write(_topLevel.join(";"));
       b.write(";");
     }
-    b.write('(function(λ, ${_includes.join(",")}){');
+    b.write('(function(${(["λ"]..addAll(_includes)).join(",")}){');
 
     if (options["allow-injection"] != false) {
       b.write('typeof badgerInjectGlobal !== "undefined" ? badgerInjectGlobal(λ) : null;');
