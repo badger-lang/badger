@@ -367,6 +367,13 @@ class JsAstVisitor extends AstVisitor {
   void visitDefined(Defined defined) {
     buff.write('λ.hasOwnProperty("${defined.identifier}")');
   }
+
+  @override
+  void visitParentheses(Parentheses parens) {
+    buff.write("(");
+    visitExpression(parens.expression);
+    buff.write(")");
+  }
 }
 
 class JsCompilerTarget extends CompilerTarget<String> {
@@ -588,29 +595,31 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
   void addTopLevel(String a, [String b]) {
     if (b == null) {
-      _topLevel.add(a);
+      _topLevel.add([a]);
     } else {
-      addTopLevel("var ${a} = ${b}");
+      _topLevel.add([a, b]);
     }
   }
 
-  List<String> _topLevel = [];
+  List<List<String>> _topLevel = [];
   Set<String> _includes = new Set<String>();
 
   String generatePrelude() {
+    var str = buff.toString();
     var x = buff.toString();
     _includes = _names.where((it) => x.contains(it)).toSet();
 
+    var ti = _topLevel.where((it) => str.contains(it[0])).toList();
     var b = new StringBuffer();
-    if (_topLevel.isNotEmpty) {
-      b.write(_topLevel.join(";"));
+    if (ti.isNotEmpty) {
+      b.write(ti.map((it) => it.length == 1 ? it[0] : it[1]).join(";"));
       b.write(";");
     }
     var n = ["λ"];
     n.addAll(_includes.toList());
     b.write('(function(${n.join(",")}){');
 
-    if (options["allow-injection"] != false) {
+    if (options["hooks"] == true) {
       b.write('typeof badgerInjectGlobal !== "undefined" ? badgerInjectGlobal(λ) : null;');
     }
 

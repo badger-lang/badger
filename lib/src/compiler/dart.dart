@@ -307,4 +307,11 @@ class DartAstVisitor extends AstVisitor {
   @override
   void visitDefined(Defined defined) {
   }
+
+  @override
+  void visitParentheses(Parentheses parens) {
+    buff.write("(");
+    visitExpression(parens.expression);
+    buff.write(")");
+  }
 }

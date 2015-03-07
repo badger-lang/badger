@@ -159,6 +159,12 @@ class Defined extends Expression {
   Defined(this.identifier);
 }
 
+class Parentheses extends Expression {
+  final Expression expression;
+
+  Parentheses(this.expression);
+}
+
 class HexadecimalLiteral extends Expression {
   final int value;
 

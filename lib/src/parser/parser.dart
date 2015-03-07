@@ -136,7 +136,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   parens() => super.parens().map((it) {
-    return it[1];
+    return new Parentheses(it[1]);
   });
 
   @override

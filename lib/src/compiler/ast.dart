@@ -88,7 +88,8 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     "condition": "{",
     "whenTrue": "%",
     "whenFalse": "&",
-    "elements": "^"
+    "elements": "^",
+    "parentheses": "%"
   };
 
   static String demap(String key) {

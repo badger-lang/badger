@@ -189,6 +189,11 @@ class BadgerJsonBuilder {
         "type": "defined",
         "identifier": expression.identifier
       };
+    } else if (expression is Parentheses) {
+      return {
+        "type": "parentheses",
+        "expression": _generateExpression(expression.expression)
+      };
     } else if (expression is Operator) {
       return {
         "type": "operator",
@@ -384,6 +389,8 @@ class BadgerJsonParser {
         _buildExpression(it["whenTrue"]),
         _buildExpression(it["whenFalse"])
       );
+    } else if (type == "parentheses") {
+      return new Parentheses(_buildExpression(it["expression"]));
     } else if (type == "access") {
       return new Access(_buildExpression(it["reference"]), it["identifiers"]);
     } else if (type == "map definition") {

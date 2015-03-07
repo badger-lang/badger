@@ -177,6 +177,16 @@ class BadgerAstPrinter {
       printExpression(expr.expression);
     } else if (expr is VariableReference) {
       _buff.write(expr.identifier);
+    } else if (expr is NativeCode) {
+      _buff.write("```");
+      _buff.write(expr.code);
+      _buff.write("```");
+    } else if (expr is Defined) {
+      _buff.write("${expr.identifier}?");
+    } else if (expr is Parentheses) {
+      buff.write("(");
+      printExpression(expr.expression);
+      buff.write(")");
     } else if (expr is ListDefinition) {
       if (expr.elements.isNotEmpty) {
         _buff.writeln("[");

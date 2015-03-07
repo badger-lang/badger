@@ -30,12 +30,12 @@ abstract class AstVisitorBase {
   void visitOperator(Operator operator);
   void visitDefined(Defined defined);
   void visitAccess(Access access);
+  void visitParentheses(Parentheses parens);
   void visitNativeCode(NativeCode code);
   void visitBracketAccess(BracketAccess access);
   void visitTernaryOperator(TernaryOperator operator);
   void visitAnonymousFunction(AnonymousFunction function);
 }
-
 
 abstract class AstVisitor extends AstVisitorBase {
   void visit(Program program) {
@@ -124,6 +124,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitNativeCode(expression);
     } else if (expression is Defined) {
       visitDefined(expression);
+    } else if (expression is Parentheses) {
+      visitParentheses(expression);
     } else {
       throw new Exception("Unknown Expression Type: ${expression}");
     }

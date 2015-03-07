@@ -306,6 +306,8 @@ class Evaluator {
       return expr.value;
     } else if (expr is VariableReference) {
       return Context.current.getVariable(expr.identifier);
+    } else if (expr is Parentheses) {
+      return await _resolveValue(expr.expression);
     } else if (expr is AnonymousFunction) {
       var argnames = expr.args;
       var block = expr.block;
