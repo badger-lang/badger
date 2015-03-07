@@ -6,7 +6,7 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 
 ## Links
 
-- [Wiki](https://github.com/DirectMyFile/badger/wiki)
+- [Wiki](https://github.com/badger-lang/badger/wiki)
 - [Compiler Demo](http://badger.directcode.org/compiler.html)
 
 ## Features
@@ -28,11 +28,6 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 - Compiler API
 - Generate JSON from AST
 - Generate AST from JSON
-
-## Links
-
-- [Wiki]()
-
 
 ## Example:
 
