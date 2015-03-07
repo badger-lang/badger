@@ -9,7 +9,7 @@ abstract class CompilerTarget<T> {
   /**
    * Compiles the specified [program].
    */
-  T compile(Program program);
+  Future<T> compile(Program program);
 
   /**
    * Compiler Options

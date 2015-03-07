@@ -2,7 +2,7 @@ part of badger.compiler;
 
 class BadgerCompilerTarget extends CompilerTarget<String> {
   @override
-  String compile(Program program) {
+  Future<String> compile(Program program) async {
     return new BadgerAstPrinter().generate(program);
   }
 }

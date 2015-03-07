@@ -2,7 +2,7 @@ part of badger.compiler;
 
 class DartCompilerTarget extends CompilerTarget<String> {
   @override
-  String compile(Program program) {
+  Future<String> compile(Program program) async {
     var buff = new StringBuffer();
     writeHeader(buff);
     var visitor = new DartAstVisitor(buff);
@@ -63,11 +63,9 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitStatements(List<Statement> statements) {
-    var i = 0;
     for (var s in statements) {
       visitStatement(s);
       buff.write(";");
-      i++;
     }
   }
 
@@ -304,5 +302,9 @@ class DartAstVisitor extends AstVisitor {
   @override
   void visitNativeCode(NativeCode code) {
     buff.write(code.code);
+  }
+
+  @override
+  void visitDefined(Defined defined) {
   }
 }

@@ -378,7 +378,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
   JsCompilerTarget();
 
   @override
-  String compile(Program program) {
+  Future<String> compile(Program program) async {
     var isTestSuite = options["isTestSuite"] == true;
     var addHooks = options["hooks"] == true;
     var generateTeamCityTests = options["teamcity"] == true;

@@ -2,7 +2,7 @@ part of badger.compiler;
 
 class AstCompilerTarget extends CompilerTarget<String> {
   @override
-  String compile(Program program) {
+  Future<String> compile(Program program) async {
     var ast = new BadgerJsonBuilder(program);
     var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
 
@@ -13,7 +13,7 @@ class AstCompilerTarget extends CompilerTarget<String> {
 /**
  * Compiles a program into JSON that includes compiled versions of all the imports as well.
  */
-class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
+class SnapshotCompilerTarget extends CompilerTarget<String> {
   final Environment env;
 
   SnapshotCompilerTarget(this.env);
@@ -34,7 +34,7 @@ class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
       out[location] = m;
     }
 
-    out["_"] = JSON.decode(new TinyAstCompilerTarget().compile(program));
+    out["_"] = JSON.decode(await new TinyAstCompilerTarget().compile(program));
 
     return encoder.convert(out);
   }
@@ -106,7 +106,7 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
   }
 
   @override
-  String compile(Program program) {
+  Future<String> compile(Program program) async {
     var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
     var ast = new BadgerJsonBuilder(program);
     var result = ast.build();
