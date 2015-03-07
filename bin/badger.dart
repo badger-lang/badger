@@ -189,7 +189,11 @@ loadExternalCompilers() async {
       exit(1);
     } else if (!config.containsKey("command")) {
       print(
-          "ERROR: External compiler '${name}' provided an invalid configuration. Configuration should provide a command.");
+        "ERROR: External compiler '${name}' provided an invalid configuration. Configuration should provide a command.");
+      exit(1);
+    } else if (config["command"] is! String) {
+      print(
+        "ERROR: External compiler '${name}' provided an invalid configuration. Configuration should provide a command that is a string.");
       exit(1);
     } else if (config.containsKey("ast") && config["ast"] is! bool) {
       print(
