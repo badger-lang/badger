@@ -36,10 +36,9 @@ class JsAstVisitor extends AstVisitor {
       return;
     }
 
-    buff.write("if (");
-    buff.write("λbool(");
+    buff.write("λif(λ,");
     visitExpression(statement.condition);
-    buff.write(")) {");
+    buff.write(",function(λ){");
     for (var s in statement.block.statements) {
       visitStatement(s);
 
@@ -49,7 +48,7 @@ class JsAstVisitor extends AstVisitor {
     }
     buff.write("}");
     if (statement.elseBlock != null) {
-      buff.write(" else {");
+      buff.write(",function(λ){");
       for (var s in statement.elseBlock.statements) {
         visitStatement(s);
 
@@ -59,6 +58,7 @@ class JsAstVisitor extends AstVisitor {
       }
       buff.write("}");
     }
+    buff.write(")");
   }
 
   void visitWhileStatement(WhileStatement statement) {
@@ -70,10 +70,9 @@ class JsAstVisitor extends AstVisitor {
       return;
     }
 
-    buff.write("while (");
-    buff.write("λbool(");
+    buff.write("λwhile(λ,");
     visitExpression(statement.condition);
-    buff.write(")) {");
+    buff.write(",function(λ){");
     for (var s in statement.block.statements) {
       visitStatement(s);
 
@@ -81,7 +80,7 @@ class JsAstVisitor extends AstVisitor {
         buff.write(";");
       }
     }
-    buff.write("}");
+    buff.write("})");
   }
 
   void visitReturnStatement(ReturnStatement statement) {
@@ -90,12 +89,16 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitBreakStatement(BreakStatement statement) {
-    buff.write("break");
+    buff.write("return false");
   }
 
   void visitAssignment(Assignment assignment) {
     if (assignment.immutable) {
       buff.write('λlet(λ,"${assignment.reference}",');
+      visitExpression(assignment.value);
+      buff.write(")");
+    } else if (assignment.isInitialDefine) {
+      buff.write('λvar(λ,"${assignment.reference}",');
       visitExpression(assignment.value);
       buff.write(")");
     } else {
@@ -118,6 +121,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitMethodCall(MethodCall call) {
+    buff.write("λ.");
     if (call.reference is String) {
       buff.write("${call.reference}(");
     } else {
@@ -190,9 +194,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitVariableReference(VariableReference reference, [bool isAccess = false]) {
-    if (!isAccess) {
-      buff.write("λ.");
-    }
+    buff.write("λ.");
     buff.write("${reference.identifier}");
   }
 
@@ -307,13 +309,14 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitFunctionDefinition(FunctionDefinition function) {
-    this.buff.write("function ${function.name}(");
+    this.buff.write("λ.${function.name} = function(");
 
-    if (function.args != null)
+    if (function.args != null) {
       this.buff.write(function.args.join(","));
+    }
 
     var m = ((function.args == null ? [] : function.args) as List).map((it) => '"${it}": ${it}').join(",");
-    this.buff.write("){var λ = {${m}};");
+    buff.write("){λload(λ, {${m}});");
 
     for(var statement in function.block.statements) {
       visitStatement(statement);
@@ -363,7 +366,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
     var addHooks = options["hooks"] == true;
     var generateTeamCityTests = options["teamcity"] == true;
 
-    addGlobal("λlet", """
+    addHelper("λlet", """
       function(context, name, value) {
         Object.defineProperty(context, name, {
           enumerable: true,
@@ -377,27 +380,64 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
-    addGlobal("λfor", """
-      function(block, value, λ) {
-        for (var i in value) {
-          if (value.hasOwnProperty(i)) {
-            block(value[i], Object.create(λ));
+    addHelper("λvar", """
+      function(context, name, value) {
+        var m = value;
+        Object.defineProperty(context, name, {
+          enumerable: true,
+          get: function() {
+            return m;
+          },
+          set: function(v) {
+            m = v;
+          }
+        });
+      }
+    """);
+
+    addHelper("λfor", """
+      function(b, v, λ) {
+        for (var i = 0; i < v.length; i++) {
+          var r = b(v[i], Object.create(λ));
+          if (r === false) {
+            return false;
           }
         }
       }
     """);
 
-    addGlobal("λrange", """
-      function(lower, upper) {
-        var list = [];
-        for (var i = lower; i <= upper; i++) {
-          list.push(i);
+    addHelper("λwhile", """
+      function(λ, c, t) {
+        while (λbool(c)) {
+          var r = t(Object.create(λ));
+          if (r === false) {
+            break;
+          }
         }
-        return list;
       }
     """);
 
-    addGlobal("λbool", """
+    addHelper("λif", """
+      function(λ, c, t, f) {
+        if (λbool(c)) {
+          return t(Object.create(λ));
+        } else if (typeof f !== "undefined") {
+          return f(Object.create(λ));
+        }
+      }
+    """);
+
+    addHelper("λrange", """
+      function(l, u) {
+        var m = [];
+        for (var i = l; i <= u; i++) {
+          m.push(i);
+        }
+        return m;
+      }
+    """);
+
+    addTopLevel("λbool", """
       function(value) {
         if (value === null || typeof value === "undefined") {
           return false;
@@ -410,6 +450,14 @@ class JsCompilerTarget extends CompilerTarget<String> {
         } else {
           return true;
         }
+      }
+    """);
+
+    addHelper("λload", """
+      function(λ, m) {
+        Object.keys(m).forEach(function(k) {
+          λ[k] = m[k];
+        });
       }
     """);
 
@@ -500,10 +548,16 @@ class JsCompilerTarget extends CompilerTarget<String> {
     return minify(generatePrelude() + buff.toString() + generatePostlude());
   }
 
-  void addGlobal(String name, String body) {
+  void addHelper(String name, String body) {
     _names.add(name);
     _bodies.add(minify(body));
   }
+
+  void addGlobal(String name, String body) {
+    _globals.add([name, body]);
+  }
+
+  List<List<String>> _globals = [];
 
   void addTopLevel(String a, [String b]) {
     if (b == null) {
@@ -525,7 +579,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       b.write(_topLevel.join(";"));
       b.write(";");
     }
-    b.write('(function(${_includes.join(",")}){var λ = {${_includes.contains("args") ? '"args": args' : ''}};');
+    b.write('(function(λ, ${_includes.join(",")}){');
     return b.toString();
   }
 
@@ -540,7 +594,20 @@ class JsCompilerTarget extends CompilerTarget<String> {
   }
 
   String generatePostlude() {
+    var str = buff.toString();
     var map = {};
+    var ctx = "{";
+
+    var l = 0;
+    var used = _globals.where((it) => str.contains(it[0])).toList();
+    ctx += used.map((it) {
+      var name = it[0];
+      var body = it[1];
+
+      return '"${name}"' + ':' + '${body}';
+    }).join(",");
+
+    ctx += "}";
 
     var i = 0;
     for (var n in _names) {
@@ -550,6 +617,6 @@ class JsCompilerTarget extends CompilerTarget<String> {
       i++;
     }
 
-    return "})(${_bodies.where((it) => map.values.contains(it)).join(",")});";
+    return "})(${ctx},${_bodies.where((it) => map.values.contains(it)).join(",")});";
   }
 }
