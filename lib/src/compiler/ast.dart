@@ -10,6 +10,9 @@ class AstCompilerTarget extends CompilerTarget<String> {
   }
 }
 
+/**
+ * Compiles a program into JSON that includes compiled versions of all the imports as well.
+ */
 class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
   final Environment env;
 
@@ -37,6 +40,9 @@ class SnapshotCompilerTarget extends CompilerTarget<Future<String>> {
   }
 }
 
+/**
+ * Compiles a Badger Program into JSON that maps all set AST keys into a single character.
+ */
 class TinyAstCompilerTarget extends CompilerTarget<String> {
   static final Map<String, String> MAPPING = {
     "type": "a",
