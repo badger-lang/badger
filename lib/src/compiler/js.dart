@@ -465,7 +465,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     addTopLevel("λbreaker", """
     "BADGER_BREAK_NOW"
-    """);
+    """, true);
 
     addHelper("λload", """
       function(λ, m) {
