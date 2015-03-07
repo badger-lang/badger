@@ -572,7 +572,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       visitor.visitStatement(new MethodCall("runTests", []));
     }
 
-    return minify(generatePrelude() + buff.toString() + generatePostlude());
+    return minify(generatePrelude() + buff.toString() + generatePostlude()).replaceAll(new RegExp("(\λ\.)+(\λ)"), "λ");
   }
 
   void addHelper(String name, String body) {

@@ -1,3 +1,9 @@
-let x = true
+func greet(name) {
+  return "Hello $(name)"
+}
 
-print(x)
+let names = ["Kenneth", "Logan", "Sam", "Mike"]
+
+for name in names {
+  window.alert(name)
+}
