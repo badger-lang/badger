@@ -88,6 +88,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   lessThanOrEqualOperator() => ref(OPERATOR, "<=");
   greaterThanOrEqualOperator() => ref(OPERATOR, ">=");
   equalOperator() => ref(OPERATOR, "==");
+  notEqualOperator() => ref(OPERATOR, "!=");
 
   OPERATOR(String x) => ref(expressionItem) &
     whitespace().star() &
@@ -152,7 +153,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression);
 
   variableReference() => ref(identifier);
-  expression() => ref(ternaryOperator) |
+  expression() => ref(definedOperator) |
+    ref(ternaryOperator) |
     ref(plusOperator) |
     ref(minusOperator) |
     ref(multiplyOperator) |
@@ -167,6 +169,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(greaterThanOrEqualOperator) |
     ref(lessThanOrEqualOperator) |
     ref(equalOperator) |
+    ref(notEqualOperator) |
     ref(negate) |
     ref(expressionItem);
 
@@ -197,6 +200,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   ).pick(0);
 
   negate() => char("!") & ref(expressionItem);
+  definedOperator() => ref(identifier) & char("?");
 
   ifStatement() => string("if") &
     whitespace().plus() &
@@ -319,7 +323,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   ).flatten();
 
   identifier() => (
-    pattern("A-Za-z_") | anyIn(["\$"])
+    pattern("A-Za-z_") | anyIn([
+      "\$",
+      "\u03A0", // Pi
+    ])
   ).plus();
 }
 

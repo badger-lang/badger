@@ -155,6 +155,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  definedOperator() => super.definedOperator().map((it) {
+    return new Defined(it[0]);
+  });
+
+  @override
   featureDeclaration() => super.featureDeclaration().map((it) {
     return new FeatureDeclaration(it[1]);
   });

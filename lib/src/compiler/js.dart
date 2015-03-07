@@ -335,6 +335,11 @@ class JsAstVisitor extends AstVisitor {
     // TODO(kaendfinger): Look into a safer way to do this.
     buff.write(code.code);
   }
+
+  @override
+  void visitDefined(Defined defined) {
+    buff.write('λ.hasOwnProperty("${defined.identifier}")');
+  }
 }
 
 class JsCompilerTarget extends CompilerTarget<String> {

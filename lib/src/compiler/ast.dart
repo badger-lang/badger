@@ -77,7 +77,8 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     "map entry": "]",
     "return": "*",
     "ternary": ";",
-    "break": "="
+    "break": "=",
+    "defined": "#"
   };
 
   static String demap(String key) {

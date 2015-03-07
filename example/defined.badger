@@ -1,0 +1,13 @@
+if x? {
+  print("x is defined.")
+} else {
+  print("x is not defined.")
+}
+
+let m = 0
+
+if m? {
+  print("m is defined.")
+} else {
+  print("m is not defined.")
+}

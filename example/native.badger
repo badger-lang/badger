@@ -1,2 +1,2 @@
-var l = ```"Hello"```
-print(l)
+let platform = ```process.platform```
+print(platform)

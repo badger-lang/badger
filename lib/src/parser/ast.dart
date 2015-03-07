@@ -153,6 +153,12 @@ class DoubleLiteral extends Expression {
   String toString() => "DoubleLiteral(${value})";
 }
 
+class Defined extends Expression {
+  final String identifier;
+
+  Defined(this.identifier);
+}
+
 class HexadecimalLiteral extends Expression {
   final int value;
 

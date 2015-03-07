@@ -184,6 +184,11 @@ class BadgerJsonBuilder {
         "reference": expression.reference is String ? expression.reference : _generateExpression(expression.reference),
         "args": _generateExpressions(expression.args)
       };
+    } else if (expression is Defined) {
+      return {
+        "type": "defined",
+        "identifier": expression.identifier
+      };
     } else if (expression is Operator) {
       return {
         "type": "operator",
@@ -393,6 +398,8 @@ class BadgerJsonParser {
       return new AnonymousFunction(it["args"], new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "native code") {
       return new NativeCode(it["code"]);
+    } else if (type == "defined") {
+      return new Defined(it["identifier"]);
     } else {
       throw new Exception("Failed to build expression for ${it}");
     }

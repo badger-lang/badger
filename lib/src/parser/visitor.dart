@@ -28,6 +28,7 @@ abstract class AstVisitorBase {
   void visitBooleanLiteral(BooleanLiteral literal);
   void visitHexadecimalLiteral(HexadecimalLiteral literal);
   void visitOperator(Operator operator);
+  void visitDefined(Defined defined);
   void visitAccess(Access access);
   void visitNativeCode(NativeCode code);
   void visitBracketAccess(BracketAccess access);
@@ -121,6 +122,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitTernaryOperator(expression);
     } else if (expression is NativeCode) {
       visitNativeCode(expression);
+    } else if (expression is Defined) {
+      visitDefined(expression);
     } else {
       throw new Exception("Unknown Expression Type: ${expression}");
     }
