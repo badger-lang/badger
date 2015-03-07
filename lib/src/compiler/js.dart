@@ -607,6 +607,11 @@ class JsCompilerTarget extends CompilerTarget<String> {
       b.write(";");
     }
     b.write('(function(λ, ${_includes.join(",")}){');
+
+    if (options["allow-injection"] != false) {
+      b.write('typeof badgerInjectGlobal !== "undefined" ? badgerInjectGlobal(λ) : null;');
+    }
+
     return b.toString();
   }
 
@@ -625,7 +630,6 @@ class JsCompilerTarget extends CompilerTarget<String> {
     var map = {};
     var ctx = "{";
 
-    var l = 0;
     var used = _globals.where((it) => str.contains(it[0])).toList();
     ctx += used.map((it) {
       var name = it[0];
