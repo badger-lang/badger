@@ -153,7 +153,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression);
 
   variableReference() => ref(identifier);
-  expression() => ref(definedOperator) |
+  expression() =>
+    ref(definedOperator) |
     ref(ternaryOperator) |
     ref(plusOperator) |
     ref(minusOperator) |

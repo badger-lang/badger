@@ -312,7 +312,7 @@ class JsAstVisitor extends AstVisitor {
 
       return;
     }
-    
+
     visitExpression(operator.condition);
     buff.write(" ? ");
     visitExpression(operator.whenTrue);

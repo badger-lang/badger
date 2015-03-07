@@ -138,15 +138,18 @@ class Evaluator {
   }
 
   _evaluateBlock(List<dynamic> statements) async {
+    var retval = VOID;
     for (var statement in statements) {
       if (statement is Statement) {
         var value = await _evaluateStatement(statement);
 
         if (value != null) {
           if (value is ReturnValue) {
-            return value.value;
+            retval = value;
+            break;
           } else if (value == _BREAK_NOW) {
-            return _BREAK_NOW;
+            retval = _BREAK_NOW;
+            break;
           }
         }
       } else if (statement is Expression) {
@@ -156,27 +159,12 @@ class Evaluator {
       }
     }
 
-    return VOID;
+    return retval;
   }
 
   _evaluateStatement(Statement statement) async {
     if (statement is MethodCall) {
-      var args = [];
-
-      for (var s in statement.args) {
-        args.add(await _resolveValue(s));
-      }
-
-      var ref = statement.reference;
-
-      if (ref is String) {
-        return await Context.current.invoke(ref, args);
-      } else {
-        var v = await _resolveValue(ref.reference);
-        var n = ref.identifier;
-
-        return BadgerUtils.getProperty(n, v);
-      }
+      return await _callMethod(statement);
     } else if (statement is Assignment) {
       var value = await _resolveValue(statement.value);
 
@@ -211,7 +199,8 @@ class Evaluator {
     } else if (statement is IfStatement) {
       var value = await _resolveValue(statement.condition);
       var c = BadgerUtils.asBoolean(value);
-      return Context.current.createContext(() async {
+
+      var v = await Context.current.createContext(() async {
         if (c) {
           return await _evaluateBlock(statement.block.statements);
         } else {
@@ -220,11 +209,15 @@ class Evaluator {
           }
         }
       });
+
+      return v;
     } else if (statement is WhileStatement) {
       while (BadgerUtils.asBoolean(await _resolveValue(statement.condition))) {
         var value = await _evaluateBlock(statement.block.statements);
 
         if (value == _BREAK_NOW) {
+          return value;
+        } else if (value is ReturnValue) {
           return value;
         }
       }
@@ -271,11 +264,18 @@ class Evaluator {
 
         return Context.current.createContext(() async {
           var cmt = Context.current;
+
           for (var n in inputs.keys) {
             cmt.setVariable(n, inputs[n]);
           }
 
-          return await _evaluateBlock(block.statements);
+          var result = await _evaluateBlock(block.statements);
+
+          if (result is ReturnValue) {
+            result = result.value;
+          }
+
+          return result;
         });
       }, wrap: false);
     } else if (statement is BreakStatement) {
@@ -338,30 +338,7 @@ class Evaluator {
         return await func(a);
       });
     } else if (expr is MethodCall) {
-      var args = [];
-
-      for (var s in expr.args) {
-        args.add(await _resolveValue(s));
-      }
-
-      var ref = expr.reference;
-
-      if (ref is String) {
-        return await Context.current.invoke(ref, args);
-      } else {
-        var v = await _resolveValue(ref.reference);
-        List<String> n = ref.identifiers;
-        List<String> ids = new List<String>.from(n);
-        ids.removeLast();
-
-        for (var id in ids) {
-          v = await BadgerUtils.getProperty(id, v);
-        }
-
-        var l = n.last;
-
-        return await Function.apply(await BadgerUtils.getProperty(l, v), args);
-      }
+      return await _callMethod(expr);
     } else if (expr is Defined) {
       return Context.current.hasVariable(expr.identifier);
     } else if (expr is NativeCode) {
@@ -455,6 +432,33 @@ class Evaluator {
         return BadgerUtils.asBoolean(a) && BadgerUtils.asBoolean(b);
       default:
         throw new Exception("Unsupported Operator");
+    }
+  }
+
+  dynamic _callMethod(MethodCall call) async {
+    var args = [];
+
+    for (var s in call.args) {
+      args.add(await _resolveValue(s));
+    }
+
+    var ref = call.reference;
+
+    if (ref is String) {
+      return await Context.current.invoke(ref, args);
+    } else {
+      var v = await _resolveValue(ref.reference);
+      List<String> n = ref.identifiers;
+      List<String> ids = new List<String>.from(n);
+      ids.removeLast();
+
+      for (var id in ids) {
+        v = await BadgerUtils.getProperty(id, v);
+      }
+
+      var l = n.last;
+
+      return await Function.apply(await BadgerUtils.getProperty(l, v), args);
     }
   }
 }
