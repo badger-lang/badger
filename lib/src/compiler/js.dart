@@ -572,7 +572,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
       visitor.visitStatement(new MethodCall("runTests", []));
     }
 
-    return minify(generatePrelude() + buff.toString() + generatePostlude()).replaceAll(new RegExp("(\λ\.)+(\λ)"), "λ");
+    return minify(generatePrelude() + buff.toString() + generatePostlude()).replaceAll(new RegExp(r"(\λ\.)+(\λ)"), "λ");
   }
 
   void addHelper(String name, String body) {
@@ -606,7 +606,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
       b.write(_topLevel.join(";"));
       b.write(";");
     }
-    b.write('(function(${(["λ"]..addAll(_includes)).join(",")}){');
+    var n = ["λ"];
+    n.addAll(_includes.toList());
+    b.write('(function(${n.join(",")}){');
 
     if (options["allow-injection"] != false) {
       b.write('typeof badgerInjectGlobal !== "undefined" ? badgerInjectGlobal(λ) : null;');
