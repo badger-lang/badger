@@ -97,17 +97,13 @@ class JsAstVisitor extends AstVisitor {
       buff.write('λlet(λ,"${assignment.reference}",');
       visitExpression(assignment.value);
       buff.write(")");
-    } else if (assignment.isInitialDefine) {
-      buff.write('λvar(λ,"${assignment.reference}",');
-      visitExpression(assignment.value);
-      buff.write(")");
     } else {
-      this.buff.write("λ.${assignment.reference} =");
+      buff.write("λ.${assignment.reference} =");
 
       if (assignment.value != null) {
-        this.visitExpression(assignment.value);
+        visitExpression(assignment.value);
       } else {
-        this.buff.write("null");
+        buff.write("null");
       }
     }
   }
@@ -316,10 +312,9 @@ class JsAstVisitor extends AstVisitor {
 
       return;
     }
-
-    buff.write("λbool(");
+    
     visitExpression(operator.condition);
-    buff.write(") ? ");
+    buff.write(" ? ");
     visitExpression(operator.whenTrue);
     buff.write(" : ");
     visitExpression(operator.whenFalse);
@@ -404,21 +399,6 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
-    addHelper("λvar", """
-      function(context, name, value) {
-        var m = value;
-        Object.defineProperty(context, name, {
-          enumerable: true,
-          get: function() {
-            return m;
-          },
-          set: function(v) {
-            m = v;
-          }
-        });
-      }
-    """);
-
     addHelper("λfor", """
       function(b, v, λ) {
         for (var i = 0; i < v.length; i++) {
@@ -476,12 +456,12 @@ class JsCompilerTarget extends CompilerTarget<String> {
         } else if (typeof value === "string") {
           return value.length !== 0;
         } else if (typeof value === "boolean") {
-          return value === true;
+          return value;
         } else {
           return true;
         }
       }
-    """);
+    """, true);
 
     addTopLevel("λbreaker", """
     "BADGER_BREAK_NOW"
@@ -593,11 +573,11 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
   List<List<String>> _globals = [];
 
-  void addTopLevel(String a, [String b]) {
+  void addTopLevel(String a, [String b, bool always = false]) {
     if (b == null) {
       _topLevel.add([a]);
     } else {
-      _topLevel.add([a, b]);
+      _topLevel.add([a, b, always]);
     }
   }
 
@@ -609,10 +589,10 @@ class JsCompilerTarget extends CompilerTarget<String> {
     var x = buff.toString();
     _includes = _names.where((it) => x.contains(it)).toSet();
 
-    var ti = _topLevel.where((it) => str.contains(it[0])).toList();
+    var ti = _topLevel.where((it) => str.contains(it[0]) || it.length == 3 && it[2] == true).toList();
     var b = new StringBuffer();
     if (ti.isNotEmpty) {
-      b.write(ti.map((it) => it.length == 1 ? it[0] : it[1]).join(";"));
+      b.write(ti.map((it) => it.length == 1 ? it[0] : "var ${it[0]} = " + it[1]).join(";"));
       b.write(";");
     }
     var n = ["λ"];
