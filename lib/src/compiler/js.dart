@@ -89,7 +89,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitBreakStatement(BreakStatement statement) {
-    buff.write("return false");
+    buff.write("throw λbreaker;");
   }
 
   void visitAssignment(Assignment assignment) {
@@ -398,9 +398,12 @@ class JsCompilerTarget extends CompilerTarget<String> {
     addHelper("λfor", """
       function(b, v, λ) {
         for (var i = 0; i < v.length; i++) {
-          var r = b(v[i], Object.create(λ));
-          if (r === false) {
-            return false;
+          try {
+            b(v[i], Object.create(λ));
+          } catch (e) {
+            if (e === BADGER_BREAK_NOW) {
+              break;
+            }
           }
         }
       }
@@ -409,9 +412,12 @@ class JsCompilerTarget extends CompilerTarget<String> {
     addHelper("λwhile", """
       function(λ, c, t) {
         while (λbool(c)) {
-          var r = t(Object.create(λ));
-          if (r === false) {
-            break;
+          try {
+            t(Object.create(λ));
+          } catch (e) {
+            if (e === λbreaker) {
+              break;
+            }
           }
         }
       }
@@ -420,9 +426,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
     addHelper("λif", """
       function(λ, c, t, f) {
         if (λbool(c)) {
-          return t(Object.create(λ));
+          t(Object.create(λ));
         } else if (typeof f !== "undefined") {
-          return f(Object.create(λ));
+          f(Object.create(λ));
         }
       }
     """);
@@ -451,6 +457,10 @@ class JsCompilerTarget extends CompilerTarget<String> {
           return true;
         }
       }
+    """);
+
+    addTopLevel("λbreaker", """
+    "BADGER_BREAK_NOW"
     """);
 
     addHelper("λload", """
