@@ -48,7 +48,7 @@ for name in names {
 To install the badger interpreter, run the following command:
 
 ```bash
-pub global activate -sgit git://github.com/DirectMyFile/badger.git
+pub global activate -sgit git://github.com/badger-lang/badger.git
 ```
 
 To run an example, run the following command:
