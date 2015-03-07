@@ -306,6 +306,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitDefined(Defined defined) {
+    throw new Exception("Defined operator (${defined.identifier}?) is not yet implemented.");
   }
 
   @override
