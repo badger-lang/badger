@@ -86,4 +86,55 @@ class FileEnvironment extends IOEnvironment {
   }
 
   String _content;
+
+  @override
+  Future<Program> resolveProgram(String location) async {
+    var uri = Uri.parse(location);
+
+    try {
+      if (uri.scheme == "file") {
+        var file = new File(uri.toFilePath());
+        return await parse(await file.readAsString());
+      } else if (uri.scheme == "http" || uri.scheme == "https") {
+        var client = new HttpClient();
+        var request = await client.getUrl(uri);
+        var response = await request.close();
+
+        if (response.statusCode != 200) {
+          throw new Exception("Failed to fetch import over HTTP: Status Code: ${response.statusCode}");
+        }
+
+        var content = await response.transform(UTF8.decoder).join();
+
+        return await parse(content);
+      } else {
+        throw new Exception("Unsupported Import URI Scheme: ${uri.scheme}");
+      }
+    } on FormatException catch (e) {
+    }
+
+    var dir = file.parent;
+
+    Program program;
+
+    if (pathlib.isRelative(location)) {
+      var f = new File("${dir.path}/${location}");
+
+      if (!(await f.exists())) {
+        throw new Exception("Tried to import file ${f.path}, but it does not exist.");
+      }
+
+      program = await parse(await f.readAsString());
+    } else {
+      var f = new File(location);
+
+      if (!(await f.exists())) {
+        throw new Exception("Tried to import file ${f.path}, but it does not exist.");
+      }
+
+      program = await parse(await f.readAsString());
+    }
+
+    return program;
+  }
 }

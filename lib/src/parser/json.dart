@@ -353,7 +353,9 @@ class BadgerTinyAst {
     "whenTrue": "%",
     "whenFalse": "&",
     "elements": "^",
-    "parentheses": "%"
+    "parentheses": "%",
+    "isNullable": "(",
+    "location": ")"
   };
 
   static String demap(String key) {
@@ -479,7 +481,12 @@ class BadgerJsonParser {
     } else if (type == "null") {
       return new NullLiteral();
     } else if (type == "range literal") {
-      return new RangeLiteral(_buildExpression(it["left"]), _buildExpression(it["right"]), it["exclusive"], it["step"] != null ? _buildExpression(it["step"]) : null);
+      return new RangeLiteral(
+        _buildExpression(it["left"]),
+        _buildExpression(it["right"]),
+        it["exclusive"],
+        it["step"] != null ? _buildExpression(it["step"]) : null
+      );
     } else if (type == "hexadecimal literal") {
       return new HexadecimalLiteral(it["value"]);
     } else if (type == "boolean literal") {

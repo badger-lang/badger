@@ -29,7 +29,16 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
     }
 
     for (var location in locations) {
-      var p = await env.import(location);
+      if (location.startsWith("badger:")) {
+        continue;
+      }
+
+      var p = await env.resolveProgram(location);
+
+      if (p == null) { // Probably Dynamic
+        continue;
+      }
+
       var m = JSON.decode(await compile(p));
       out[location] = m;
     }

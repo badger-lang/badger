@@ -2,6 +2,7 @@ part of badger.common;
 
 abstract class Environment {
   Future import(String location, Evaluator evaluator, Context context);
+  Future<Program> resolveProgram(String location);
 }
 
 class ImportMapEnvironment extends Environment {
@@ -13,6 +14,11 @@ class ImportMapEnvironment extends Environment {
   Future import(String location, Evaluator evaluator, Context context) async {
     var program = programs[location];
     await evaluator.evaluateProgram(program, context);
+  }
+
+  @override
+  Future<Program> resolveProgram(String location) async {
+    return programs[location];
   }
 }
 
