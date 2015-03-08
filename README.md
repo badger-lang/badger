@@ -9,26 +9,6 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 - [Wiki](https://github.com/badger-lang/badger/wiki)
 - [Compiler Demo](http://badger.directcode.org/compiler.html)
 
-## Features
-
-### Language
-
-- Method Calls
-- Variables
-- Immutable Variables
-- Function Definitions
-- While Statements
-- If Then Else Statements
-- For In Statements
-
-### Implementation
-
-- JavaScript Compiler
-- Dart Compiler
-- Compiler API
-- Generate JSON from AST
-- Generate AST from JSON
-
 ## Example:
 
 ```badger
