@@ -70,11 +70,19 @@ class TestingLibrary {
       tests.add([name, func]);
     });
 
-    context.define("testEqual", (a, b) {
+    context.define("assertEqual", (a, b) {
       var result = a == b;
 
       if (!result) {
         throw new Exception("Test failed: ${a} != ${b}");
+      }
+    });
+
+    context.alias("assertEqual", "testEqual");
+
+    context.define("assert", (a) {
+      if (!BadgerUtils.asBoolean(a)) {
+        throw new Exception("Assertion Failed");
       }
     });
 
@@ -93,12 +101,12 @@ class TestingLibrary {
     });
 
     context.define("runTests", () async {
-      Context.current.meta["tests.ran"] = true;
+      Context.current.setMetadata("__tests__", true);
 
-      if (!Context.current.meta.containsKey("__tests__")) {
+      if (!Context.current.hasMetadata("__tests__")) {
         return false;
       } else {
-        var tests = Context.current.meta["__tests__"];
+        var tests = Context.current.getMetadata("__tests__");
 
         if (handleTestsBegin != null) {
           handleTestsBegin();

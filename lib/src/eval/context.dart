@@ -241,6 +241,18 @@ class Context extends BadgerObject {
   Map<String, dynamic> variables = {};
   Map<String, dynamic> meta = {};
 
+  dynamic getMetadata(String name) {
+    return meta[name];
+  }
+
+  bool hasMetadata(String name) {
+    return meta.containsKey(name);
+  }
+
+  void setMetadata(String name, dynamic value) {
+    meta[name] = value;
+  }
+
   dynamic getVariable(String name) {
     if (variables.containsKey(name)) {
       var x = variables[name];
@@ -265,6 +277,16 @@ class Context extends BadgerObject {
     functions[name] = wrap ? ((args) {
       return Function.apply(function, args);
     }) : function;
+  }
+
+  void alias(String from, String to) {
+    if (functions.containsKey(from)) {
+      functions[to] = functions[from];
+    } else if (variables.containsKey(from)) {
+      variables[to] = variables[from];
+    } else {
+      throw new Exception("Failed to alias ${from} to ${to}, ${from} is not defined.");
+    }
   }
 
   void proxy(String name, dynamic value) {
