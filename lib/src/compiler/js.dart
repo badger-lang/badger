@@ -396,6 +396,11 @@ class JsAstVisitor extends AstVisitor {
       visitStatements(c.block.statements);
     }
   }
+
+  @override
+  void visitNullLiteral(NullLiteral literal) {
+    buff.write("null");
+  }
 }
 
 class JsCompilerTarget extends CompilerTarget<String> {

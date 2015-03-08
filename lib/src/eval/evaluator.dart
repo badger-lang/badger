@@ -384,13 +384,16 @@ class Evaluator {
         return await _resolveValue(expr.whenFalse);
       }
     } else if (expr is MapDefinition) {
-      var map = {};
+      var map = {
+      };
       for (var e in expr.entries) {
         var key = await _resolveValue(e.key);
         var value = await _resolveValue(e.value);
         map[key] = value;
       }
       return map;
+    } else if (expr is NullLiteral) {
+      return null;
     } else if (expr is ListDefinition) {
       var x = [];
       for (var e in expr.elements) {

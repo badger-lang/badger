@@ -27,6 +27,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   breakStatement() => string("break");
   booleanLiteral() => string("true") | string("false");
+  nullLiteral() => string("null");
 
   methodCall() => (ref(access) | ref(identifier)) &
     char("(") &
@@ -183,6 +184,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(nullLiteral) |
       ref(nativeCode) |
       ref(methodCall) |
       ref(access) |

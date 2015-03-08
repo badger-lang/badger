@@ -165,7 +165,14 @@ class BadgerAstPrinter {
     } else if (expr is RangeLiteral) {
       printExpression(expr.left);
       _buff.write("..");
+      if (expr.exlusive) {
+        _buff.write("<");
+      }
       printExpression(expr.right);
+      if (expr.step != null) {
+        _buff.write(":");
+        printExpression(expr.step);
+      }
     } else if (expr is MethodCall) {
       var ref = expr.reference;
       if (ref is String) {
@@ -225,6 +232,8 @@ class BadgerAstPrinter {
       } else {
         _buff.write("[]");
       }
+    } else if (expr is NullLiteral) {
+      buff.write("null");
     } else if (expr is StringLiteral) {
       _buff.write('"');
       for (var c in expr.components) {

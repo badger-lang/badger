@@ -70,6 +70,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  nullLiteral() => super.nullLiteral().map((it) {
+    return new NullLiteral();
+  });
+
+  @override
   arguments() => super.arguments().map((it) {
     return it.where((it) => it is Expression).toList();
   });

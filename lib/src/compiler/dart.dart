@@ -335,4 +335,9 @@ class DartAstVisitor extends AstVisitor {
       }
     }
   }
+
+  @override
+  void visitNullLiteral(NullLiteral literal) {
+    buff.write("null");
+  }
 }

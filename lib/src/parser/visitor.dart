@@ -21,6 +21,7 @@ abstract class AstVisitorBase {
   void visitIntegerLiteral(IntegerLiteral literal);
   void visitDoubleLiteral(DoubleLiteral literal);
   void visitRangeLiteral(RangeLiteral literal);
+  void visitNullLiteral(NullLiteral literal);
   void visitVariableReference(VariableReference reference);
   void visitListDefinition(ListDefinition definition);
   void visitMapDefinition(MapDefinition definition);

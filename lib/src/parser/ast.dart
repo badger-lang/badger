@@ -83,6 +83,9 @@ class Negate extends Expression {
   Negate(this.expression);
 }
 
+class NullLiteral extends Expression {
+}
+
 class Operator extends Expression {
   final Expression left;
   final Expression right;
