@@ -20,6 +20,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(forInStatement) |
       ref(returnStatement) |
       ref(ifStatement) |
+      ref(switchStatement) |
       ref(expression)
     ) & char(";").optional()
   ).pick(0);
@@ -89,6 +90,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   greaterThanOrEqualOperator() => ref(OPERATOR, ">=");
   equalOperator() => ref(OPERATOR, "==");
   notEqualOperator() => ref(OPERATOR, "!=");
+  inOperator() => ref(OPERATOR, "in");
 
   OPERATOR(String x) => ref(expressionItem) &
     whitespace().star() &
@@ -154,6 +156,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   variableReference() => ref(identifier);
   expression() =>
+    ref(inOperator) |
     ref(definedOperator) |
     ref(ternaryOperator) |
     ref(plusOperator) |
@@ -213,6 +216,27 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(block)
   ).optional();
 
+  switchStatement() => string("switch") &
+    whitespace().plus() &
+    ref(expression) &
+    whitespace().plus() &
+    char("{") &
+    whitespace().plus() &
+    (ref(caseStatement)).separatedBy(whitespace().star()).optional() &
+    whitespace().plus() &
+    char("}") &
+    whitespace().star();
+
+  caseStatement() => string("case") &
+    whitespace().plus() &
+    ref(expression) &
+    whitespace().star() &
+    ref(block);
+
+  defaultStatement() => string("default") &
+    whitespace().plus() &
+    ref(block);
+
   simpleAnonymousFunction() => char("(") &
     ref(identifier).separatedBy(
       whitespace().star() &
@@ -246,7 +270,11 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   rangeLiteral() => (
     ref(integerLiteral) &
     string("..") &
-    ref(integerLiteral)
+    char("<").optional() &
+    ref(integerLiteral) &
+    (
+      char(":") & ref(integerLiteral)
+    ).optional()
   );
 
   hexadecimalLiteral() => (

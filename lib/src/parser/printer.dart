@@ -88,6 +88,27 @@ class BadgerAstPrinter {
         i++;
       }
       _buff.write("}");
+    } else if (statement is SwitchStatement) {
+      _buff.write("switch ");
+      printExpression(statement.expression);
+      _buff.writeln(" {");
+      _buff.increment();
+      for (var c in statement.cases) {
+        _buff.writeIndent();
+        _buff.write("case ");
+        printExpression(c.expression);
+        _buff.writeln(" {");
+        _buff.increment();
+        for (var s in c.block.statements) {
+          _buff.writeIndent();
+          printStatement(s);
+        }
+        _buff.decrement();
+        _buff.writeIndent();
+        _buff.writeln("}");
+      }
+      _buff.decrement();
+      _buff.write("}");
     } else if (statement is WhileStatement) {
       _buff.write("while ");
       printExpression(statement.condition);

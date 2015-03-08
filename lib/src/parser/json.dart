@@ -121,6 +121,18 @@ class BadgerJsonBuilder {
         "block": _generateStatements(statement.block.statements),
         "args": statement.args
       };
+    } else if (statement is SwitchStatement) {
+      return {
+        "type": "switch",
+        "expression": _generateExpression(statement.expression),
+        "cases": _generateStatements(statement.cases)
+      };
+    } else if (statement is CaseStatement) {
+      return {
+        "type": "case",
+        "expression": _generateExpression(statement.expression),
+        "block": _generateStatements(statement.block.statements)
+      };
     } else if (statement is WhileStatement) {
       return {
         "type": "while",
@@ -215,7 +227,9 @@ class BadgerJsonBuilder {
       return {
         "type": "range literal",
         "left": _generateExpression(expression.left),
-        "right": _generateExpression(expression.right)
+        "right": _generateExpression(expression.right),
+        "exclusive": expression.exclusive,
+        "step": expression.step != null ? _generateExpression(expression.step) : null
       };
     } else if (expression is VariableReference) {
       return {
@@ -355,6 +369,8 @@ class BadgerJsonParser {
       );
     } else if (type == "break") {
       return new BreakStatement();
+    } else if (type == "switch") {
+      return new SwitchStatement(_buildExpression(it["expression"]), it["cases"].map(_buildStatement).toList());
     } else {
       return _buildExpression(it);
     }
@@ -378,7 +394,7 @@ class BadgerJsonParser {
     } else if (type == "negate") {
       return new Negate(_buildExpression(it["value"]));
     } else if (type == "range literal") {
-      return new RangeLiteral(_buildExpression(it["left"]), _buildExpression(it["right"]));
+      return new RangeLiteral(_buildExpression(it["left"]), _buildExpression(it["right"]), it["exclusive"], it["step"] != null ? _buildExpression(it["step"]) : null);
     } else if (type == "hexadecimal literal") {
       return new HexadecimalLiteral(it["value"]);
     } else if (type == "boolean literal") {

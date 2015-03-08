@@ -20,6 +20,16 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  switchStatement() => super.switchStatement().map((it) {
+    return new SwitchStatement(it[2], (it[6] == null ? [] : it[6]).where((it) => it is CaseStatement).toList());
+  });
+
+  @override
+  caseStatement() => super.caseStatement().map((it) {
+    return new CaseStatement(it[2], it[4] == null ? new Block([]) : it[4]);
+  });
+
+  @override
   breakStatement() => super.breakStatement().map((it) {
     return new BreakStatement();
   });
@@ -51,7 +61,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   rangeLiteral() => super.rangeLiteral().map((it) {
-    return new RangeLiteral(it[0], it[2]);
+    return new RangeLiteral(it[0], it[3], it[2] != null, it[4] != null ? it[4][1] : null);
   });
 
   @override
@@ -99,6 +109,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
     return new Assignment(it[1], it[5], it[0] != null ? it[0][0] == "let" : false, it[0] != null);
   });
 
+  @override
   accessAssignment() => super.accessAssignment().map((it) {
     return new Assignment(it[0], it[4], false, false);
   });

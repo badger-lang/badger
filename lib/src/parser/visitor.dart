@@ -35,6 +35,7 @@ abstract class AstVisitorBase {
   void visitBracketAccess(BracketAccess access);
   void visitTernaryOperator(TernaryOperator operator);
   void visitAnonymousFunction(AnonymousFunction function);
+  void visitSwitchStatement(SwitchStatement statement);
 }
 
 abstract class AstVisitor extends AstVisitorBase {
@@ -77,6 +78,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitBreakStatement(statement);
     } else if (statement is FunctionDefinition) {
       visitFunctionDefinition(statement);
+    } else if (statement is SwitchStatement) {
+      visitSwitchStatement(statement);
     } else if (statement is Assignment) {
       visitAssignment(statement);
     } else if (statement is MethodCall) {

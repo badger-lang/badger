@@ -220,9 +220,13 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitOperator(Operator operator) {
-    visitExpression(operator.left);
-    buff.write(" ${operator.op} ");
-    visitExpression(operator.right);
+    if (operator.op == "in") {
+      throw new Exception("Compiler does not yet support the in operator.");
+    } else {
+      visitExpression(operator.left);
+      buff.write(" ${operator.op} ");
+      visitExpression(operator.right);
+    }
   }
 
   @override
@@ -316,5 +320,19 @@ class DartAstVisitor extends AstVisitor {
     buff.write("(");
     visitExpression(parens.expression);
     buff.write(")");
+  }
+
+  @override
+  void visitSwitchStatement(SwitchStatement statement) {
+    buff.write("switch (");
+    visitExpression(statement.expression);
+    for (var c in statement.cases) {
+      buff.write("case ");
+      visitExpression(c.expression);
+      buff.write(":");
+      for (var statement in c.block.statements) {
+        visitStatement(statement);
+      }
+    }
   }
 }

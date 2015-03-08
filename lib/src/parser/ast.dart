@@ -71,8 +71,10 @@ class TernaryOperator extends Expression {
 class RangeLiteral extends Expression {
   final Expression left;
   final Expression right;
+  final Expression step;
+  final bool exclusive;
 
-  RangeLiteral(this.left, this.right);
+  RangeLiteral(this.left, this.right, this.exclusive, this.step);
 }
 
 class Negate extends Expression {
@@ -157,6 +159,20 @@ class Defined extends Expression {
   final String identifier;
 
   Defined(this.identifier);
+}
+
+class SwitchStatement extends Statement {
+  final Expression expression;
+  final List<CaseStatement> cases;
+
+  SwitchStatement(this.expression, this.cases);
+}
+
+class CaseStatement extends Statement {
+  final Expression expression;
+  final Block block;
+
+  CaseStatement(this.expression, this.block);
 }
 
 class Parentheses extends Expression {

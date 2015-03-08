@@ -199,6 +199,17 @@ class Evaluator {
       }
 
       return new ReturnValue(value);
+    } else if (statement is SwitchStatement) {
+      var value = await _resolveValue(statement.expression);
+
+      for (var c in statement.cases) {
+        var v = await _resolveValue(c.expression);
+
+        if (value == v) {
+          await _evaluateBlock(c.block.statements);
+          break;
+        }
+      }
     } else if (statement is IfStatement) {
       var value = await _resolveValue(statement.condition);
       var c = BadgerUtils.asBoolean(value);
@@ -361,7 +372,8 @@ class Evaluator {
     } else if (expr is Negate) {
       return !(await _resolveValue(expr.expression));
     } else if (expr is RangeLiteral) {
-      return _createRange(await _resolveValue(expr.left), await _resolveValue(expr.right));
+      var step = expr.step != null ? await _resolveValue(expr.step): 1;
+      return _createRange(await _resolveValue(expr.left), await _resolveValue(expr.right), inclusive: !expr.exclusive, step: step);
     } else if (expr is TernaryOperator) {
       var value = await _resolveValue(expr.condition);
       var c = BadgerUtils.asBoolean(value);
@@ -427,6 +439,13 @@ class Evaluator {
         return a == b;
       case "&":
         return a & b;
+      case "in":
+        if (b is Map) {
+          return b.containsKey(a);
+        } else {
+          return b.contains(a);
+        }
+        break;
       case "|":
         return a | b;
       case "||":
@@ -469,9 +488,9 @@ class Evaluator {
 Iterable<int> _createRange(int lower, int upper, {bool inclusive: true, int step: 1}) {
   if (step == 1) {
     if (inclusive) {
-      return new Iterable<int>.generate(upper - lower + 1, (i) => lower + i);
+      return new Iterable<int>.generate(upper - lower + 1, (i) => lower + i).toList();
     } else {
-      return new Iterable<int>.generate(upper - lower - 1, (i) => lower + i + 1);
+      return new Iterable<int>.generate(upper - lower - 1, (i) => lower + i + 1).toList();
     }
   } else {
     var list = [];

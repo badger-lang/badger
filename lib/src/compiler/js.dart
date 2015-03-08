@@ -2,10 +2,12 @@ part of badger.compiler;
 
 class JsAstVisitor extends AstVisitor {
   StringBuffer buff;
+  bool useBreaker = false;
 
   JsAstVisitor(this.buff);
 
   void visitForInStatement(ForInStatement statement) {
+    useBreaker = true;
     buff.write('λfor(function(${statement.identifier}, λ){λlet(λ, "${statement.identifier}", ${statement.identifier});');
 
     for (var s in statement.block.statements) {
@@ -19,6 +21,7 @@ class JsAstVisitor extends AstVisitor {
     buff.write("},");
     visitExpression(statement.value);
     buff.write(", λ)");
+    useBreaker = false;
   }
 
   void visitImportDeclaration(ImportDeclaration declaration) {
@@ -70,6 +73,8 @@ class JsAstVisitor extends AstVisitor {
       return;
     }
 
+    useBreaker = true;
+
     buff.write("λwhile(λ,");
     visitExpression(statement.condition);
     buff.write(",function(λ){");
@@ -81,6 +86,7 @@ class JsAstVisitor extends AstVisitor {
       }
     }
     buff.write("})");
+    useBreaker = false;
   }
 
   void visitReturnStatement(ReturnStatement statement) {
@@ -89,7 +95,11 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitBreakStatement(BreakStatement statement) {
-    buff.write("throw λbreaker;");
+    if (useBreaker) {
+      buff.write("throw λbreaker;");
+    } else {
+      buff.write("break");
+    }
   }
 
   void visitAssignment(Assignment assignment) {
@@ -257,6 +267,10 @@ class JsAstVisitor extends AstVisitor {
   }
 
   void visitOperator(Operator operator) {
+    if (operator.op == "in") {
+      throw new Exception("Compiler does not yet support the in operator.");
+    }
+
     if (operator.op == "~/") {
       buff.write("~~(");
     }
@@ -368,6 +382,19 @@ class JsAstVisitor extends AstVisitor {
     buff.write("(");
     visitExpression(parens.expression);
     buff.write(")");
+  }
+
+  @override
+  void visitSwitchStatement(SwitchStatement statement) {
+    buff.write("switch(");
+    visitExpression(statement.expression);
+    buff.write("){");
+    for (var c in statement.cases) {
+      buff.write("case ");
+      visitExpression(c.expression);
+      buff.write(":");
+      visitStatements(c.block.statements);
+    }
   }
 }
 

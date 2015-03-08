@@ -1,0 +1,11 @@
+switch 5 {
+  case 4 {
+    print("Four")
+    break
+  }
+
+  case 5 {
+    print("Five")
+    break
+  }
+}
