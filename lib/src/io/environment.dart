@@ -13,7 +13,20 @@ class FileEnvironment extends IOEnvironment {
     try {
       var uri = Uri.parse(location);
 
-      if (uri.scheme == "file") {
+      if (uri.scheme == "badger") {
+        var name = uri.path;
+
+        if (name == "core") {
+          CoreLibrary.import(context);
+        } else if (name == "io") {
+          IOLibrary.import(context);
+        } else if (name == "test") {
+          TestingLibrary.import(context);
+        } else {
+          throw new Exception("Unknown Standard Library: ${name}");
+        }
+        return;
+      } else if (uri.scheme == "file") {
         var file = new File(uri.toFilePath());
         var program = await parse(await file.readAsString());
         await evaluator.evaluateProgram(program, context);

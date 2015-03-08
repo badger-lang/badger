@@ -142,6 +142,14 @@ class Nullable extends BadgerObject {
 
 class BadgerUtils {
   static dynamic getProperty(String name, obj) {
+    if (obj is ReturnValue) {
+      obj = obj.value;
+    }
+
+    if (obj is Immutable) {
+      obj = obj.value;
+    }
+
     if (obj is Map) {
       return obj[name];
     }
@@ -152,7 +160,7 @@ class BadgerUtils {
           var result = [];
 
           for (var e in obj) {
-            if (await x(e)) {
+            if (asBoolean(await x(e))) {
               result.add(e);
             }
           }

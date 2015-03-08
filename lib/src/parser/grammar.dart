@@ -25,9 +25,9 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ) & char(";").optional()
   ).pick(0);
 
-  breakStatement() => string("break");
-  booleanLiteral() => string("true") | string("false");
-  nullLiteral() => string("null");
+  breakStatement() => ref(BREAK);
+  booleanLiteral() => ref(TRUE) | ref(FALSE);
+  nullLiteral() => ref(NULL);
 
   methodCall() => (ref(access) | ref(identifier)) &
     char("(") &
@@ -40,11 +40,11 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star()
   );
 
-  forInStatement() => string("for") &
+  forInStatement() => ref(FOR) &
     whitespace().plus() &
     ref(identifier) &
     whitespace().plus() &
-    string("in") &
+    ref(IN) &
     whitespace().plus() &
     ref(expression) &
     ref(block);
@@ -53,7 +53,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression) &
     char(")");
 
-  returnStatement() =>  string("return") & (
+  returnStatement() => ref(RETURN) & (
     whitespace().star() &
     ref(expression) &
     whitespace().star()
@@ -64,7 +64,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(arguments) &
     char(",").optional() &
     whitespace().star() &
-    char("]");
+    ref(token, "");
 
   ternaryOperator() => ref(expressionItem) &
     whitespace().star() &
@@ -99,15 +99,22 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(expression);
 
-  comment() => char("#") & any() & char("\n");
+  NEWLINE() => pattern('\n\r');
+
+  singleLineComment() => string('//')
+    & ref(NEWLINE).neg().star()
+    & ref(NEWLINE).optional();
+
   declarations() => ref(declaration).separatedBy(char("\n"));
   declaration() => ref(featureDeclaration) |
     ref(importDeclaration);
 
-  featureDeclaration() => string("using feature ")
+  featureDeclaration() => ref(USING_FEATURE) &
+    whitespace().plus()
     & ref(stringLiteral);
 
-  importDeclaration() => string("import ") &
+  importDeclaration() => ref(IMPORT) &
+    whitespace().star() &
     ref(stringLiteral);
 
   bracketAccess() => ref(variableReference) &
@@ -122,7 +129,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     char("}");
 
-  functionDefinition() => string("func ") &
+  functionDefinition() => ref(FUNC) & whitespace().plus() &
     ref(identifier) &
     char("(") &
     ref(identifier).separatedBy(
@@ -138,13 +145,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   assignment() =>
   (
     (
-      (string("let") | string("var")) & char("?").optional()
+      (ref(LET) | ref(VAR)) & char("?").optional()
     ).flatten().optional() &
     whitespace().plus()
   ).optional() &
     ref(identifier) &
     whitespace().star() &
-    string("=") &
+    ref(token, "=") &
     whitespace().star() &
     ref(expression);
 
@@ -208,17 +215,17 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   negate() => char("!") & ref(expressionItem);
   definedOperator() => ref(identifier) & char("?");
 
-  ifStatement() => string("if") &
+  ifStatement() => ref(IF) &
     whitespace().plus() &
     ref(expression) &
     whitespace().plus() &
     ref(block) & (
     whitespace().star() &
-    string("else") &
+    ref(ELSE) &
     ref(block)
   ).optional();
 
-  switchStatement() => string("switch") &
+  switchStatement() => ref(SWITCH) &
     whitespace().plus() &
     ref(expression) &
     whitespace().plus() &
@@ -229,13 +236,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     char("}") &
     whitespace().star();
 
-  caseStatement() => string("case") &
+  caseStatement() => ref(CASE) &
     whitespace().plus() &
     ref(expression) &
     whitespace().star() &
     ref(block);
 
-  defaultStatement() => string("default") &
+  defaultStatement() => ref(DEFAULT) &
     whitespace().plus() &
     ref(block);
 
@@ -248,7 +255,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(expression);
 
-  whileStatement() => string("while") &
+  whileStatement() => ref(WHILE) &
     whitespace().plus() &
     ref(expression) &
     whitespace().plus() &
@@ -321,24 +328,6 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression) &
     char(")");
 
-  record() => string("record") &
-    whitespace().star() &
-    ref(identifier) &
-    ref(recordBlock);
-
-  recordBlock() => whitespace().star() &
-    char("{") &
-    whitespace().star() &
-    ref(recordEntry) &
-    whitespace().star() &
-    char("}") &
-    whitespace().star();
-
-  recordEntry() => (ref(identifier) &
-    whitespace().plus()).optional() &
-    ref(identifier) &
-    char(";").optional();
-
   character() => ref(unicodeEscape) |
     ref(characterEscape) |
     pattern('^"\\');
@@ -359,6 +348,41 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       "\u03A0", // Pi
     ])
   ).plus();
+
+  BREAK() => ref(token, "break");
+  CASE() => ref(token, "case");
+  ELSE() => ref(token, "else");
+  TRUE() => ref(token, "true");
+  FALSE() => ref(token, "false");
+  FOR() => ref(token, "for");
+  IF() => ref(token, "if");
+  IN() => ref(token, "in");
+  NULL() => ref(token, "null");
+  SWITCH() => ref(token, "switch");
+  VAR() => ref(token, "var");
+  LET() => ref(token, "let");
+  WHILE() => ref(token, "while");
+  DEFAULT() => ref(token, "default");
+  FUNC() => ref(token, "func");
+  RETURN() => ref(token, "return");
+  IMPORT() => ref(token, "import");
+  USING_FEATURE() => ref(token, "using feature");
+
+  HIDDEN() => ref(singleLineComment);
+
+  Parser token(input) {
+    if (input is String) {
+      input = input.length == 1 ? char(input) : string(input);
+    } else if (input is Function) {
+      input = ref(input);
+    }
+
+    if (input is! Parser && input is TrimmingParser) {
+      throw new StateError("Invalid token parser: ${input}");
+    }
+
+    return input.token().trim(ref(HIDDEN));
+  }
 }
 
 class BadgerGrammar extends GrammarParser {

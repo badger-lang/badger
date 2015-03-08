@@ -35,8 +35,7 @@ main(List<String> args) async {
   }
 
   var context = new Context();
-  StandardLibrary.import(context);
-  IOLibrary.import(context);
+  CoreLibrary.import(context);
 
   if (opts["test"]) {
     TestingLibrary.import(context);

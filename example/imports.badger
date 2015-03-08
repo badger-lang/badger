@@ -1,0 +1,6 @@
+import "badger:io"
+
+var http = make(HttpClient)
+var response = http.get("http://www.google.com")
+
+print(response.statusCode)

@@ -1,6 +1,6 @@
 part of badger.eval;
 
-class StandardLibrary {
+class CoreLibrary {
   static void import(Context context) {
     context.proxy("print", print);
     context.proxy("currentContext", () => Context.current);

@@ -19,7 +19,7 @@ class BadgerHttpClient {
       heads[x] = y.first;
     });
     client.close();
-    return new BadgerHttpResponse(heads, bytes);
+    return new BadgerHttpResponse(res.statusCode, heads, bytes);
   }
 }
 
@@ -30,6 +30,7 @@ class IOLibrary {
 }
 
 class BadgerHttpResponse {
+  final int statusCode;
   final Map<String, String> headers;
   final List<int> bytes;
   String _body;
@@ -41,5 +42,5 @@ class BadgerHttpResponse {
     return _body;
   }
 
-  BadgerHttpResponse(this.headers, this.bytes);
+  BadgerHttpResponse(this.statusCode, this.headers, this.bytes);
 }

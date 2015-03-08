@@ -1,3 +1,5 @@
+import "badger:io"
+
 print("DirectCode Repositories:")
 
 let url = "https://api.github.com/users/DirectMyFile/repos?type=owner&sort=full_name&direction=asc"
@@ -8,7 +10,8 @@ var json = JSON.parse(response.body)
 
 json = json.where((a) -> {
   let stars = a.stargazers_count
-  return stars > 0
+  let include = stars > 0
+  return include
 })
 
 json = json.sort((a, b) -> {

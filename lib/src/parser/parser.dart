@@ -70,7 +70,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
-  nullLiteral() => super.nullLiteral().map((it) {
+  nullLiteral() => super.nullLiteral().map((Token token) {
     return new NullLiteral();
   });
 
@@ -96,7 +96,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   importDeclaration() => super.importDeclaration().map((it) {
-    return new ImportDeclaration(it[1]);
+    return new ImportDeclaration(it[2]);
   });
 
   @override
@@ -149,8 +149,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
-  booleanLiteral() => super.booleanLiteral().map((it) {
-    return new BooleanLiteral(it == "true");
+  booleanLiteral() => super.booleanLiteral().map((Token it) {
+    return new BooleanLiteral(it.value == "true");
   });
 
   @override
@@ -180,7 +180,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   featureDeclaration() => super.featureDeclaration().map((it) {
-    return new FeatureDeclaration(it[1]);
+    return new FeatureDeclaration(it[2]);
   });
 
   @override

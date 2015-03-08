@@ -223,6 +223,20 @@ class Evaluator {
   }
 
   _resolveValue(Expression expr) async {
+    var v = await __resolveValue(expr);
+
+    if (v is ReturnValue) {
+      v = v.value;
+    }
+
+    if (v is Immutable) {
+      v = v.value;
+    }
+
+    return v;
+  }
+
+  __resolveValue(Expression expr) async {
     if (expr is StringLiteral) {
       var components = [];
       for (var it in expr.components) {
@@ -265,7 +279,17 @@ class Evaluator {
             c.setVariable(n, inputs[n]);
           }
 
-          return await _evaluateBlock(block.statements);
+          var result = await _evaluateBlock(block.statements);
+
+          if (result is ReturnValue) {
+            result = result.value;
+          }
+
+          if (result is Immutable) {
+            result = result.value;
+          }
+
+          return result;
         });
       };
 
@@ -400,11 +424,29 @@ class Evaluator {
 
       for (var id in ids) {
         v = await BadgerUtils.getProperty(id, v);
+
+        if (v is ReturnValue) {
+          v = v.value;
+        }
+
+        if (v is Immutable) {
+          v = v.value;
+        }
       }
 
       var l = n.last;
 
-      return await Function.apply(await BadgerUtils.getProperty(l, v), args);
+      var z = await BadgerUtils.getProperty(l, v);
+
+      if (z is ReturnValue) {
+        z = z.value;
+      }
+
+      if (z is Immutable) {
+        z = z.value;
+      }
+
+      return await Function.apply(z, args);
     }
   }
 }
