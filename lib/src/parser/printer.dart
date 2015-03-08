@@ -1,275 +1,355 @@
 part of badger.parser;
 
-class BadgerAstPrinter {
-  IndentedStringBuffer _buff = new IndentedStringBuffer();
+class BadgerAstPrinter extends AstVisitor {
+  final Program program;
 
-  String generate(Program program) {
-    for (var decl in program.declarations) {
-      printDeclaration(decl);
-    }
+  IndentedStringBuffer buff = new IndentedStringBuffer();
 
-    for (var statement in program.statements) {
-      if (statement is Statement) {
-        printStatement(statement);
-      } else if (statement is Expression) {
-        printExpression(statement);
-        _buff.writeln();
-      } else {
-        throw new Exception("Failed to print program statement: ${statement}");
-      }
-    }
+  BadgerAstPrinter(this.program);
 
-    return _buff.toString();
+  @override
+  void visitAccess(Access access) {
+    visitExpression(access.reference);
+    buff.write(".");
+    buff.write(access.identifiers.join("."));
   }
 
-  void printDeclaration(Declaration decl) {
-    if (decl is FeatureDeclaration) {
-      _buff.writeln('using feature "${decl.feature.components.join()}"');
-    } else if (decl is ImportDeclaration) {
-      _buff.writeln('import "${decl.location.components.join()}"');
+  @override
+  void visitAnonymousFunction(AnonymousFunction function) {
+    if (function.block.statements.length == 1 && function.block.statements.first is Expression) {
+      buff.write("(${function.args.join(", ")}) => ");
+      visitStatement(function.block.statements.first);
     } else {
-      throw new Exception("Unknown Declaration Type");
+      buff.write("(${function.args.join(", ")}) -> {");
+      buff.increment();
+      visitStatements(function.block.statements);
+      buff.decrement();
+      buff.write("}");
     }
   }
 
-  void printStatement(Statement statement) {
-    if (statement is MethodCall) {
-      var ref = statement.reference;
-      if (ref is String) {
-        _buff.write(ref);
+  @override
+  void visitAssignment(Assignment assignment) {
+    if (assignment.isInitialDefine) {
+      if (assignment.immutable) {
+        buff.write("let");
       } else {
-        printExpression(ref);
+        buff.write("var");
       }
-      _buff.write("(");
+
+      if (assignment.isNullable == true) {
+        buff.write("?");
+      }
+
+      buff.write(" ");
+    }
+
+    if (assignment.reference is String) {
+      buff.write(assignment.reference);
+    } else {
+      visitExpression(assignment.reference);
+    }
+
+    buff.write(" = ");
+
+    visitExpression(assignment.value);
+  }
+
+  @override
+  void visitBooleanLiteral(BooleanLiteral literal) {
+    buff.write(literal.value);
+  }
+
+  @override
+  void visitBracketAccess(BracketAccess access) {
+    visitExpression(access.reference);
+    buff.write("[");
+    visitExpression(access.index);
+    buff.write("]");
+  }
+
+  @override
+  void visitBreakStatement(BreakStatement statement) {
+    buff.write("break");
+  }
+
+  @override
+  void visitDefined(Defined defined) {
+    buff.write("${defined.identifier}?");
+  }
+
+  @override
+  void visitDoubleLiteral(DoubleLiteral literal) {
+    buff.write(literal.value);
+  }
+
+  @override
+  void visitFeatureDeclaration(FeatureDeclaration declaration) {
+    buff.write('using feature "${declaration.feature.components.join()}"');
+  }
+
+  @override
+  void visitForInStatement(ForInStatement statement) {
+    buff.write("for ${statement.identifier} in ");
+    visitExpression(statement.value);
+    buff.writeln(" {");
+    buff.increment();
+    visitStatements(statement.block.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
+  }
+
+  @override
+  void visitStatements(List<Statement> statements) {
+    var i = 0;
+    for (var statement in statements) {
+      buff.writeIndent();
+      visitStatement(statement);
+      if (i != statements.length - 1) {
+        buff.writeln();
+      }
+      i++;
+    }
+  }
+
+  @override
+  void visitFunctionDefinition(FunctionDefinition definition) {
+    buff.write("func ${definition.name}(${definition.args.join(", ")}) {");
+    buff.increment();
+    buff.writeln();
+    visitStatements(definition.block.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
+  }
+
+  @override
+  void visitHexadecimalLiteral(HexadecimalLiteral literal) {
+    buff.write("0x" + literal.value.toRadixString(16));
+  }
+
+  @override
+  void visitIfStatement(IfStatement statement) {
+    buff.write("if ");
+    visitExpression(statement.condition);
+    buff.writeln(" {");
+    buff.increment();
+    visitStatements(statement.block.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
+
+    if (statement.elseBlock == null) {
+      buff.writeln();
+    } else {
+      buff.increment();
+      buff.writeln(" else {");
+      visitStatements(statement.elseBlock.statements);
+      buff.decrement();
+      buff.writeln();
+      buff.writeIndent();
+      buff.write("}");
+    }
+  }
+
+  @override
+  void visitImportDeclaration(ImportDeclaration declaration) {
+    buff.write("import ");
+    visitStringLiteral(declaration.location);
+  }
+
+  @override
+  void visitIntegerLiteral(IntegerLiteral literal) {
+    buff.write(literal.value);
+  }
+
+  @override
+  void visitListDefinition(ListDefinition definition) {
+    buff.write("[");
+    if (definition.elements.isNotEmpty) {
+      buff.increment();
       var i = 0;
-      for (var arg in statement.args) {
-        printExpression(arg);
-
-        if (i != statement.args.length - 1) {
-          _buff.write(", ");
+      for (var e in definition.elements) {
+        buff.writeln();
+        buff.writeIndent();
+        visitExpression(e);
+        if (i != definition.elements.length - 1) {
+          buff.write(",");
+        } else {
+          buff.writeln();
         }
-
         i++;
       }
-      _buff.writeln(")");
-    } else if (statement is ForInStatement) {
-      _buff.write("for ${statement.identifier} in ");
-      printExpression(statement.value);
-      _buff.write(" {");
-      _buff.increment();
-      for (var x in statement.block.statements) {
-        _buff.writeln();
-        _buff.writeIndent();
-        printStatement(x);
+
+      buff.decrement();
+    }
+    buff.write("]");
+  }
+
+  @override
+  void visitMapDefinition(MapDefinition definition) {
+    buff.writeln("{");
+    buff.increment();
+    var i = 0;
+    for (var x in definition.entries) {
+      buff.writeIndent();
+      visitExpression(x.key);
+      buff.write(": ");
+      visitExpression(x.value);
+
+      if (i != definition.entries.length - 1) {
+        buff.write(",");
       }
-      _buff.decrement();
-      _buff.writeln("}");
-    } else if (statement is IfStatement) {
-      _buff.write("if ");
-      printExpression(statement.condition);
-      _buff.writeln("{");
-      _buff.increment();
-      for (var statement in statement.block.statements) {
-        _buff.writeln();
-        _buff.writeIndent();
-        printStatement(statement);
+      i++;
+    }
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
+  }
+
+  @override
+  void visitMethodCall(MethodCall call) {
+    if (call.reference is String) {
+      buff.write("${call.reference}");
+    } else {
+      visitExpression(call.reference);
+    }
+
+    buff.write("(");
+    var i = 0;
+    for (var x in call.args) {
+      visitExpression(x);
+      if (i != call.args.length - 1) {
+        buff.write(", ");
       }
-      _buff.decrement();
-      _buff.writeln("}");
-    } else if (statement is FunctionDefinition) {
-      _buff.writeln("func ${statement.name}(${statement.args.join(", ")}) {");
-      _buff.increment();
-      var i = 0;
-      for (var x in statement.block.statements) {
-        if (i == 0) {
-          _buff.writeln();
-        }
-        printStatement(x);
-        i++;
+      i++;
+    }
+    buff.write(")");
+  }
+
+  @override
+  void visitNativeCode(NativeCode code) {
+    buff.write("```");
+    buff.write(code.code);
+    buff.write("```");
+  }
+
+  @override
+  void visitNegate(Negate negate) {
+    buff.write("!");
+    visitExpression(negate.expression);
+  }
+
+  @override
+  void visitNullLiteral(NullLiteral literal) {
+    buff.write("null");
+  }
+
+  @override
+  void visitOperator(Operator operator) {
+    visitExpression(operator.left);
+    buff.write(" ${operator.op} ");
+    visitExpression(operator.right);
+  }
+
+  @override
+  void visitParentheses(Parentheses parens) {
+    buff.write("(");
+    visitExpression(parens.expression);
+    buff.write(")");
+  }
+
+  @override
+  void visitRangeLiteral(RangeLiteral literal) {
+    visitExpression(literal.left);
+    buff.write("..");
+    if (literal.exclusive) {
+      buff.write("<");
+    }
+
+    visitExpression(literal.right);
+
+    if (literal.step != null) {
+      buff.write(":");
+      visitExpression(literal.step);
+    }
+  }
+
+  @override
+  void visitReturnStatement(ReturnStatement statement) {
+    buff.write("return");
+
+    if (statement.expression != null) {
+      buff.write(" ");
+      visitExpression(statement.expression);
+    }
+  }
+
+  @override
+  void visitStringLiteral(StringLiteral literal) {
+    buff.write('"');
+    for (var x in literal.components) {
+      if (x is String) {
+        buff.write(x);
+      } else {
+        buff.write("\$(");
+        visitExpression(x);
+        buff.write(")");
       }
-      _buff.write("}");
-    } else if (statement is SwitchStatement) {
-      _buff.write("switch ");
-      printExpression(statement.expression);
-      _buff.writeln(" {");
-      _buff.increment();
+    }
+    buff.write('"');
+  }
+
+  @override
+  void visitSwitchStatement(SwitchStatement statement) {
+    buff.write("switch ");
+    visitExpression(statement.expression);
+    buff.write(" {");
+    if (statement.cases.isNotEmpty) {
+      buff.increment();
       for (var c in statement.cases) {
-        _buff.writeIndent();
-        _buff.write("case ");
-        printExpression(c.expression);
-        _buff.writeln(" {");
-        _buff.increment();
-        for (var s in c.block.statements) {
-          _buff.writeIndent();
-          printStatement(s);
-        }
-        _buff.decrement();
-        _buff.writeIndent();
-        _buff.writeln("}");
+        buff.writeln();
+        buff.writeIndent();
+        buff.write("case ");
+        visitExpression(c.expression);
+        buff.write(":");
+        buff.increment();
+        visitStatements(c.block.statements);
+        buff.decrement();
       }
-      _buff.decrement();
-      _buff.write("}");
-    } else if (statement is WhileStatement) {
-      _buff.write("while ");
-      printExpression(statement.condition);
-      _buff.writeln("{");
-      _buff.increment();
-      for (var statement in statement.block.statements) {
-        _buff.writeln();
-        _buff.writeIndent();
-        printStatement(statement);
-      }
-      _buff.decrement();
-      _buff.writeln("}");
-    } else if (statement is ReturnStatement) {
-      _buff.write("return");
-
-      if (statement.expression != null) {
-        _buff.write(" ");
-        printExpression(statement.expression);
-      }
-    } else if (statement is Assignment) {
-      if (!_buff.toString().endsWith("\n\n")) {
-        _buff.writeln();
-      }
-
-      if (statement.isInitialDefine) {
-        if (statement.immutable) {
-          if (statement.isNullable == true) {
-            _buff.write("let? ");
-          } else {
-            _buff.write("let ");
-          }
-        } else {
-          if (statement.isNullable == true) {
-            _buff.write("var? ");
-          } else {
-            _buff.write("var ");
-          }
-        }
-      }
-
-      if (statement.reference is String) {
-        _buff.write(statement.reference);
-      } else {
-        printExpression(statement.reference);
-      }
-      _buff.write(" = ");
-      printExpression(statement.value);
-    } else {
-      throw new Exception("Failed to print statement: ${statement}");
+      buff.decrement();
     }
   }
 
-  void printExpression(Expression expr) {
-    if (expr is IntegerLiteral) {
-      _buff.write(expr.value);
-    } else if (expr is DoubleLiteral) {
-      _buff.write(expr.value);
-    } else if (expr is BooleanLiteral) {
-      _buff.write(expr.value);
-    } else if (expr is HexadecimalLiteral) {
-      _buff.write("0x${expr.value.toRadixString(16)}");
-    } else if (expr is RangeLiteral) {
-      printExpression(expr.left);
-      _buff.write("..");
-      if (expr.exlusive) {
-        _buff.write("<");
-      }
-      printExpression(expr.right);
-      if (expr.step != null) {
-        _buff.write(":");
-        printExpression(expr.step);
-      }
-    } else if (expr is MethodCall) {
-      var ref = expr.reference;
-      if (ref is String) {
-        _buff.write(ref);
-      } else {
-        printExpression(ref);
-      }
-      _buff.write("(");
-      var i = 0;
-      for (var arg in expr.args) {
-        printExpression(arg);
+  @override
+  void visitTernaryOperator(TernaryOperator operator) {
+    visitExpression(operator.condition);
+    buff.write(" ? ");
+    visitExpression(operator.whenTrue);
+    buff.write(" : ");
+    visitExpression(operator.whenFalse);
+  }
 
-        if (i != expr.args.length - 1) {
-          _buff.write(", ");
-        }
+  @override
+  void visitVariableReference(VariableReference reference) {
+    buff.write(reference.identifier);
+  }
 
-        i++;
-      }
-      _buff.writeln(")");
-    } else if (expr is Access) {
-      printExpression(expr.reference);
-      _buff.write(".");
-      _buff.write(expr.identifiers.join("."));
-    } else if (expr is Operator) {
-      printExpression(expr.left);
-      _buff.write(" ${expr.op} ");
-      printExpression(expr.right);
-    } else if (expr is Negate) {
-      _buff.write("!");
-      printExpression(expr.expression);
-    } else if (expr is VariableReference) {
-      _buff.write(expr.identifier);
-    } else if (expr is NativeCode) {
-      _buff.write("```");
-      _buff.write(expr.code);
-      _buff.write("```");
-    } else if (expr is Defined) {
-      _buff.write("${expr.identifier}?");
-    } else if (expr is Parentheses) {
-      buff.write("(");
-      printExpression(expr.expression);
-      buff.write(")");
-    } else if (expr is ListDefinition) {
-      if (expr.elements.isNotEmpty) {
-        _buff.writeln("[");
-        _buff.increment();
-        var i = 0;
-        for (var x in expr.elements) {
-          if (i != expr.elements.length - 1) {
-            _buff.write(", ");
-          }
-
-          printExpression(x);
-
-          i++;
-        }
-      } else {
-        _buff.write("[]");
-      }
-    } else if (expr is NullLiteral) {
-      buff.write("null");
-    } else if (expr is StringLiteral) {
-      _buff.write('"');
-      for (var c in expr.components) {
-        if (c is String) {
-          _buff.write(c);
-        } else {
-          _buff.write("\$(");
-          printExpression(c);
-          _buff.write(")");
-        }
-      }
-      _buff.write('"');
-    } else if (expr is AnonymousFunction) {
-      _buff.write("(${expr.args != null ? expr.args.join(", ") : ''}) -> {");
-      _buff.increment();
-      var i = 0;
-      for (var statement in expr.block.statements) {
-        if (i == 0) {
-          _buff.writeln();
-        }
-        _buff.writeIndent();
-        printStatement(statement);
-        i++;
-      }
-      _buff.decrement();
-      _buff.write("}");
-    } else {
-      throw new Exception("Failed to print expression: ${expr}");
-    }
+  @override
+  void visitWhileStatement(WhileStatement statement) {
+    buff.write("while ");
+    visitExpression(statement.condition);
+    buff.writeln(" {");
+    buff.increment();
+    visitStatements(statement.block.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
   }
 }

@@ -62,9 +62,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   listDefinition() => char("[") &
     whitespace().star() &
     ref(arguments) &
-    char(",").optional() &
     whitespace().star() &
-    ref(token, "");
+    char("]");
 
   ternaryOperator() => ref(expressionItem) &
     whitespace().star() &
