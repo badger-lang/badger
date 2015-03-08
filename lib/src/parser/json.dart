@@ -218,6 +218,10 @@ class BadgerJsonBuilder {
         "type": "negate",
         "value": _generateExpression(expression.expression)
       };
+    } else if (expression is NullLiteral) {
+      return {
+        "type": "null"
+      };
     } else if (expression is ListDefinition) {
       return {
         "type": "list definition",
@@ -393,6 +397,8 @@ class BadgerJsonParser {
       return new Operator(_buildExpression(it["left"]), _buildExpression(it["right"]), it["op"]);
     } else if (type == "negate") {
       return new Negate(_buildExpression(it["value"]));
+    } else if (type == "null") {
+      return new NullLiteral();
     } else if (type == "range literal") {
       return new RangeLiteral(_buildExpression(it["left"]), _buildExpression(it["right"]), it["exclusive"], it["step"] != null ? _buildExpression(it["step"]) : null);
     } else if (type == "hexadecimal literal") {
