@@ -269,10 +269,6 @@ class Context extends BadgerObject {
     }
   }
 
-  void defun(String name, BadgerFunction function) {
-    define(name, function);
-  }
-
   void merge(Context ctx) {
     ctx.variables.keys.where((it) => !it.startsWith("_")).forEach((x) {
       variables[x] = ctx.variables[x];

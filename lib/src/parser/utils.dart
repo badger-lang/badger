@@ -34,7 +34,3 @@ final Map<String, String> _decodeTable = const {
   'r': '\r',
   't': '\t'
 };
-
-abstract class Environment {
-  Future<Program> import(String location);
-}

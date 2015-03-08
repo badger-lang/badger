@@ -1,6 +1,7 @@
 import "dart:io";
 import "package:badger/eval.dart";
 import "package:badger/compiler.dart";
+import "package:badger/io.dart";
 
 main(List<String> args) async {
   var dir = new Directory("test/scripts");

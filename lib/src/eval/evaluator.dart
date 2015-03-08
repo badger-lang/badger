@@ -3,105 +3,23 @@ part of badger.eval;
 final Object VOID = new Object();
 final Object _BREAK_NOW = new Object();
 
-class FileEnvironment extends Environment {
-  static final BadgerParser _parser = new BadgerParser();
-
-  final File file;
-
-  Environment _e;
-
-  FileEnvironment(this.file) {
-    _e = this;
-  }
-
-  Future compile(CompilerTarget target) async {
-    return target.compile(await parse());
-  }
-
-  eval(Context context) async {
-    var program = _parse(await file.readAsString());
-    return await new Evaluator(program, _e).eval(context);
-  }
-
-  Future<Program> parse() async {
-    return _parse(await file.readAsString());
-  }
-
-  Future<Map> generateJSON() async {
-    return new BadgerJsonBuilder(await parse()).build();
-  }
-
-  Future<Program> parseJSON() async {
-    return new BadgerJsonParser().build(JSON.decode(await file.readAsString()));
-  }
-
-  Future<Program> _parseJSON(String content) async {
-    return new BadgerJsonParser().build(JSON.decode(content));
-  }
-
-  buildEvalJSON(Context ctx) async {
-    return await new Evaluator(await _parseJSON(JSON.encode(await generateJSON())), _e).eval(ctx);
-  }
-
-  Program _parse(String content) {
-    try {
-      var json = JSON.decode(content);
-
-      if (json.containsKey("_")) {
-        var p = new BadgerSnapshotParser(json);
-        var m = p.parse();
-        _e = new ImportMapEnvironment(m);
-        return m["_"];
-      }
-
-      return new BadgerJsonParser().build(json);
-    } on FormatException catch (e) {
-    }
-    _e = this;
-
-    return _parser.parse(content).value;
-  }
-
-  @override
-  Future<Program> import(String location) async {
-    try {
-      var uri = Uri.parse(location);
-
-      if (uri.scheme == "file") {
-        var file = new File(uri.toFilePath());
-        return _parse(await file.readAsString());
-      }
-    } catch (e) {
-    }
-
-    var dir = file.parent;
-
-    if (pathlib.isRelative(location)) {
-      var f = new File("${dir.path}/${location}");
-      return _parse(await f.readAsString());
-    } else {
-      return _parse(await new File(location).readAsString());
-    }
-  }
-}
-
 class Evaluator {
   static const List<String> SUPPORTED_FEATURES = const [];
 
-  final Program program;
+  final Program mainProgram;
   final Environment environment;
   final Set<String> features = new Set<String>();
 
-  Evaluator(this.program, this.environment);
+  Evaluator(this.mainProgram, this.environment);
 
-  eval(Context ctx) async {
+  evaluate(Context ctx) async {
     if (!ctx.hasVariable("runtime")) {
       ctx.setVariable("runtime", "badger");
     }
-    return await _evalProgram(program, ctx);
+    return await evaluateProgram(mainProgram, ctx);
   }
 
-  _evalProgram(Program program, Context ctx) async {
+  evaluateProgram(Program program, Context ctx) async {
     return ctx.run(() async {
       await _processDeclarations(program.declarations, ctx);
       return await _evaluateBlock(program.statements);
@@ -132,8 +50,7 @@ class Evaluator {
 
   _import(String location, Context ctx) async {
     var c = await ctx.createContext(() async {
-      var tp = await environment.import(location);
-      await _evalProgram(tp, ctx);
+      await environment.import(location, this, Context.current);
       return Context.current;
     });
 
