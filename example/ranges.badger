@@ -1,0 +1,9 @@
+let inclusive = 0..10
+let exclusive = 0..<10
+let inclusiveStep = 0..10:2
+let exclusiveStep = 0..<10:2
+
+print("Inclusive: $(inclusive)")
+print("Exclusive: $(exclusive)")
+print("Inclusive with step of 2: $(inclusiveStep)")
+print("Exclusive with step of 2: $(exclusiveStep)")

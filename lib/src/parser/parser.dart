@@ -111,12 +111,15 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   assignment() => super.assignment().map((it) {
-    return new Assignment(it[1], it[5], it[0] != null ? it[0][0] == "let" : false, it[0] != null);
+    var isInitialDefine = it[0] != null;
+    var isNullable = it[0] == null ? null : it[0][0].endsWith("?");
+    var isImmutable = it[0] != null && it[0][0].startsWith("let");
+    return new Assignment(it[1], it[5], isImmutable, isInitialDefine, isNullable);
   });
 
   @override
   accessAssignment() => super.accessAssignment().map((it) {
-    return new Assignment(it[0], it[4], false, false);
+    return new Assignment(it[0], it[4], false, false, true);
   });
 
   @override

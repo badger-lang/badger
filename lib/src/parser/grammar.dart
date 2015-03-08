@@ -138,7 +138,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   assignment() =>
   (
     (
-      string("let") | string("var")
+      (string("let") | string("var")) & char("?").optional()
     ).flatten().optional() &
     whitespace().plus()
   ).optional() &

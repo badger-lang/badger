@@ -112,7 +112,8 @@ class BadgerJsonBuilder {
         "reference": statement.reference is String ? statement.reference : _generateExpression(statement.reference),
         "value": _generateExpression(statement.value),
         "immutable": statement.immutable,
-        "isInitialDefine": statement.isInitialDefine
+        "isInitialDefine": statement.isInitialDefine,
+        "isNullable": statement.isNullable
       };
     } else if (statement is FunctionDefinition) {
       return {
@@ -349,7 +350,8 @@ class BadgerJsonParser {
         it["reference"] is String ? it["reference"] : _buildExpression(it["reference"]),
         _buildExpression(it["value"]),
         it["immutable"],
-        it["isInitialDefine"]
+        it["isInitialDefine"],
+        it["isNullable"]
       );
     } else if (type == "function definition") {
       return new FunctionDefinition(it["identifier"], it["args"], new Block(it["block"].map(_buildStatement).toList()));

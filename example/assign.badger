@@ -1,0 +1,15 @@
+let x = 0
+let? xn = null
+var y = 1
+var? yn = null
+
+print(x)
+print(xn)
+print(y)
+print(yn)
+var m = 0
+
+m = null
+
+print(m)
+print("Done")

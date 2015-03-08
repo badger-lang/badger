@@ -129,6 +129,17 @@ class Immutable extends BadgerObject {
   }
 }
 
+class Nullable extends BadgerObject {
+  final dynamic value;
+
+  Nullable(this.value);
+
+  @override
+  dynamic getValue() {
+    return value;
+  }
+}
+
 class BadgerUtils {
   static dynamic getProperty(String name, obj) {
     if (obj is Map) {
@@ -225,6 +236,10 @@ class Context extends BadgerObject {
   dynamic getVariable(String name) {
     if (variables.containsKey(name)) {
       var x = variables[name];
+
+      if (x is Nullable) {
+        x = x.value;
+      }
 
       if (x is Immutable) {
         x = x.value;
@@ -323,8 +338,18 @@ class Context extends BadgerObject {
     if (parent != null && parent.hasVariable(name)) {
       return parent.setVariable(name, value);
     } else {
-      if (variables.containsKey(name) && variables[name] is Immutable) {
-        throw new Exception("Unable to set ${name}, it is immutable.");
+      if (variables.containsKey(name)) {
+        var v = variables[name];
+
+        if (value == null && v is! Nullable) {
+          throw new Exception("Unable to set ${name} to null, it is not nullable.");
+        } else if (v is Nullable) {
+          v = v.value;
+        }
+
+        if (v is Immutable) {
+          throw new Exception("Unable to set ${name}, it is immutable.");
+        }
       }
 
       return variables[name] = value;

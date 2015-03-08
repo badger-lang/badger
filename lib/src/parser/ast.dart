@@ -206,8 +206,9 @@ class Assignment extends Statement {
   final dynamic reference;
   final Expression value;
   final bool isInitialDefine;
+  final bool isNullable;
 
-  Assignment(this.reference, this.value, this.immutable, this.isInitialDefine);
+  Assignment(this.reference, this.value, this.immutable, this.isInitialDefine, this.isNullable);
 
   @override
   String toString() => "Assignment(identifier: ${reference}, value: ${value})";

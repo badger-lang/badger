@@ -175,6 +175,10 @@ class Evaluator {
         value = new Immutable(value);
       }
 
+      if (statement.isNullable == true) {
+        value = new Nullable(value);
+      }
+
       var ref = statement.reference;
 
       if (ref is String) {

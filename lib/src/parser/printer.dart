@@ -135,9 +135,17 @@ class BadgerAstPrinter {
 
       if (statement.isInitialDefine) {
         if (statement.immutable) {
-          _buff.write("let ");
+          if (statement.isNullable == true) {
+            _buff.write("let? ");
+          } else {
+            _buff.write("let ");
+          }
         } else {
-          _buff.write("var ");
+          if (statement.isNullable == true) {
+            _buff.write("var? ");
+          } else {
+            _buff.write("var ");
+          }
         }
       }
 
