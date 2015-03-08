@@ -519,7 +519,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
     addGlobal("runtime", '"javascript"');
 
     if (isTestSuite) {
-      addTopLevel("__tests__", "[]");
+      addTopLevel("__tests__", "[]", true);
 
       addGlobal("test", """
         function(name, func) {

@@ -201,8 +201,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   functionDefinition() => super.functionDefinition().map((it) {
-    var argnames = it[3] != null ? it[3].where((it) => it is String).toList() : [];
-    return new FunctionDefinition(it[1], argnames, it[5]);
+    var argnames = it[4] != null ? it[4].where((it) => it is String).toList() : [];
+    return new FunctionDefinition(it[2], argnames, it[6]);
   });
 
   @override
