@@ -266,6 +266,8 @@ class Context extends BadgerObject {
       }
 
       return x;
+    } else if (hasFunction(name)) {
+      return getFunction(name);
     } else if (parent != null && parent.hasVariable(name)) {
       return parent.getVariable(name);
     } else {

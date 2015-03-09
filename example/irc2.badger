@@ -7,6 +7,18 @@ print("Connected")
 socket.writeLine("NICK BadgerBot")
 socket.writeLine("USER BadgerBot 8 * :Badger Bot")
 
+func handleCommand(cmd, args, reply) {
+  switch cmd {
+    case "hello" {
+      reply("Hello World")
+    }
+
+    case "goodbye" {
+      reply("Goodbye World")
+    }
+  }
+}
+
 socket.handleLine((line) -> {
   let split = line.split(" ")
 
@@ -30,30 +42,13 @@ socket.handleLine((line) -> {
     if iscmd {
       let s = msg.split(" ")
       let f = s[0]
-      let cmd = f.substring(1)
+      cmd = f.substring(1)
 
-      if cmd == "hello" {
-        socket.writeLine("PRIVMSG $(channel) :Hello!")
+      func reply(m) {
+        socket.writeLine("PRIVMSG $(channel) :$(m)")
       }
 
-      if cmd == "google" {
-        let query = cargs.join(" ")
-
-        let http = make(HttpClient)
-        let response = http.get("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=$(query)")
-
-        let json = JSON.parse(response.body)
-        let results = json.responseData.results
-
-        if results.length == 0 {
-          socket.writeLine("PRIVMSG $(channel) :No Results Found")
-        } else {
-          let result = results.first
-          let url = result.unescapedUrl
-
-          socket.writeLine("PRIVMSG $(channel) :$(result.titleNoFormatting) | $(url)")
-        }
-      }
+      handleCommand(cmd, cargs, reply)
     }
   }
 

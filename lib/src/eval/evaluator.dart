@@ -188,7 +188,9 @@ class Evaluator {
       var argnames = statement.args;
       var block = statement.block;
 
-      Context.current.define(name, (args) async {
+      var ctx = Context.current;
+      
+      ctx.define(name, (args) async {
         var i = 0;
         var inputs = {};
 
@@ -200,7 +202,7 @@ class Evaluator {
           i++;
         }
 
-        return Context.current.createContext(() async {
+        return ctx.createContext(() async {
           var cmt = Context.current;
 
           for (var n in inputs.keys) {
@@ -364,45 +366,46 @@ class Evaluator {
   }
 
   _handleOperation(Expression left, Expression right, String op) async {
-    var a = await _resolveValue(left);
-    var b = await _resolveValue(right);
+    var a = () async => await _resolveValue(left);
+    var b = () async => await _resolveValue(right);
 
     switch (op) {
       case "+":
-        return a + b;
+        return (await a()) + (await b());
       case "-":
-        return a - b;
+        return (await a()) - (await b());
       case "*":
-        return a * b;
+        return (await a()) * (await b());
       case "/":
-        return a / b;
+        return (await a()) / (await b());
       case "~/":
-        return a ~/ b;
+        return (await a()) ~/ (await b());
       case "<":
-        return a < b;
+        return (await a()) < (await b());
       case ">":
-        return a > b;
+        return (await a()) > (await b());
       case "<=":
-        return a <= b;
+        return (await a()) <= (await b());
       case ">=":
-        return a >= b;
+        return (await a()) >= (await b());
       case "==":
-        return a == b;
+        return (await a()) == (await b());
       case "&":
-        return a & b;
+        return (await a()) & (await b());
       case "in":
-        if (b is Map) {
-          return b.containsKey(a);
+        var m = await b();
+        if (m is Map) {
+          return m.containsKey(await a());
         } else {
-          return b.contains(a);
+          return m.contains(await a());
         }
         break;
       case "|":
-        return a | b;
+        return (await a ()) | (await b());
       case "||":
-        return BadgerUtils.asBoolean(a) || BadgerUtils.asBoolean(b);
+        return BadgerUtils.asBoolean((await a())) || BadgerUtils.asBoolean((await b()));
       case "&&":
-        return BadgerUtils.asBoolean(a) && BadgerUtils.asBoolean(b);
+        return BadgerUtils.asBoolean((await a())) && BadgerUtils.asBoolean((await b()));
       default:
         throw new Exception("Unsupported Operator");
     }
