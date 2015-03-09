@@ -266,7 +266,7 @@ class BadgerJsonBuilder {
       return {
         "type": "access",
         "reference": _generateExpression(expression.reference),
-        "identifiers": expression.identifiers
+        "parts": expression.parts.map((it) => it is Expression ? _generateExpression(it) : it).toList()
       };
     } else if (expression is BooleanLiteral) {
       return {
@@ -341,7 +341,6 @@ class BadgerTinyAst {
     "ternary operator": ">",
     "boolean literal": ">",
     "range literal": ".",
-    "identifiers": "?",
     "list definition": "|",
     "map definition": "[",
     "map entry": "]",
@@ -355,7 +354,8 @@ class BadgerTinyAst {
     "elements": "^",
     "parentheses": "%",
     "isNullable": "(",
-    "location": ")"
+    "location": ")",
+    "parts": "?"
   };
 
   static String demap(String key) {
@@ -500,7 +500,7 @@ class BadgerJsonParser {
     } else if (type == "parentheses") {
       return new Parentheses(_buildExpression(it["expression"]));
     } else if (type == "access") {
-      return new Access(_buildExpression(it["reference"]), it["identifiers"]);
+      return new Access(_buildExpression(it["reference"]), it["parts"].map((it) => it is Map ? _buildExpression(it) : it).toList());
     } else if (type == "map definition") {
       return new MapDefinition(it["entries"].map(_buildExpression).toList());
     } else if (type == "map entry") {

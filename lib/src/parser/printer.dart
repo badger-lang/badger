@@ -16,7 +16,18 @@ class BadgerAstPrinter extends AstVisitor {
   void visitAccess(Access access) {
     visitExpression(access.reference);
     buff.write(".");
-    buff.write(access.identifiers.join("."));
+    var i = 0;
+    for (var x in access.parts) {
+      if (x is String) {
+        buff.write(x);
+      } else {
+        visitExpression(x);
+      }
+      if (i != access.parts.length - 1) {
+        buff.write(".");
+      }
+      i++;
+    }
   }
 
   @override
