@@ -118,11 +118,15 @@ class BadgerAstPrinter extends AstVisitor {
   }
 
   @override
-  void visitStatements(List<Statement> statements) {
+  void visitStatements(List statements) {
     var i = 0;
     for (var statement in statements) {
       buff.writeIndent();
-      visitStatement(statement);
+      if (statement is Statement) {
+        visitStatement(statement);
+      } else {
+        visitExpression(statement);
+      }
       if (i != statements.length - 1) {
         buff.writeln();
       }
@@ -366,6 +370,56 @@ class BadgerAstPrinter extends AstVisitor {
     buff.decrement();
     buff.writeln();
     buff.writeIndent();
+    buff.write("}");
+  }
+
+  @override
+  void visitMultiAssignment(MultiAssignment assignment) {
+    if (assignment.isInitialDefine) {
+      buff.write(assignment.immutable ? "let" : "var");
+
+      if (assignment.isNullable) {
+        buff.write("?");
+      }
+
+      buff.write(" ");
+    }
+    buff.write("{" + assignment.ids.join(", ") + "}");
+    buff.write(" = ");
+    visitExpression(assignment.value);
+  }
+
+  @override
+  void visitNamespaceBlock(NamespaceBlock block) {
+    buff.write("namespace ${block.name} {");
+    buff.increment();
+    buff.writeln();
+    visitStatements(block.block.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
+  }
+
+  @override
+  void visitTypeBlock(TypeBlock block) {
+    buff.write("type ${block.name}");
+
+    if (block.args.isNotEmpty) {
+      buff.write("(");
+      buff.write(block.args.join(", "));
+      buff.write(")");
+    }
+
+    buff.write(" {");
+    if (block.block.statements.isNotEmpty) {
+      buff.increment();
+      buff.writeln();
+      visitStatements(block.block.statements);
+      buff.decrement();
+      buff.writeln();
+      buff.writeIndent();
+    }
     buff.write("}");
   }
 }

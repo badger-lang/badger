@@ -12,6 +12,9 @@ abstract class AstVisitorBase {
   void visitReturnStatement(ReturnStatement statement);
   void visitBreakStatement(BreakStatement statement);
   void visitAssignment(Assignment assignment);
+  void visitTypeBlock(TypeBlock block);
+  void visitNamespaceBlock(NamespaceBlock block);
+  void visitMultiAssignment(MultiAssignment assignment);
   void visitFunctionDefinition(FunctionDefinition definition);
 
   void visitMethodCall(MethodCall call);
@@ -59,9 +62,13 @@ abstract class AstVisitor extends AstVisitorBase {
     }
   }
 
-  void visitStatements(List<Statement> statements) {
+  void visitStatements(List statements) {
     for (var statement in statements) {
-      visitStatement(statement);
+      if (statement is Statement) {
+        visitStatement(statement);
+      } else {
+        visitExpression(statement);
+      }
     }
   }
 
@@ -81,10 +88,16 @@ abstract class AstVisitor extends AstVisitorBase {
       visitFunctionDefinition(statement);
     } else if (statement is SwitchStatement) {
       visitSwitchStatement(statement);
+    } else if (statement is NamespaceBlock) {
+      visitNamespaceBlock(statement);
+    } else if (statement is MultiAssignment) {
+      visitMultiAssignment(statement);
     } else if (statement is Assignment) {
       visitAssignment(statement);
     } else if (statement is MethodCall) {
       visitMethodCall(statement);
+    } else if (statement is TypeBlock) {
+      visitTypeBlock(statement);
     } else {
       throw new Exception("Unknown Statement Type: ${statement}");
     }
