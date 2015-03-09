@@ -324,11 +324,16 @@ class Evaluator {
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 
-      for (var id in expr.identifiers) {
-        if (value is BadgerObject) {
-          value = await value.getProperty(id);
+      for (var p in expr.parts) {
+        if (p is String) {
+          if (value is BadgerObject) {
+            value = await value.getProperty(p);
+          } else {
+            value = await BadgerUtils.getProperty(p, value);
+          }
         } else {
-          value = await BadgerUtils.getProperty(id, value);
+          MethodCall c = p;
+          value = await _callMethod(c, value);
         }
       }
 
@@ -426,7 +431,7 @@ class Evaluator {
     }
   }
 
-  dynamic _callMethod(MethodCall call) async {
+  dynamic _callMethod(MethodCall call, [dynamic obj]) async {
     var args = [];
 
     for (var s in call.args) {
@@ -435,27 +440,32 @@ class Evaluator {
 
     var ref = call.reference;
 
-    if (ref is String) {
+    if (ref is String && obj == null) {
       return await Context.current.invoke(ref, args);
     } else {
-      var v = await _resolveValue(ref.reference);
-      List<String> n = ref.identifiers;
-      List<String> ids = new List<String>.from(n);
-      ids.removeLast();
+      var v = obj == null ? await _resolveValue(ref.reference) : obj;
 
-      for (var id in ids) {
-        v = await BadgerUtils.getProperty(id, v);
+      var l = call.reference;
 
-        if (v is ReturnValue) {
-          v = v.value;
+      if (obj == null) {
+        List<String> n = ref.identifiers;
+        List<String> ids = new List<String>.from(n);
+        ids.removeLast();
+
+        for (var id in ids) {
+          v = await BadgerUtils.getProperty(id, v);
+
+          if (v is ReturnValue) {
+            v = v.value;
+          }
+
+          if (v is Immutable) {
+            v = v.value;
+          }
         }
 
-        if (v is Immutable) {
-          v = v.value;
-        }
+        l = n.last;
       }
-
-      var l = n.last;
 
       var z = await BadgerUtils.getProperty(l, v);
 

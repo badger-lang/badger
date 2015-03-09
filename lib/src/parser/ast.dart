@@ -120,9 +120,9 @@ class ReturnStatement extends Statement {
 
 class Access extends Expression {
   final Expression reference;
-  final List<String> identifiers;
+  final List<dynamic> parts;
 
-  Access(this.reference, this.identifiers);
+  Access(this.reference, this.parts);
 }
 
 class StringLiteral extends Expression {

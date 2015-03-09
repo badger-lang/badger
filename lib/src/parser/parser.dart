@@ -20,6 +20,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  simpleMethodCall() => super.simpleMethodCall().map((it) {
+    return new MethodCall(it[0], it[2]);
+  });
+
+  @override
   switchStatement() => super.switchStatement().map((it) {
     return new SwitchStatement(it[2], (it[6] == null ? [] : it[6]).where((it) => it is CaseStatement).toList());
   });

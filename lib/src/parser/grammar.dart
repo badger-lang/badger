@@ -29,7 +29,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   booleanLiteral() => ref(TRUE) | ref(FALSE);
   nullLiteral() => ref(NULL);
 
-  methodCall() => (ref(access) | ref(identifier)) &
+  methodCall() => (ref(identifier) | ref(access)) &
+    char("(") &
+    ref(arguments).optional() &
+    char(")");
+
+  simpleMethodCall() => ref(identifier) &
     char("(") &
     ref(arguments).optional() &
     char(")");
@@ -184,16 +189,18 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(negate) |
     ref(expressionItem);
 
-  access() => ref(variableReference) & char(".") & (
-    ref(identifier)
+  callable() => ref(stringLiteral) | ref(simpleMethodCall) | ref(variableReference);
+
+  access() => ref(callable) & char(".") & (
+    ref(simpleMethodCall) | ref(identifier)
   ).separatedBy(char(".")).optional();
 
   expressionItem() => (
     (
+      ref(access) |
       ref(nullLiteral) |
       ref(nativeCode) |
       ref(methodCall) |
-      ref(access) |
       ref(rangeLiteral) |
       ref(mapDefinition) |
       ref(hexadecimalLiteral) |
