@@ -8,5 +8,6 @@ class IOLibrary {
     context.proxy("Directory", BadgerDirectory);
     context.proxy("FileSystemEntity", BadgerFileSystemEntity);
     context.proxy("WebSocket", BadgerWebSocket);
+    context.proxy("HttpServer", BadgerHttpServer);
   }
 }

@@ -19,11 +19,41 @@ socket.handleLine((line) -> {
     socket.writeLine("JOIN :#directcode")
   }
 
-  if (split[1] == "PRIVMSG") {
+  if split[1] == "PRIVMSG" {
     let channel = split[2]
+    let th = split[3]
+    let msg = th.substring(1)
+    let left = split.skip(4)
+    let cargs = left.toList()
+    let iscmd = msg.startsWith("!")
 
-    if (split[3] == ":!hello") {
-      socket.writeLine("PRIVMSG $(channel) :Hello!")
+    if iscmd {
+      let s = msg.split(" ")
+      let f = s[0]
+      let cmd = f.substring(1)
+
+      if cmd == "hello" {
+        socket.writeLine("PRIVMSG $(channel) :Hello!")
+      }
+
+      if cmd == "google" {
+        let query = cargs.join(" ")
+
+        let http = make(HttpClient)
+        let response = http.get("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=$(query)")
+
+        let json = JSON.parse(response.body)
+        let results = json.responseData.results
+
+        if results.length == 0 {
+          socket.writeLine("PRIVMSG $(channel) :No Results Found")
+        } else {
+          let result = results.first
+          let url = result.unescapedUrl
+
+          socket.writeLine("PRIVMSG $(channel) :$(result.titleNoFormatting) | $(url)")
+        }
+      }
     }
   }
 

@@ -2,8 +2,51 @@ part of badger.io;
 
 class BadgerHttpClient {
   Future<BadgerHttpResponse> get(String url, [Map<String, String> headers]) async {
+    return await request("GET", url, headers);
+  }
+
+  Future<BadgerHttpResponse> post(String url, body, [Map<String, String> headers]) async {
+    return await request("POST", url, headers, body);
+  }
+
+  Future<BadgerHttpResponse> put(String url, body, [Map<String, String> headers]) async {
+    return await request("PUT", url, headers, body);
+  }
+
+  Future<BadgerHttpResponse> head(String url, [Map<String, String> headers]) async {
+    return await request("HEAD", url, headers);
+  }
+
+  Future<BadgerHttpResponse> delete(String url, [Map<String, String> headers]) async {
+    return await request("DELETE", url, headers);
+  }
+
+  Future<BadgerHttpResponse> request(String method, String url, [Map<String, String> headers, body]) async {
     var client = new HttpClient();
     HttpClientRequest req = await client.getUrl(Uri.parse(url));
+
+    if (body != null) {
+      if (body is List<int>) {
+        req.add(body);
+      } else if (body is Stream) {
+        req.addStream(body);
+      } else if (body is String) {
+        req.write(body);
+      } else if (body is Map) {
+        var str = "";
+        var i = 0;
+        for (var x in body.keys) {
+          str += Uri.encodeQueryComponent(x);
+          str += "=";
+          str += Uri.encodeQueryComponent(body[x]);
+          if (i != body.length - 1) {
+            str += "&";
+          }
+        }
+        req.write(str);
+      }
+    }
+
     if (headers != null) {
       for (var key in headers.keys) {
         req.headers.set(key, headers[key]);

@@ -15,3 +15,4 @@ part "src/io/library.dart";
 part "src/io/socket.dart";
 part "src/io/http.dart";
 part "src/io/fs.dart";
+part "src/io/server.dart";
