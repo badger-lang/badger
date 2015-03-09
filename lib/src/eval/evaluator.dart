@@ -157,6 +157,8 @@ class Evaluator {
 
         if (value == _BREAK_NOW) {
           break;
+        } else if (value is ReturnValue) {
+          return value;
         }
       }
     } else if (statement is ForInStatement) {
@@ -189,7 +191,7 @@ class Evaluator {
       var block = statement.block;
 
       var ctx = Context.current;
-      
+
       ctx.define(name, (args) async {
         var i = 0;
         var inputs = {};
