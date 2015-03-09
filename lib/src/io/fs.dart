@@ -37,8 +37,8 @@ class BadgerFile extends BadgerFileSystemEntity {
     return of;
   }
 
-  HandlerSubscription handleEvent(handler(FileSystemEvent event)) {
-    return new HandlerSubscription(_file.watch().map((it) {
+  HandlerSubscription handleEvent(handler(FileSystemEvent event), [bool recursive = false]) {
+    return new HandlerSubscription(_file.watch(recursive: recursive).map((it) {
       var e = new BadgerFileSystemEvent(
         it.type,
         it.path,
@@ -87,8 +87,8 @@ class BadgerDirectory extends BadgerFileSystemEntity {
   static BadgerDirectory temp() => new BadgerDirectory(Directory.systemTemp);
   static BadgerDirectory current() => new BadgerDirectory(Directory.current);
 
-  HandlerSubscription handleEvent(handler(FileSystemEvent event)) {
-    return new HandlerSubscription(_dir.watch().map((it) {
+  HandlerSubscription handleEvent(handler(FileSystemEvent event), [bool recursive = false]) {
+    return new HandlerSubscription(_dir.watch(recursive: recursive).map((it) {
       var e = new BadgerFileSystemEvent(
         it.type,
         it.path,
