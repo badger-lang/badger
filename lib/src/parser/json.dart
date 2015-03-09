@@ -164,6 +164,15 @@ class BadgerJsonBuilder {
         "type": "return",
         "value": statement.expression != null ? _generateExpression(statement.expression) : null
       };
+    } else if (statement is MultiAssignment) {
+      return {
+        "type": "multiple assignment",
+        "ids": statement.ids,
+        "immutable": statement.immutable,
+        "isNullable": statement.isNullable,
+        "isInitialDefine": statement.isInitialDefine,
+        "value": _generateExpression(statement.value)
+      };
     } else if (statement is BreakStatement) {
       return {
         "type": "break"
@@ -370,7 +379,8 @@ class BadgerTinyAst {
     "isNullable": "(",
     "location": ")",
     "parts": "?",
-    "extension": "_"
+    "extension": "_",
+    "multiple assignment": "~"
   };
 
   static String demap(String key) {
@@ -463,6 +473,8 @@ class BadgerJsonParser {
         _buildExpression(it["value"]),
         new Block(it["block"].map(_buildStatement).toList())
       );
+    } else if (type == "multiple assignment") {
+      return new MultiAssignment(it["ids"], _buildExpression(it["value"]), it["immutable"], it["isInitialDefine"], it["isNullable"]);
     } else if (type == "type") {
       return new TypeBlock(
         it["name"],
