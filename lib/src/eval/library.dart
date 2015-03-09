@@ -303,5 +303,3 @@ class Event {
   Event(this.name, this.value);
 }
 
-class EventLoop {
-}
