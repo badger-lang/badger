@@ -334,7 +334,7 @@ class Context extends BadgerObject {
       return variables[name](args);
     } else if (variables.containsKey(name) && variables[name] is Type) {
       var c = reflectClass(variables[name]);
-      return c.newInstance(MirrorSystem.getSymbol(""), args);
+      return c.newInstance(MirrorSystem.getSymbol(""), args).reflectee;
     } else if (parent != null && parent.hasFunction(name)) {
       return parent.invoke(name, args);
     } else {

@@ -4,6 +4,6 @@ let server = HttpServer.listen("0.0.0.0", 8080)
 
 print("Server Started on port $(server.port)")
 
-server.handleRequest((request) -> {
-  request.close("Hello World")
+server.createVirtualDirectory("/", {
+  "allowDirectoryListing": true
 })

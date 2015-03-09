@@ -8,6 +8,7 @@ import "package:badger/eval.dart";
 import "package:badger/parser.dart";
 import "package:badger/common.dart";
 
+import "package:http_server/http_server.dart";
 import "package:path/path.dart" as pathlib;
 
 part "src/io/environment.dart";

@@ -20,6 +20,7 @@ class CoreLibrary {
     context.proxy("later", later);
     context.proxy("void", VOID);
     context.proxy("eval", eval);
+    context.proxy("EventBus", EventBus);
   }
 
   static dynamic eval(String content) async {
@@ -234,4 +235,73 @@ class TestingLibrary {
       }
     });
   }
+}
+
+class EventBus {
+  static EventBus create() {
+    return new EventBus();
+  }
+
+  final StreamController<Event> _controller = new StreamController<Event>.broadcast();
+
+  void post(String name, [dynamic value]) {
+    _controller.add(new Event(name, value));
+  }
+
+  void emit(String name, [dynamic value]) {
+    _controller.add(new Event(name, value));
+  }
+
+  HandlerSubscription on(String name, handler(object)) {
+    return new HandlerSubscription(_controller.stream.where((it) => it.name == name).listen(handler));
+  }
+
+  HandlerSubscription onEvent(handler(event)) {
+    return new HandlerSubscription(_controller.stream.listen(handler));
+  }
+
+  Future<dynamic> nextEvent(String name, [int timeout, onTimeout()]) async {
+    var f = _controller.stream.where((it) => it.name == name).map((it) => it.value).first;
+
+    if (timeout != null) {
+      f = f.timeout(new Duration(milliseconds: timeout), onTimeout: onTimeout);
+    }
+
+    return f;
+  }
+
+  Future<Event> wait([int timeout, onTimeout()]) async {
+    var f = _controller.stream.first;
+
+    if (timeout != null) {
+      f = f.timeout(new Duration(milliseconds: timeout), onTimeout: onTimeout);
+    }
+
+    return f;
+  }
+}
+
+class HandlerSubscription {
+  final StreamSubscription sub;
+
+  HandlerSubscription(this.sub);
+
+  Future cancel() async {
+    await sub.cancel();
+  }
+
+  Future wait() => sub.asFuture();
+  void pause([Future until]) => sub.pause(until);
+  void resume() => sub.resume();
+  bool get isPaused => sub.isPaused;
+}
+
+class Event {
+  final String name;
+  final dynamic value;
+
+  Event(this.name, this.value);
+}
+
+class EventLoop {
 }

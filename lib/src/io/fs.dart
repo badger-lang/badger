@@ -21,6 +21,7 @@ class BadgerFile extends BadgerFileSystemEntity {
   Future appendBytes(List<int> bytes) => _file.writeAsBytes(bytes, mode: FileMode.APPEND);
   Future append(String content) => _file.writeAsString(content, mode: FileMode.APPEND);
   Future<List<int>> readBytes() => _file.readAsBytes();
+  Future<BadgerFile> copy(String path) async => new BadgerFile(await _file.copy(path));
   Future<BadgerOpenFile> open([int mode = 0]) async {
     FileMode m = {
       0: FileMode.READ,
@@ -174,24 +175,21 @@ class BadgerOpenFile {
     await _f.writeFrom(bytes, start, end);
   }
 
+  Future lock([FileLock mode, int start = 0, int end]) async {
+    await _f.lock(mode, start, end);
+  }
+
+  Future unlock([int start = 0, int end]) async {
+    await _f.unlock(start, end);
+  }
+
+  Future truncate(int length) async {
+    await _f.truncate(length);
+  }
+
   Future close() async {
     await _f.close();
   }
-}
-
-class HandlerSubscription {
-  final StreamSubscription sub;
-
-  HandlerSubscription(this.sub);
-
-  Future cancel() async {
-    await sub.cancel();
-  }
-
-  Future wait() => sub.asFuture();
-  void pause([Future until]) => sub.pause(until);
-  void resume() => sub.resume();
-  bool get isPaused => sub.isPaused;
 }
 
 class BadgerFileSystemEvent {

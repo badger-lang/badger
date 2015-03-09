@@ -1,0 +1,13 @@
+let bus = EventBus()
+
+bus.on("hello", () -> {
+  print("Hello World!")
+})
+
+bus.emit("hello")
+
+async(() => bus.emit("test", "This is a test."))
+
+let event = bus.nextEvent("test")
+
+print(event)
