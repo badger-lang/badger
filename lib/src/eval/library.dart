@@ -115,6 +115,15 @@ class CoreLibrary {
   }
 }
 
+class ParserLibrary {
+  static void import(Context context) {
+    context.proxy("BadgerParser", BadgerParser);
+    context.proxy("BadgerPrinter", BadgerAstPrinter);
+    context.proxy("BadgerJsonBuilder", BadgerJsonBuilder);
+    context.proxy("BadgerJsonParser", BadgerJsonParser);
+  }
+}
+
 class BadgerJSON {
   dynamic parse(String input) {
     return JSON.decode(input);

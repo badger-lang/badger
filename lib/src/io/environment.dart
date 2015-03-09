@@ -22,6 +22,8 @@ class FileEnvironment extends IOEnvironment {
           IOLibrary.import(context);
         } else if (name == "test") {
           TestingLibrary.import(context);
+        } else if (name == "parser") {
+          ParserLibrary.import(context);
         } else {
           throw new Exception("Unknown Standard Library: ${name}");
         }

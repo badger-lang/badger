@@ -7,6 +7,11 @@ class BadgerAstPrinter extends AstVisitor {
 
   BadgerAstPrinter(this.program);
 
+  String print() {
+    visit(program);
+    return buff.toString();
+  }
+
   @override
   void visitAccess(Access access) {
     visitExpression(access.reference);
