@@ -1,0 +1,7 @@
+import "badger:io"
+
+let cwd = Directory.current()
+
+cwd.walk((file) -> {
+  print(file.path)
+})

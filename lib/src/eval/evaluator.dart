@@ -57,19 +57,22 @@ class Evaluator {
     ctx.merge(c);
   }
 
-  _evaluateBlock(List<dynamic> statements) async {
+  _evaluateBlock(List<dynamic> statements, [bool allowBreak = false]) async {
     var retval = VOID;
+
     for (var statement in statements) {
       if (statement is Statement) {
-        var value = await _evaluateStatement(statement);
+        var value = await _evaluateStatement(statement, allowBreak);
 
         if (value != null) {
           if (value is ReturnValue) {
             retval = value;
             break;
           } else if (value == _BREAK_NOW) {
-            retval = _BREAK_NOW;
-            break;
+            if (allowBreak) {
+              retval = _BREAK_NOW;
+              break;
+            }
           }
         }
       } else if (statement is Expression) {
@@ -82,7 +85,7 @@ class Evaluator {
     return retval;
   }
 
-  _evaluateStatement(Statement statement) async {
+  _evaluateStatement(Statement statement, [bool allowBreak = false]) async {
     if (statement is MethodCall) {
       return await _callMethod(statement);
     } else if (statement is Assignment) {
@@ -127,7 +130,7 @@ class Evaluator {
         var v = await _resolveValue(c.expression);
 
         if (value == v) {
-          await _evaluateBlock(c.block.statements);
+          await _evaluateBlock(c.block.statements, allowBreak);
           break;
         }
       }
@@ -137,10 +140,10 @@ class Evaluator {
 
       var v = await Context.current.createContext(() async {
         if (c) {
-          return await _evaluateBlock(statement.block.statements);
+          return await _evaluateBlock(statement.block.statements, allowBreak);
         } else {
           if (statement.elseBlock != null) {
-            return await _evaluateBlock(statement.elseBlock.statements);
+            return await _evaluateBlock(statement.elseBlock.statements, allowBreak);
           }
         }
       });
@@ -148,12 +151,12 @@ class Evaluator {
       return v;
     } else if (statement is WhileStatement) {
       while (BadgerUtils.asBoolean(await _resolveValue(statement.condition))) {
-        var value = await _evaluateBlock(statement.block.statements);
+        var value = await Context.current.createContext(() async {
+          return await _evaluateBlock(statement.block.statements, true);
+        });
 
         if (value == _BREAK_NOW) {
-          return value;
-        } else if (value is ReturnValue) {
-          return value;
+          break;
         }
       }
     } else if (statement is ForInStatement) {
@@ -163,7 +166,7 @@ class Evaluator {
       call(value) async {
         return Context.current.createContext(() async {
           Context.current.setVariable(i, value);
-          return await _evaluateBlock(statement.block.statements);
+          return await _evaluateBlock(statement.block.statements, allowBreak);
         });
       }
 
@@ -204,7 +207,7 @@ class Evaluator {
             cmt.setVariable(n, inputs[n]);
           }
 
-          var result = await _evaluateBlock(block.statements);
+          var result = await _evaluateBlock(block.statements, allowBreak);
 
           if (result is ReturnValue) {
             result = result.value;

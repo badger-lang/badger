@@ -1,0 +1,31 @@
+import "badger:io"
+
+let socket = Socket.connect("irc.esper.net", 6667)
+
+print("Connected")
+
+socket.writeLine("NICK BadgerBot")
+socket.writeLine("USER BadgerBot 8 * :Badger Bot")
+
+socket.handleLine((line) -> {
+  let split = line.split(" ")
+
+  if split[0] == "PING" {
+    let x = split[1]
+    socket.writeLine("PONG $(x)")
+  }
+
+  if split[1] == "001" {
+    socket.writeLine("JOIN :#directcode")
+  }
+
+  if (split[1] == "PRIVMSG") {
+    let channel = split[2]
+
+    if (split[3] == ":!hello") {
+      socket.writeLine("PRIVMSG $(channel) :Hello!")
+    }
+  }
+
+  print(line)
+})
