@@ -294,6 +294,16 @@ class RecordEntry {
   RecordEntry(this.type, this.name);
 }
 
+class MultiAssignment extends Statement {
+  final bool immutable;
+  final List<String> ids;
+  final Expression value;
+  final bool isInitialDefine;
+  final bool isNullable;
+
+  MultiAssignment(this.ids, this.value, this.immutable, this.isInitialDefine, this.isNullable);
+}
+
 class Program {
   final List<dynamic> statements;
   final List<Declaration> declarations;

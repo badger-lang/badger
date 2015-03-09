@@ -133,6 +133,14 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  multipleAssign() => super.multipleAssign().map((it) {
+    var isInitialDefine = it[0] != null;
+    var isNullable = it[0] == null ? null : it[0][0].endsWith("?");
+    var isImmutable = it[0] != null && it[0][0].startsWith("let");
+    return new MultiAssignment(it[3], it[9], isImmutable, isInitialDefine, isNullable);
+  });
+
+  @override
   accessAssignment() => super.accessAssignment().map((it) {
     return new Assignment(it[0], it[4], false, false, true);
   });

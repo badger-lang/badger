@@ -12,6 +12,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   statement() => (
     (
       ref(functionDefinition) |
+      ref(multipleAssign) |
       ref(accessAssignment) |
       ref(assignment) |
       ref(methodCall) |
@@ -31,6 +32,19 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   booleanLiteral() => ref(TRUE) | ref(FALSE);
   nullLiteral() => ref(NULL);
 
+  multipleAssign() => (
+    (string("let") | string("var")) & char("?").optional() & whitespace().star()
+  ).optional() & char("{") & whitespace().star() &
+    ref(identifier).separatedBy(
+      whitespace().star() &
+      char(",") &
+      whitespace().star(),
+      includeSeparators: false
+    ) & whitespace().star() & char("}") &
+    whitespace().star() &
+    char("=") & whitespace().star() &
+    ref(expression);
+
   methodCall() => (ref(identifier) | ref(access)) &
     char("(") &
     ref(arguments).optional() &
@@ -44,7 +58,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   arguments() => ref(expression).separatedBy(
     whitespace().star() &
     char(",") &
-    whitespace().star()
+    whitespace().star(),
+    includeSeparators: false
   );
 
   forInStatement() => ref(FOR) &
@@ -344,7 +359,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   mapDefinition() => char("{") &
     whitespace().star() &
-    ref(mapEntry).separatedBy(char(",").trim()).optional() &
+    ref(mapEntry).separatedBy(char(",").trim(), includeSeparators: false).optional() &
     char(",").optional() &
     whitespace().star() &
     char("}");

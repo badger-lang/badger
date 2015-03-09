@@ -135,6 +135,22 @@ class Evaluator {
       }
 
       return value;
+    } else if (statement is MultiAssignment) {
+      var r = await _resolveValue(statement.value);
+
+      var ids = statement.ids;
+
+      var i = 0;
+      for (var id in ids) {
+        var v = r is List ? r[i] : r[id];
+        if (statement.immutable) {
+          v = new Immutable(v);
+        }
+        Context.current.setVariable(id, v, statement.isInitialDefine);
+        i++;
+      }
+
+      return r;
     } else if (statement is ReturnStatement) {
       var value = null;
 

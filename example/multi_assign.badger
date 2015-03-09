@@ -1,0 +1,9 @@
+let {a, b} = {
+  "a": "Hello",
+  "b": "World"
+}
+
+let {c, d} = ["Hello", "World"]
+
+print("$(a):$(b)")
+print("$(c):$(d)")
