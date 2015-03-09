@@ -42,9 +42,16 @@ class BadgerHttpResponse {
 class BadgerWebSocket {
   final WebSocket _socket;
   Stream _stream;
+  bool get open => _open;
+  bool _open = true;
 
   BadgerWebSocket(this._socket) {
     _stream = _socket.asBroadcastStream();
+    _socket.done.then((_) {
+      if (_onClose != null) {
+        _onClose();
+      }
+    });
   }
 
   static Future<BadgerWebSocket> connect(String url, [List<String> protocols, Map<String, String> headers]) {
@@ -55,7 +62,31 @@ class BadgerWebSocket {
     _socket.add(value);
   }
 
-  Future<dynamic> read([int timeout]) {
-    return _stream.first;
+  Future<dynamic> read([int timeout, onTimeout]) {
+    var f = _stream.first;
+    if (timeout != null) {
+      return f.timeout(new Duration(milliseconds: timeout), onTimeout: onTimeout);
+    }
+    return f;
   }
+
+  void handleData(handler(data)) {
+    _stream.listen(handler);
+  }
+
+  Function _onClose;
+
+  void handleClose(handler()) {
+    _onClose = handler;
+  }
+
+  int get pingInterval => _socket.pingInterval != null ? _socket.pingInterval.inMilliseconds : -1;
+  set pingInterval(int x) => _socket.pingInterval = new Duration(milliseconds: x);
+
+  Future close([int code, String reason]) {
+    return _socket.close(code, reason);
+  }
+
+  int get closeCode => _socket.closeCode;
+  String get closeReason => _socket.closeReason;
 }
