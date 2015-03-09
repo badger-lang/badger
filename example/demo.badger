@@ -1,0 +1,23 @@
+namespace Test {
+  type Example {
+    describe() {
+      return "Example Instance A"
+    }
+  }
+}
+
+type Example {
+  describe() {
+    return "Example Instance B"
+  }
+}
+
+example() {
+  return "Example Function"
+}
+
+let a = Test.Example()
+let b = Example()
+print(a.describe())
+print(b.describe())
+print(example())

@@ -452,6 +452,18 @@ class Context extends BadgerObject {
     }
   }
 
+  TypeCreator getType(String name) {
+    if (hasType(name)) {
+      if (types.containsKey(name)) {
+        return types[name];
+      } else {
+        return parent.getType(name);
+      }
+    } else {
+      throw new Exception("Undefined Type: ${name}");
+    }
+  }
+
   @override
   dynamic getProperty(String name) {
     if (hasVariable(name)) {
@@ -460,6 +472,8 @@ class Context extends BadgerObject {
       return getFunction(name);
     } else if (hasNamespace(name)) {
       return getNamespace(name);
+    } else if (hasType(name)) {
+      return getType(name);
     } else {
       throw new Exception("Failed to get property ${name} on context.");
     }
