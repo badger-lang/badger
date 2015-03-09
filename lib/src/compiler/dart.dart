@@ -51,9 +51,9 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitAccess(Access access) {
-    visitExpression(access.reference);
+/*    visitExpression(access.reference);
     buff.write(".");
-    buff.write(access.identifiers.join("."));
+    buff.write(access.identifiers.join("."));*/
   }
 
   @override
@@ -339,5 +339,20 @@ class DartAstVisitor extends AstVisitor {
   @override
   void visitNullLiteral(NullLiteral literal) {
     buff.write("null");
+  }
+
+  @override
+  void visitMultiAssignment(MultiAssignment assignment) {
+    // TODO: implement visitMultiAssignment
+  }
+
+  @override
+  void visitNamespaceBlock(NamespaceBlock block) {
+    // TODO: implement visitNamespaceBlock
+  }
+
+  @override
+  void visitTypeBlock(TypeBlock block) {
+    // TODO: implement visitTypeBlock
   }
 }

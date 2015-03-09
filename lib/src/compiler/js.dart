@@ -401,6 +401,21 @@ class JsAstVisitor extends AstVisitor {
   void visitNullLiteral(NullLiteral literal) {
     buff.write("null");
   }
+
+  @override
+  void visitMultiAssignment(MultiAssignment assignment) {
+    throw new Exception("Mult Assignment is not implemented yet.");
+  }
+
+  @override
+  void visitNamespaceBlock(NamespaceBlock block) {
+    throw new Exception("Namespaces are not implemented yet.");
+  }
+
+  @override
+  void visitTypeBlock(TypeBlock block) {
+    throw new Exception("Types are not implemented yet.");
+  }
 }
 
 class JsCompilerTarget extends CompilerTarget<String> {
