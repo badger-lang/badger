@@ -17,5 +17,9 @@ class IOLibrary {
     context.proxy("NetworkInterface", NetworkInterface);
     context.proxy("InternetAddress", InternetAddress);
     context.proxy("InternetAddressType", InternetAddressType);
+    context.proxy("exit", exit);
+    context.proxy("setExitCode", (x) => exitCode = x);
+    context.proxy("getExitCode", () => exitCode);
+    context.proxy("getProcessId", () => pid);
   }
 }

@@ -1,6 +1,8 @@
 part of badger.io;
 
 abstract class BadgerFileSystemEntity {
+  bool get isFile => this is BadgerFile;
+  bool get isDirectory => this is BadgerDirectory;
 }
 
 class BadgerFile extends BadgerFileSystemEntity {
@@ -33,6 +35,10 @@ class BadgerFile extends BadgerFileSystemEntity {
     var of = new BadgerOpenFile(this);
     of._f = await _file.open();
     return of;
+  }
+
+  HandlerSubscription handleEvent(handler(FileSystemEvent event)) {
+    return new HandlerSubscription(_file.watch().listen(handler));
   }
 
   Future<int> get length => _file.length();
@@ -69,7 +75,12 @@ class BadgerDirectory extends BadgerFileSystemEntity {
   }
 
   static BadgerDirectory root() => BadgerDirectory.get("/");
+  static BadgerDirectory temp() => new BadgerDirectory(Directory.systemTemp);
   static BadgerDirectory current() => new BadgerDirectory(Directory.current);
+
+  HandlerSubscription handleEvent(handler(FileSystemEvent event)) {
+    return new HandlerSubscription(_dir.watch().listen(handler));
+  }
 
   Future<bool> get exists => _dir.exists();
   String get path => _dir.path;
@@ -148,4 +159,19 @@ class BadgerOpenFile {
   Future close() async {
     await _f.close();
   }
+}
+
+class HandlerSubscription {
+  final StreamSubscription sub;
+
+  HandlerSubscription(this.sub);
+
+  Future cancel() async {
+    await sub.cancel();
+  }
+
+  Future wait() => sub.asFuture();
+  void pause([Future until]) => sub.pause(until);
+  void resume() => sub.resume();
+  bool get isPaused => sub.isPaused;
 }

@@ -90,10 +90,9 @@ class BadgerWebSocket {
 
   BadgerWebSocket(this._socket) {
     _stream = _socket.asBroadcastStream();
-    _socket.done.then((_) {
-      if (_onClose != null) {
-        _onClose();
-      }
+    _socket.done.then((_) async {
+      _closeController.add(null);
+      await _closeController.close();
     });
   }
 
@@ -113,14 +112,16 @@ class BadgerWebSocket {
     return f;
   }
 
-  void handleData(handler(data)) {
-    _stream.listen(handler);
+  HandlerSubscription handleData(handler(data)) {
+    return new HandlerSubscription(_stream.listen(handler));
   }
 
-  Function _onClose;
+  StreamController _closeController = new StreamController.broadcast();
 
-  void handleClose(handler()) {
-    _onClose = handler;
+  HandlerSubscription handleClose(handler()) {
+    return new HandlerSubscription(_closeController.stream.listen((x) {
+      handler();
+    }));
   }
 
   int get pingInterval => _socket.pingInterval != null ? _socket.pingInterval.inMilliseconds : -1;

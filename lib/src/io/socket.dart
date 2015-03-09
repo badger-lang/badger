@@ -23,16 +23,15 @@ class BadgerSocket {
 
   BadgerSocket(this.socket) {
     _input = socket.asBroadcastStream();
-    socket.done.then((_) {
+    socket.done.then((_) async {
       _open = false;
 
-      if (_onClose != null) {
-        _onClose();
-      }
+      _closeController.add(null);
+      await _closeController.close();
     });
   }
 
-  Function _onClose;
+  StreamController _closeController = new StreamController.broadcast();
 
   Future<List<int>> readBytes([int timeout, onTimeout()]) {
     return timeout != null ? _input.first.timeout(new Duration(milliseconds: timeout)) : _input.first;
@@ -66,23 +65,25 @@ class BadgerSocket {
     }
   }
 
-  void handleBytes(handler(List<int> bytes)) {
-    _input.listen(handler);
+  HandlerSubscription handleBytes(handler(List<int> bytes)) {
+    return new HandlerSubscription(_input.listen(handler));
   }
 
-  void handleClose(handler()) {
-    _onClose = handler;
+  HandlerSubscription handleClose(handler()) {
+    return new HandlerSubscription(_closeController.stream.listen((x) {
+      handler();
+    }));
   }
 
-  void handleString(handler(String string)) {
+  HandlerSubscription handleString(handler(String string)) {
     if (_utf == null) {
       _utf = _input.transform(UTF8.decoder).asBroadcastStream();
     }
 
-    _utf.listen(handler);
+    return new HandlerSubscription(_utf.listen(handler));
   }
 
-  void handleLine(handler(String line)) {
+  HandlerSubscription handleLine(handler(String line)) {
     if (_utf == null) {
       _utf = _input.transform(UTF8.decoder).asBroadcastStream();
     }
@@ -91,7 +92,7 @@ class BadgerSocket {
       _lines = _utf.transform(new LineSplitter()).asBroadcastStream();
     }
 
-    _lines.listen(handler);
+    return new HandlerSubscription(_lines.listen(handler));
   }
 
   void writeString(String str) {

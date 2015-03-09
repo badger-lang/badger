@@ -14,8 +14,8 @@ class BadgerHttpServer {
     return new BadgerHttpServer(await HttpServer.bind(host, port));
   }
 
-  void handleRequest(handler(BadgerHttpServerRequest request)) {
-    _requests.listen(handler);
+  HandlerSubscription handleRequest(handler(BadgerHttpServerRequest request)) {
+    return new HandlerSubscription(_requests.listen(handler));
   }
 
   Future<BadgerHttpServerRequest> wait([int timeout, onTimeout()]) async {

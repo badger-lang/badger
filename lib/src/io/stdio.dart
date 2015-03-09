@@ -135,19 +135,19 @@ class BadgerStdin {
   bool get lineMode => stdin.lineMode;
   set lineMode(bool line) => stdin.lineMode = line;
 
-  void handleBytes(handler(List<int> bytes)) {
-    _stream.listen(handler);
+  HandlerSubscription handleBytes(handler(List<int> bytes)) {
+    return new HandlerSubscription(_stream.listen(handler));
   }
 
-  void handleString(handler(String str)) {
+  HandlerSubscription handleString(handler(String str)) {
     if (_utf == null) {
       _utf = _stream.transform(UTF8.decoder);
     }
 
-    _utf.listen(handler);
+    return new HandlerSubscription(_utf.listen(handler));
   }
 
-  void handleLine(handler(String line)) {
+  HandlerSubscription handleLine(handler(String line)) {
     if (_utf == null) {
       _utf = _stream.transform(UTF8.decoder);
     }
@@ -156,6 +156,6 @@ class BadgerStdin {
       _lines = _stream.transform(new LineSplitter());
     }
 
-    _lines.listen(handler);
+    return new HandlerSubscription(_lines.listen(handler));
   }
 }
