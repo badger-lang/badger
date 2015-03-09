@@ -339,6 +339,10 @@ class Context extends BadgerObject {
     ctx.namespaces.keys.where((it) => !it.startsWith("_")).forEach((x) {
       namespaces[x] = ctx.namespaces[x];
     });
+
+    ctx.types.keys.where((it) => !it.startsWith("_")).forEach((x) {
+      types[x] = ctx.types[x];
+    });
   }
 
   Context fork() {
