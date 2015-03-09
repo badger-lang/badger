@@ -84,11 +84,19 @@ class Evaluator {
               break;
             }
           } else {
+            if (value is ReturnValue) {
+              value = value.value;
+            }
+
+            if (value is Immutable) {
+              value = value.value;
+            }
+
             retval = value;
           }
         }
       } else if (statement is Expression) {
-        return await _resolveValue(statement);
+        retval = await _resolveValue(statement);
       } else {
         throw new Exception("Invalid Block Statement");
       }

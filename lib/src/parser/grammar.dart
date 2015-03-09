@@ -199,10 +199,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(methodCall) |
       ref(access) |
       ref(nullLiteral) |
       ref(nativeCode) |
-      ref(methodCall) |
       ref(rangeLiteral) |
       ref(mapDefinition) |
       ref(hexadecimalLiteral) |

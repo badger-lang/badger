@@ -1,0 +1,9 @@
+import "badger:io"
+
+let channel = Channel()
+
+channel.handle((item) -> {
+  print(item)
+})
+
+channel.add("Hello World")
