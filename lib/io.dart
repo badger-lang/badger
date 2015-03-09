@@ -16,3 +16,5 @@ part "src/io/socket.dart";
 part "src/io/http.dart";
 part "src/io/fs.dart";
 part "src/io/server.dart";
+part "src/io/process.dart";
+part "src/io/stdio.dart";

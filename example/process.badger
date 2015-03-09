@@ -1,0 +1,4 @@
+import "badger:io"
+
+let result = Process.run("echo", ["Hello World"])
+print(result.stdout)
