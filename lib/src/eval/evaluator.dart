@@ -22,7 +22,17 @@ class Evaluator {
   evaluateProgram(Program program, Context ctx) async {
     return ctx.run(() async {
       await _processDeclarations(program.declarations, ctx);
-      return await _evaluateBlock(program.statements);
+      var result = await _evaluateBlock(program.statements);
+
+      if (result is ReturnValue) {
+        result = result.value;
+      }
+
+      if (result is Immutable) {
+        result = result.value;
+      }
+
+      return result;
     });
   }
 
@@ -73,6 +83,8 @@ class Evaluator {
               retval = _BREAK_NOW;
               break;
             }
+          } else {
+            retval = value;
           }
         }
       } else if (statement is Expression) {
@@ -336,8 +348,7 @@ class Evaluator {
         return await _resolveValue(expr.whenFalse);
       }
     } else if (expr is MapDefinition) {
-      var map = {
-      };
+      var map = {};
       for (var e in expr.entries) {
         var key = await _resolveValue(e.key);
         var value = await _resolveValue(e.value);
@@ -392,6 +403,8 @@ class Evaluator {
         return (await a()) >= (await b());
       case "==":
         return (await a()) == (await b());
+      case "!=":
+        return (await a()) != (await b());
       case "&":
         return (await a()) & (await b());
       case "in":

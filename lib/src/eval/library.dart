@@ -18,6 +18,16 @@ class CoreLibrary {
     context.proxy("async", async);
     context.proxy("waitForLoop", waitForLoop);
     context.proxy("later", later);
+    context.proxy("void", VOID);
+    context.proxy("eval", eval);
+  }
+
+  static dynamic eval(String content) async {
+    var parser = new BadgerParser();
+    var program = parser.parse(content).value;
+    var env = new ImportMapEnvironment({});
+    var evaluator = new Evaluator(program, env);
+    return await evaluator.evaluate(Context.current);
   }
 
   /**

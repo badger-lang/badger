@@ -7,14 +7,34 @@ print("Connected")
 socket.writeLine("NICK BadgerBot")
 socket.writeLine("USER BadgerBot 8 * :Badger Bot")
 
-func handleCommand(cmd, args, reply) {
+func sendMessage(target, message) {
+  socket.writeLine("PRIVMSG $(target) :$(message)")
+}
+
+func join(channel) {
+  socket.writeLine("JOIN $(channel)")
+}
+
+func part(channel) {
+  socket.writeLine("PART $(channel)")
+}
+
+func handleCommand(cmd, args, channel) {
   switch cmd {
     case "hello" {
-      reply("Hello World")
+      sendMessage(channel, "Hello World")
     }
 
     case "goodbye" {
-      reply("Goodbye World")
+      sendMessage(channel, "Goodbye World")
+    }
+
+    case "eval" {
+      let value = eval(args.join(" "))
+
+      if value != void {
+        sendMessage(channel, value)
+      }
     }
   }
 }
@@ -28,7 +48,7 @@ socket.handleLine((line) -> {
   }
 
   if split[1] == "001" {
-    socket.writeLine("JOIN :#directcode")
+    join("#directcode")
   }
 
   if split[1] == "PRIVMSG" {
@@ -44,11 +64,7 @@ socket.handleLine((line) -> {
       let f = s[0]
       cmd = f.substring(1)
 
-      func reply(m) {
-        socket.writeLine("PRIVMSG $(channel) :$(m)")
-      }
-
-      handleCommand(cmd, cargs, reply)
+      handleCommand(cmd, cargs, channel)
     }
   }
 
