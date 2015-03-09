@@ -135,7 +135,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     char("}");
 
-  functionDefinition() => ref(FUNC) & whitespace().plus() &
+  functionDefinition() => ref(FUNC).optional() & whitespace().star() &
     ref(identifier) &
     char("(") &
     ref(identifier).separatedBy(

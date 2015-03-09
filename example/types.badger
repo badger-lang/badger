@@ -1,5 +1,5 @@
 type Animal(name) {
-  func describe() {
+  describe() {
     return "Animal($(name))"
   }
 }

@@ -59,7 +59,7 @@ class Evaluator {
   }
 
   _import(String location, Context ctx) async {
-    var c = await ctx.createContext(() async {
+    var c = await ctx.createChild(() async {
       await environment.import(location, this, Context.current);
       return Context.current;
     });
@@ -147,7 +147,7 @@ class Evaluator {
         }
       }
     } else if (statement is NamespaceBlock) {
-      var ctx = await Context.current.createContext(() async {
+      var ctx = await Context.current.createChild(() async {
         await _evaluateBlock(statement.block.statements);
         return Context.current;
       });
@@ -157,6 +157,7 @@ class Evaluator {
       var creator = (args) async {
         var map = {};
         var i = 0;
+
         for (var n in statement.args) {
           if (i < statement.args.length) {
             map[n] = args[i];
@@ -168,7 +169,7 @@ class Evaluator {
           Context.current.setVariable(n, map[n]);
         }
 
-        return await Context.current.createContext(() async {
+        return await Context.current.createChild(() async {
           Context.current.typeName = statement.name;
           await _evaluateBlock(statement.block.statements);
           return Context.current;
@@ -182,7 +183,7 @@ class Evaluator {
       var value = await _resolveValue(statement.condition);
       var c = BadgerUtils.asBoolean(value);
 
-      var v = await Context.current.createContext(() async {
+      var v = await Context.current.createChild(() async {
         if (c) {
           return await _evaluateBlock(statement.block.statements, allowBreak);
         } else {
@@ -195,7 +196,7 @@ class Evaluator {
       return v;
     } else if (statement is WhileStatement) {
       while (BadgerUtils.asBoolean(await _resolveValue(statement.condition))) {
-        var value = await Context.current.createContext(() async {
+        var value = await Context.current.createChild(() async {
           return await _evaluateBlock(statement.block.statements, true);
         });
 
@@ -210,7 +211,7 @@ class Evaluator {
       var n = await _resolveValue(statement.value);
 
       call(value) async {
-        return Context.current.createContext(() async {
+        return Context.current.createChild(() async {
           Context.current.setVariable(i, value);
           return await _evaluateBlock(statement.block.statements, allowBreak);
         });
@@ -248,7 +249,7 @@ class Evaluator {
           i++;
         }
 
-        return ctx.createContext(() async {
+        return ctx.createChild(() async {
           var cmt = Context.current;
 
           for (var n in inputs.keys) {
@@ -323,7 +324,7 @@ class Evaluator {
           i++;
         }
 
-        return await Context.current.createContext(() async {
+        return await Context.current.createChild(() async {
           var c = Context.current;
 
           for (var n in inputs.keys) {

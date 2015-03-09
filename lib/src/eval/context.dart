@@ -470,7 +470,7 @@ class Context extends BadgerObject {
     setVariable(name, value);
   }
 
-  dynamic createContext(void handler()) {
+  dynamic createChild(void handler()) {
     var ctx = fork();
     return Zone.current.fork(zoneValues: {
       "context": ctx
