@@ -31,6 +31,21 @@ class BooleanLiteral extends Expression {
   BooleanLiteral(this.value);
 }
 
+class NamespaceBlock extends Statement {
+  final String name;
+  final Block block;
+
+  NamespaceBlock(this.name, this.block);
+}
+
+class TypeBlock extends Statement {
+  final String name;
+  final List<String> args;
+  final Block block;
+
+  TypeBlock(this.name, this.args, this.block);
+}
+
 class FunctionDefinition extends Statement {
   final String name;
   final List<String> args;

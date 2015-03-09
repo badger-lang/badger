@@ -21,6 +21,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(returnStatement) |
       ref(ifStatement) |
       ref(switchStatement) |
+      ref(namespace) |
+      ref(type) |
       ref(expression)
     ) & char(";").optional()
   ).pick(0);
@@ -230,6 +232,27 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(ELSE) &
     ref(block)
   ).optional();
+
+  namespace() => ref(token, "namespace") &
+    whitespace().plus() &
+    ref(identifier) &
+    whitespace().star() &
+    ref(block);
+
+  type() => ref(token, "type") &
+    whitespace().plus() &
+    ref(identifier) &
+    (
+      char("(") &
+      ref(identifier).separatedBy(
+        whitespace().star() &
+        char(",") &
+        whitespace().star()
+      ).optional() &
+      char(")")
+    ).pick(1).optional() &
+    whitespace().star() &
+    ref(block);
 
   switchStatement() => ref(SWITCH) &
     whitespace().plus() &

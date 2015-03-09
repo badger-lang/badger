@@ -21,7 +21,17 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   simpleMethodCall() => super.simpleMethodCall().map((it) {
-    return new MethodCall(it[0], it[2]);
+    return new MethodCall(it[0], it[2] == null ? [] : it[2]);
+  });
+
+  @override
+  type() => super.type().map((it) {
+    return new TypeBlock(it[2], it[3] == null ? [] : it[3].where((it) => it is String).toList(), it[5]);
+  });
+
+  @override
+  namespace() => super.namespace().map((it) {
+    return new NamespaceBlock(it[2], it[4]);
   });
 
   @override

@@ -146,6 +146,38 @@ class Evaluator {
           break;
         }
       }
+    } else if (statement is NamespaceBlock) {
+      var ctx = await Context.current.createContext(() async {
+        await _evaluateBlock(statement.block.statements);
+        return Context.current;
+      });
+
+      Context.current.defineNamespace(statement.name, ctx);
+    } else if (statement is TypeBlock) {
+      var creator = (args) async {
+        var map = {};
+        var i = 0;
+        for (var n in statement.args) {
+          if (i < statement.args.length) {
+            map[n] = args[i];
+          }
+          i++;
+        }
+
+        for (var n in map.keys) {
+          Context.current.setVariable(n, map[n]);
+        }
+
+        return await Context.current.createContext(() async {
+          Context.current.typeName = statement.name;
+          await _evaluateBlock(statement.block.statements);
+          return Context.current;
+        });
+      };
+
+      Context.current.defineType(statement.name, creator);
+
+      return creator;
     } else if (statement is IfStatement) {
       var value = await _resolveValue(statement.condition);
       var c = BadgerUtils.asBoolean(value);
@@ -273,7 +305,7 @@ class Evaluator {
     } else if (expr is HexadecimalLiteral) {
       return expr.value;
     } else if (expr is VariableReference) {
-      return Context.current.getVariable(expr.identifier);
+      return Context.current.getProperty(expr.identifier);
     } else if (expr is Parentheses) {
       return await _resolveValue(expr.expression);
     } else if (expr is AnonymousFunction) {

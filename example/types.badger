@@ -1,0 +1,8 @@
+type Animal(name) {
+  func describe() {
+    return "Animal($(name))"
+  }
+}
+
+let cow = Animal("Cow")
+print(cow.describe())

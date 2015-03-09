@@ -154,6 +154,19 @@ class BadgerUtils {
       return obj[name];
     }
 
+    if (obj is Context) {
+      var prop = obj.getProperty(name);
+
+      if (prop is Function) {
+        var n = prop;
+        prop = new Interceptor((x) {
+          return n(x);
+        });
+      }
+
+      return prop;
+    }
+
     if (obj is Iterable) {
       if (name == "where") {
         return (x) async {
@@ -231,15 +244,20 @@ class BadgerUtils {
   }
 }
 
+typedef TypeCreator(List<dynamic> args);
 
 class Context extends BadgerObject {
   final Context parent;
 
   Context([this.parent]);
 
+  String typeName;
+
   Map<String, BadgerFunction> functions = {};
   Map<String, dynamic> variables = {};
   Map<String, dynamic> meta = {};
+  Map<String, dynamic> namespaces = {};
+  Map<String, TypeCreator> types = {};
 
   dynamic getMetadata(String name) {
     return meta[name];
@@ -251,6 +269,14 @@ class Context extends BadgerObject {
 
   void setMetadata(String name, dynamic value) {
     meta[name] = value;
+  }
+
+  void defineNamespace(String name, Context context) {
+    namespaces[name] = context;
+  }
+
+  void defineType(String name, TypeCreator creator) {
+    types[name] = creator;
   }
 
   dynamic getVariable(String name) {
@@ -309,6 +335,10 @@ class Context extends BadgerObject {
     ctx.functions.keys.where((it) => !it.startsWith("_")).forEach((x) {
       functions[x] = ctx.functions[x];
     });
+
+    ctx.namespaces.keys.where((it) => !it.startsWith("_")).forEach((x) {
+      namespaces[x] = ctx.namespaces[x];
+    });
   }
 
   Context fork() {
@@ -330,6 +360,12 @@ class Context extends BadgerObject {
   dynamic invoke(String name, List<dynamic> args) {
     if (functions.containsKey(name)) {
       return functions[name](args);
+    } else if (hasType(name)) {
+      if (types.containsKey(name)) {
+        return types[name](args);
+      } else {
+        return parent.invoke(name, args);
+      }
     } else if (variables.containsKey(name) && variables[name] is Function) {
       return variables[name](args);
     } else if (variables.containsKey(name) && variables[name] is Type) {
@@ -356,6 +392,14 @@ class Context extends BadgerObject {
 
   bool hasVariable(String name) {
     return variables.containsKey(name) || (parent != null && parent.hasVariable(name));
+  }
+
+  bool hasNamespace(String name) {
+    return namespaces.containsKey(name) || (parent != null && parent.hasNamespace(name));
+  }
+
+  bool hasType(String name) {
+    return types.containsKey(name) || (parent != null && parent.hasType(name));
   }
 
   dynamic setVariable(String name, dynamic value, [bool checkExists = false]) {
@@ -392,12 +436,26 @@ class Context extends BadgerObject {
 
   static Context get current => Zone.current["context"];
 
+  Context getNamespace(String name) {
+    if (hasNamespace(name)) {
+      if (namespaces.containsKey(name)) {
+        return namespaces[name];
+      } else {
+        return parent.getNamespace(name);
+      }
+    } else {
+      throw new Exception("Undefined Namespace: ${name}");
+    }
+  }
+
   @override
   dynamic getProperty(String name) {
     if (hasVariable(name)) {
       return getVariable(name);
     } else if (hasFunction(name)) {
       return getFunction(name);
+    } else if (hasNamespace(name)) {
+      return getNamespace(name);
     } else {
       throw new Exception("Failed to get property ${name} on context.");
     }
@@ -415,5 +473,14 @@ class Context extends BadgerObject {
     }).run(() {
       return handler();
     });
+  }
+
+  @override
+  String toString() {
+    if (typeName != null) {
+      return "Instance of '${typeName}'";
+    } else {
+      return super.toString();
+    }
   }
 }

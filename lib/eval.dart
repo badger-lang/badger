@@ -2,6 +2,7 @@ library badger.eval;
 
 import "dart:async";
 import "dart:convert";
+import "dart:collection";
 import "dart:mirrors";
 
 import "package:badger/parser.dart";

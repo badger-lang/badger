@@ -1,0 +1,10 @@
+namespace Test {
+  func hi() {
+    print("Hello World")
+  }
+
+  print("Test Namespace Defined")
+}
+
+print("Defined Namespace")
+Test.hi()
