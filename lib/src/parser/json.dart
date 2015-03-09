@@ -145,6 +145,20 @@ class BadgerJsonBuilder {
         "value": _generateExpression(statement.value),
         "block": _generateStatements(statement.block.statements)
       };
+    } else if (statement is NamespaceBlock) {
+      return {
+        "type": "namespace",
+        "name": statement.name,
+        "block": _generateStatements(statement.block.statements)
+      };
+    } else if (statement is TypeBlock) {
+      return {
+        "type": "type",
+        "name": statement.name,
+        "args": statement.args,
+        "extension": statement.extension,
+        "block": _generateStatements(statement.block.statements)
+      };
     } else if (statement is ReturnStatement) {
       return {
         "type": "return",
@@ -355,7 +369,8 @@ class BadgerTinyAst {
     "parentheses": "%",
     "isNullable": "(",
     "location": ")",
-    "parts": "?"
+    "parts": "?",
+    "extension": "_"
   };
 
   static String demap(String key) {
@@ -448,6 +463,15 @@ class BadgerJsonParser {
         _buildExpression(it["value"]),
         new Block(it["block"].map(_buildStatement).toList())
       );
+    } else if (type == "type") {
+      return new TypeBlock(
+        it["name"],
+        it["args"],
+        it["extension"],
+        new Block(it["block"].map(_buildStatement).toList())
+      );
+    } else if (type == "namespace") {
+      return new NamespaceBlock(it["name"], new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "return") {
       return new ReturnStatement(
         it["value"] == null ? null : _buildExpression(it["value"])

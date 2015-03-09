@@ -10,7 +10,7 @@ class BadgerHttpServer {
     });
   }
 
-  static Future<BadgerHttpServer> listen(host, int port) async {
+  static Future<BadgerHttpServer> bind(host, int port) async {
     return new BadgerHttpServer(await HttpServer.bind(host, port));
   }
 

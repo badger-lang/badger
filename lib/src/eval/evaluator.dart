@@ -177,6 +177,7 @@ class Evaluator {
           Context.current.typeName = statement.name;
           if (x != null) {
             Context.current.merge(x);
+            Context.current.setVariable("super", x);
           }
           await _evaluateBlock(statement.block.statements);
           return Context.current;
