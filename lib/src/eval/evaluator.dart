@@ -21,7 +21,7 @@ class Evaluator {
 
   evaluateProgram(Program program, Context ctx) async {
     return ctx.run(() async {
-      await _processDeclarations(program.declarations, ctx);
+      await _processDeclarations(program.declarations, ctx, program);
       var result = await _evaluateBlock(program.statements);
 
       if (result is ReturnValue) {
@@ -36,7 +36,7 @@ class Evaluator {
     });
   }
 
-  _processDeclarations(List<Declaration> declarations, Context ctx) async {
+  _processDeclarations(List<Declaration> declarations, Context ctx, Program program) async {
     for (var decl in declarations) {
       if (decl is FeatureDeclaration) {
         if (decl.feature.components.any((it) => it is! String)) {
@@ -51,16 +51,16 @@ class Evaluator {
 
         features.add(f);
       } else if (decl is ImportDeclaration) {
-        await _import(decl.location.components.join(), ctx);
+        await _import(decl.location.components.join(), ctx, program);
       } else {
         throw new Exception("Unable to Process Declaration");
       }
     }
   }
 
-  _import(String location, Context ctx) async {
+  _import(String location, Context ctx, Program source) async {
     var c = await ctx.createChild(() async {
-      await environment.import(location, this, Context.current);
+      await environment.import(location, this, Context.current, source);
       return Context.current;
     });
 

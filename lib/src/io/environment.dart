@@ -9,9 +9,13 @@ class FileEnvironment extends IOEnvironment {
   FileEnvironment(this.file);
 
   @override
-  Future import(String location, Evaluator evaluator, Context context) async {
+  Future import(String location, Evaluator evaluator, Context context, Program source) async {
     try {
       var uri = Uri.parse(location);
+
+      if (uri.scheme == null || uri.scheme.isEmpty) {
+        throw new FormatException();
+      }
 
       if (uri.scheme == "badger") {
         var name = uri.path;
@@ -31,6 +35,7 @@ class FileEnvironment extends IOEnvironment {
       } else if (uri.scheme == "file") {
         var file = new File(uri.toFilePath());
         var program = await parse(await file.readAsString());
+        program.meta["file.path"] = file.path;
         await evaluator.evaluateProgram(program, context);
         return;
       } else if (uri.scheme == "http" || uri.scheme == "https") {
@@ -53,18 +58,25 @@ class FileEnvironment extends IOEnvironment {
     } on FormatException catch (e) {
     }
 
-    var dir = file.parent;
+    String p;
+
+    if (source != null && source.meta.containsKey("file.path")) {
+      p = pathlib.dirname(source.meta["file.path"]);
+    } else {
+      p = pathlib.dirname(file.path);
+    }
 
     Program program;
 
     if (pathlib.isRelative(location)) {
-      var f = new File("${dir.path}/${location}");
+      var f = new File("${p}/${location}");
 
       if (!(await f.exists())) {
         throw new Exception("Tried to import file ${f.path}, but it does not exist.");
       }
 
       program = await parse(await f.readAsString());
+      program.meta["file.path"] = f.path;
     } else {
       var f = new File(location);
 
@@ -73,6 +85,7 @@ class FileEnvironment extends IOEnvironment {
       }
 
       program = await parse(await f.readAsString());
+      program.meta["file.path"] = f.path;
     }
 
     await evaluator.evaluateProgram(program, context);

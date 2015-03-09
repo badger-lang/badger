@@ -298,6 +298,11 @@ class Program {
   final List<dynamic> statements;
   final List<Declaration> declarations;
 
+  /**
+   * Metadata Storage for Environment
+   */
+  Map<String, dynamic> meta = {};
+
   Program(this.declarations, this.statements);
 
   @override
