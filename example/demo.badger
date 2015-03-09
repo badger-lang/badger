@@ -1,3 +1,6 @@
+type A {}
+type B extends A {}
+
 namespace Test {
   type Example {
     describe() {
@@ -12,12 +15,17 @@ type Example {
   }
 }
 
+type ExampleB extends Example {
+}
+
 example() {
   return "Example Function"
 }
 
 let a = Test.Example()
 let b = Example()
+let c = ExampleB()
 print(a.describe())
 print(b.describe())
 print(example())
+print(c.describe())

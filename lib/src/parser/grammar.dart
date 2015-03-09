@@ -251,6 +251,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ).optional() &
       char(")")
     ).pick(1).optional() &
+    whitespace().plus() &
+    (
+      ref(token, "extends") &
+      whitespace().plus() &
+      ref(identifier)
+    ).optional() &
     whitespace().star() &
     ref(block);
 

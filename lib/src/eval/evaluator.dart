@@ -169,8 +169,15 @@ class Evaluator {
           Context.current.setVariable(n, map[n]);
         }
 
+        var extensions = [];
+
+        var x = statement.extension != null ? await Context.current.getType(statement.extension)([]) : null;
+
         return await Context.current.createChild(() async {
           Context.current.typeName = statement.name;
+          if (x != null) {
+            Context.current.merge(x);
+          }
           await _evaluateBlock(statement.block.statements);
           return Context.current;
         });

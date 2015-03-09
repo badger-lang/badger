@@ -42,8 +42,9 @@ class TypeBlock extends Statement {
   final String name;
   final List<String> args;
   final Block block;
+  final String extension;
 
-  TypeBlock(this.name, this.args, this.block);
+  TypeBlock(this.name, this.args, this.extension, this.block);
 }
 
 class FunctionDefinition extends Statement {
