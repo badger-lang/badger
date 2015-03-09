@@ -1,34 +1,116 @@
 part of badger.eval;
 
+const _PRINT = print;
+
 class CoreLibrary {
+  /**
+   * Imports the Core Library into the specified [context].
+   */
   static void import(Context context) {
     context.proxy("print", print);
-    context.proxy("currentContext", () => Context.current);
-    context.proxy("newContext", () => new Context());
-    context.proxy("run", (func) => func([]));
-    context.proxy("NativeHelper", NativeHelper);
-    context.proxy("JSON", BadgerJSON);
-    context.proxy("make", (type, [args = const []]) {
-      return reflectClass(type).newInstance(MirrorSystem.getSymbol(""), args).reflectee;
+    context.proxy("getCurrentContext", getCurrentContext);
+    context.alias("getCurrentContext", "currentContext");
+    context.proxy("newContext", newContext);
+    context.proxy("run", run);
+    context.proxy("JSON", JSON);
+    context.proxy("make", make);
+    context.proxy("sleep", sleep);
+    context.proxy("async", async);
+    context.proxy("waitForLoop", waitForLoop);
+    context.proxy("later", later);
+  }
+
+  /**
+   * Gets the Current Context.
+   */
+  static Context getCurrentContext() => Context.current;
+
+  /**
+   * Gets the Current Context.
+   */
+  static Context currentContext() => getCurrentContext();
+
+  /**
+   * Creates a new empty context.
+   */
+  static Context newContext() => new Context();
+
+  /**
+   * Prints [line] to the console.
+   */
+  static void print(line) {
+    _PRINT(line);
+  }
+
+  /**
+   * Creates a new instance of the specified [type] with the specified [args].
+   */
+  static dynamic make(Type type, [List<dynamic> args = const []]) {
+    return reflectClass(type).newInstance(MirrorSystem.getSymbol(""), args).reflectee;
+  }
+
+  /**
+   * Runs the given [function] later given the milliseconds specified by [time].
+   */
+  static void later(function(), int time) {
+    new Future.delayed(new Duration(milliseconds: time)).then((_) {
+      function();
     });
+  }
+
+  /**
+   * Execute the given [function]
+   */
+  static dynamic run(function()) {
+    return function();
+  }
+
+  /**
+   * Badger JSON APIs
+   */
+  static final BadgerJSON JSON = new BadgerJSON();
+
+  /**
+   * Waits x amount of milliseconds specified by [time] to resume execution.
+   */
+  static Future sleep(int time) async {
+    await new Future.delayed(new Duration(milliseconds: time));
+  }
+
+  /**
+   * Schedules the given [function] to run in the next event loop.
+   *
+   * If [microtask] is specified, it will run in the microtask queue instead.
+   */
+  static void async(function(), [bool microtask = false]) {
+    if (microtask) {
+      scheduleMicrotask(function);
+    } else {
+      Timer.run(function);
+    }
+  }
+
+  /**
+   * Waits for the next event loop iteration.
+   *
+   * This is a semi-asynchronous operation.
+   */
+  static Future waitForLoop() async {
+    var completer = new Completer();
+    Timer.run(() {
+      completer.complete();
+    });
+    return completer.future;
   }
 }
 
 class BadgerJSON {
-  static dynamic parse(String input) {
+  dynamic parse(String input) {
     return JSON.decode(input);
   }
 
-  static String encode(input, [bool pretty = false]) {
+  String encode(input, [bool pretty = false]) {
     return pretty ? new JsonEncoder.withIndent("  ").convert(input) : JSON.encode(input);
-  }
-}
-
-class NativeHelper {
-  static LibraryMirror getLibrary(String name) {
-    var symbol = new Symbol(name);
-
-    return currentMirrorSystem().findLibrary(symbol);
   }
 }
 

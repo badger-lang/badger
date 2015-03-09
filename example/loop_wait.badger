@@ -1,0 +1,13 @@
+async(() -> {
+  print("Asynchronous Task")
+})
+
+waitForLoop()
+print("Loop Iteration Complete")
+
+later(() -> {
+  print("This runs 1 second later.")
+}, 1000)
+
+sleep(2000)
+print("This runs another second later.")

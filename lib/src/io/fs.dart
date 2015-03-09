@@ -38,7 +38,16 @@ class BadgerFile extends BadgerFileSystemEntity {
   }
 
   HandlerSubscription handleEvent(handler(FileSystemEvent event)) {
-    return new HandlerSubscription(_file.watch().listen(handler));
+    return new HandlerSubscription(_file.watch().map((it) {
+      var e = new BadgerFileSystemEvent(
+        it.type,
+        it.path,
+        dest: it is FileSystemMoveEvent ? it.destination : null,
+        contentChanged: it is FileSystemModifyEvent ? it.contentChanged : false
+      );
+
+      return e;
+    }).listen(handler));
   }
 
   Future<int> get length => _file.length();
@@ -79,7 +88,16 @@ class BadgerDirectory extends BadgerFileSystemEntity {
   static BadgerDirectory current() => new BadgerDirectory(Directory.current);
 
   HandlerSubscription handleEvent(handler(FileSystemEvent event)) {
-    return new HandlerSubscription(_dir.watch().listen(handler));
+    return new HandlerSubscription(_dir.watch().map((it) {
+      var e = new BadgerFileSystemEvent(
+        it.type,
+        it.path,
+        dest: it is FileSystemMoveEvent ? it.destination : null,
+        contentChanged: it is FileSystemModifyEvent ? it.contentChanged : false
+      );
+
+      return e;
+    }).listen(handler));
   }
 
   Future<bool> get exists => _dir.exists();
@@ -174,4 +192,46 @@ class HandlerSubscription {
   void pause([Future until]) => sub.pause(until);
   void resume() => sub.resume();
   bool get isPaused => sub.isPaused;
+}
+
+class BadgerFileSystemEvent {
+  final String path;
+  final String dest;
+  final bool contentChanged;
+  final int type;
+
+  BadgerFileSystemEvent(this.type, this.path, {this.dest, this.contentChanged});
+
+  BadgerFile getSourceFile() => BadgerFile.get(path);
+  BadgerFile getDestinationFile() => BadgerFile.get(dest);
+  BadgerDirectory getSourceDirectory() => BadgerDirectory.get(path);
+  BadgerDirectory getDestinationDirectory() => BadgerDirectory.get(dest);
+
+  bool get isDeleteEvent => type == FileSystemEvent.DELETE;
+  bool get isCreateEvent => type == FileSystemEvent.CREATE;
+  bool get isModifyEvent => type == FileSystemEvent.MODIFY;
+  bool get isMoveEvent => type == FileSystemEvent.MOVE;
+
+  @override
+  String toString() {
+    var type = "unknown";
+
+    if (isDeleteEvent) {
+      type = "delete";
+    } else if (isCreateEvent) {
+      type = "create";
+    } else if (isModifyEvent) {
+      type = "modify";
+    } else if (isMoveEvent) {
+      type = "move";
+    }
+
+    if (isModifyEvent) {
+      return "FileSystemEvent(type: ${type}, path: ${path}, content changed: ${contentChanged})";
+    } else if (isMoveEvent) {
+      return "FileSystemEvent(type: ${type}, path: ${path}, destination: ${dest})";
+    } else {
+      return "FileSystemEvent(type: ${type}, path: ${path})";
+    }
+  }
 }

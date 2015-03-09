@@ -5,3 +5,7 @@ let cwd = Directory.current()
 cwd.walk((file) -> {
   print(file.path)
 })
+
+cwd.handleEvent((event) -> {
+  print(event)
+})
