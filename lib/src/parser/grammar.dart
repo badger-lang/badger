@@ -3,10 +3,11 @@ part of badger.parser;
 class BadgerGrammarDefinition extends GrammarDefinition {
   @override
   start() => (
+    whitespace().star().optional() &
     ref(declarations).optional() &
-    whitespace().star() &
-    ref(statement).separatedBy(whitespace().plus() & char(";").optional() & whitespace().plus().optional()) &
-    whitespace().star()
+    whitespace().star().optional() &
+    ref(statement).separatedBy(whitespace().plus() & char(";").optional() & whitespace().plus().optional(), includeSeparators: false) &
+    whitespace().star().optional()
   ).end();
 
   statement() => (
@@ -129,8 +130,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     & ref(NEWLINE).optional();
 
   declarations() => ref(declaration).separatedBy(char("\n"));
-  declaration() => ref(featureDeclaration) |
-    ref(importDeclaration);
+  declaration() => ref(importDeclaration) | ref(featureDeclaration);
 
   featureDeclaration() => ref(USING_FEATURE) &
     whitespace().plus()

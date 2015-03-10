@@ -214,7 +214,7 @@ class Parentheses extends Expression {
   Parentheses(this.expression);
 }
 
-class HexadecimalLiteral extends Expression {
+class HexadecimalLiteral extends NumberLiteral<int> {
   final int value;
 
   String asHex() => "0x${value.toRadixString(16)}";

@@ -41,6 +41,30 @@ class BadgerSimplifier extends BadgerModifier {
         case "&":
           return NumberLiteral.create(left & right);
       }
+    } else if (operator.left is StringLiteral && operator.right is StringLiteral) {
+      var left = operator.left as StringLiteral;
+      var right = operator.right as StringLiteral;
+
+      switch (operator.op) {
+        case "+":
+          return new StringLiteral([]..addAll(left.components)..addAll(right.components));
+      }
+    } else if (operator.left is StringLiteral && operator.right is NumberLiteral) {
+      var left = operator.left as StringLiteral;
+      var right = operator.right as NumberLiteral;
+
+      switch (operator.op) {
+        case "+":
+          return new StringLiteral([]..addAll(left.components)..addAll(right.value.toString().split("")));
+      }
+    } else if (operator.left is StringLiteral && operator.right is BooleanLiteral) {
+      var left = operator.left as StringLiteral;
+      var right = operator.right as BooleanLiteral;
+
+      switch (operator.op) {
+        case "+":
+          return new StringLiteral([]..addAll(left.components)..addAll(right.value.toString().split("")));
+      }
     }
 
     return operator;

@@ -14,7 +14,7 @@ class BadgerModifier {
 
   Declaration modifyDeclaration(Declaration declaration) {
     if (declaration is ImportDeclaration) {
-      return modifyDeclaration(declaration);
+      return modifyImportDeclaration(declaration);
     } else {
       return declaration;
     }
@@ -51,6 +51,10 @@ class BadgerModifier {
     return new Assignment(ref, value, assignment.immutable, assignment.isInitialDefine, assignment.isNullable);
   }
 
+  Statement modifyMultiAssignment(MultiAssignment assignment) {
+    return assignment;
+  }
+
   Expression modifyAccess(Access access) {
     return access;
   }
@@ -60,6 +64,8 @@ class BadgerModifier {
       return modifyMethodCall(statement);
     } else if (statement is Assignment) {
       return modifyAssignment(statement);
+    } else if (statement is MultiAssignment) {
+      return modifyMultiAssignment(statement);
     } else {
       return statement;
     }
@@ -76,6 +82,12 @@ class BadgerModifier {
       return modifyStringLiteral(expression);
     } else if (expression is Operator) {
       return modifyOperator(expression);
+    } else if (expression is HexadecimalLiteral) {
+      return modifyHexadecimalLiteral(expression);
+    } else if (expression is RangeLiteral) {
+      return modifyRangeLiteral(expression);
+    } else if (expression is BooleanLiteral) {
+      return modifyBooleanLiteral(expression);
     } else {
       return expression;
     }
@@ -92,7 +104,23 @@ class BadgerModifier {
     return literal;
   }
 
+  Expression modifyRangeLiteral(RangeLiteral literal) {
+    return literal;
+  }
+
+  Expression modifyHexadecimalLiteral(HexadecimalLiteral literal) {
+    return literal;
+  }
+
   Expression modifyDoubleLiteral(DoubleLiteral literal) {
+    return literal;
+  }
+
+  Expression modifyParentheses(Parentheses parens) {
+    return parens;
+  }
+
+  Expression modifyBooleanLiteral(BooleanLiteral literal) {
     return literal;
   }
 

@@ -4,8 +4,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   @override
   start() => super.start().map((it) {
     return new Program(
-      it[0] == null ? [] : it[0].where((it) => it is Declaration).toList(),
-      it[2] == null ? [] : it[2].where((it) => it is Statement || it is Expression).toList()
+      it[1] == null ? [] : it[1].where((it) => it is Declaration).toList(),
+      it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).toList()
     );
   });
 

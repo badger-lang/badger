@@ -178,8 +178,9 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitImportDeclaration(ImportDeclaration declaration) {
-    buff.write("import ");
-    visitStringLiteral(declaration.location);
+    buff.write('import "');
+    buff.write(declaration.location.components.join());
+    buff.writeln('"');
   }
 
   @override
