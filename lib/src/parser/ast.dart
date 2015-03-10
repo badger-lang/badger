@@ -156,7 +156,21 @@ class NativeCode extends Expression {
   NativeCode(this.code);
 }
 
-class IntegerLiteral extends Expression {
+abstract class NumberLiteral<T> extends Expression {
+  static NumberLiteral create(num value) {
+    if (value is double) {
+      return new DoubleLiteral(value);
+    } else if (value is int) {
+      return new IntegerLiteral(value);
+    } else {
+      throw new Exception("Failed to create a numbe literal.");
+    }
+  }
+
+  T get value;
+}
+
+class IntegerLiteral extends NumberLiteral<int> {
   final int value;
 
   IntegerLiteral(this.value);
@@ -165,7 +179,7 @@ class IntegerLiteral extends Expression {
   String toString() => "IntegerLiteral(${value})";
 }
 
-class DoubleLiteral extends Expression {
+class DoubleLiteral extends NumberLiteral<double> {
   final double value;
 
   DoubleLiteral(this.value);

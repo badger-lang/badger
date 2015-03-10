@@ -11,3 +11,5 @@ part "src/parser/utils.dart";
 part "src/parser/printer.dart";
 part "src/parser/visitor.dart";
 part "src/parser/highlighter.dart";
+part "src/parser/simplifier.dart";
+part "src/parser/modifier.dart";

@@ -110,6 +110,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   greaterThanOperator() => ref(OPERATOR, ">");
   lessThanOrEqualOperator() => ref(OPERATOR, "<=");
   greaterThanOrEqualOperator() => ref(OPERATOR, ">=");
+  bitShiftLeft() => ref(OPERATOR, "<<");
+  bitShiftRight() => ref(OPERATOR, ">>");
   equalOperator() => ref(OPERATOR, "==");
   notEqualOperator() => ref(OPERATOR, "!=");
   inOperator() => ref(OPERATOR, "in");
@@ -203,6 +205,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(lessThanOrEqualOperator) |
     ref(equalOperator) |
     ref(notEqualOperator) |
+    ref(bitShiftLeft) |
+    ref(bitShiftRight) |
     ref(negate) |
     ref(expressionItem);
 
