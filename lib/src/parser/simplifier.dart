@@ -2,6 +2,36 @@ part of badger.parser;
 
 class BadgerSimplifier extends BadgerModifier {
   @override
+  modifyIfStatement(IfStatement statement) {
+    statement = super.modifyIfStatement(statement);
+
+    if (statement.condition is BooleanLiteral) {
+      var c = (statement.condition as BooleanLiteral).value;
+
+      if (c == false && statement.elseBlock == null) {
+        return null; // Get rid of this.
+      }
+    }
+
+    return statement;
+  }
+
+  @override
+  modifyWhileStatement(WhileStatement statement) {
+    statement = super.modifyWhileStatement(statement);
+
+    if (statement.condition is BooleanLiteral) {
+      var c = (statement.condition as BooleanLiteral).value;
+
+      if (c == false) {
+        return null; // Get rid of this.
+      }
+    }
+
+    return statement;
+  }
+
+  @override
   modifyOperator(Operator operator) {
     operator = super.modifyOperator(operator);
     if (operator.left is NumberLiteral && operator.right is NumberLiteral) {

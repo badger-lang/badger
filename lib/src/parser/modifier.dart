@@ -2,8 +2,11 @@ part of badger.parser;
 
 class BadgerModifier {
   Program modify(Program program) {
-    var declarations = program.declarations.map(modifyDeclaration).toList();
-    var statements = program.statements.map((it) => it is Statement ? modifyStatement(it) : modifyExpression(it)).toList();
+    var declarations = program.declarations.map(modifyDeclaration).where((it) => it != null).toList();
+    var statements = program.statements
+      .map((it) => it is Statement ? modifyStatement(it) : modifyExpression(it))
+      .where((it) => it != null)
+      .toList();
 
     return new Program(declarations, statements);
   }
@@ -66,9 +69,37 @@ class BadgerModifier {
       return modifyAssignment(statement);
     } else if (statement is MultiAssignment) {
       return modifyMultiAssignment(statement);
+    } else if (statement is FunctionDefinition) {
+      return modifyFunctionDefinition(statement);
+    } else if (statement is ForInStatement) {
+      return modifyForInStatement(statement);
+    } else if (statement is IfStatement) {
+      return modifyIfStatement(statement);
+    } else if (statement is WhileStatement) {
+      return modifyWhileStatement(statement);
     } else {
       return statement;
     }
+  }
+
+  Statement modifyForInStatement(ForInStatement statement) {
+    var expr = modifyExpression(statement.value);
+    var statements = statement.block.statements.map(modifyStatement).where((it) => it != null).toList();
+    return new ForInStatement(statement.identifier, expr, new Block(statements));
+  }
+
+  Statement modifyWhileStatement(WhileStatement statement) {
+    var expr = modifyExpression(statement.condition);
+    var statements = statement.block.statements.map(modifyStatement).where((it) => it != null).toList();
+    return new WhileStatement(expr, new Block(statements));
+  }
+
+  Statement modifyIfStatement(IfStatement statement) {
+    var expr = modifyExpression(statement.condition);
+    var ifStatements = statement.block.statements.map(modifyStatement).where((it) => it != null).toList();
+    var elseStatements = statement.elseBlock != null ? statement.elseBlock.statements.map(modifyStatement).where((it) => it != null).toList() : null;
+
+    return new IfStatement(expr, new Block(ifStatements), elseStatements != null ? new Block(elseStatements) : null);
   }
 
   Expression modifyExpression(Expression expression) {
@@ -88,6 +119,8 @@ class BadgerModifier {
       return modifyRangeLiteral(expression);
     } else if (expression is BooleanLiteral) {
       return modifyBooleanLiteral(expression);
+    } else if (expression is AnonymousFunction) {
+      return modifyAnonymousFunction(expression);
     } else {
       return expression;
     }
@@ -124,12 +157,27 @@ class BadgerModifier {
     return literal;
   }
 
+  Statement modifyFunctionDefinition(FunctionDefinition definition) {
+    var statements = definition.block.statements.map(modifyStatement).where((it) => it != null).toList();
+    return new FunctionDefinition(definition.name, definition.args, new Block(statements));
+  }
+
+  Expression modifyAnonymousFunction(AnonymousFunction function) {
+    var statements = function.block.statements.map(modifyStatement).where((it) => it != null).toList();
+
+    return new AnonymousFunction(function.args, new Block(statements));
+  }
+
   Expression modifyStringLiteral(StringLiteral literal) {
     var c = [];
 
     for (var part in literal.components) {
       if (part is Expression) {
-        c.add(modifyExpression(part));
+        var r = modifyExpression(part);
+
+        if (r != null) {
+          c.add(modifyExpression(part));
+        }
       } else {
         c.add(part);
       }

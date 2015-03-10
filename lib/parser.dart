@@ -1,7 +1,6 @@
 library badger.parser;
 
 import "package:petitparser/petitparser.dart";
-import "package:badger/compiler.dart";
 
 part "src/parser/grammar.dart";
 part "src/parser/parser.dart";

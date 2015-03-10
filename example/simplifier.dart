@@ -19,6 +19,12 @@ void main() {
   print(5 & 5)
   print("Hello" + " " + "World")
   print("Boolean: " + true)
+
+  if false {
+    print("Hello World")
+  }
+
+  while false {}
   """).value;
 
   var simplifier = new BadgerSimplifier();

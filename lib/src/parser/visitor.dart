@@ -143,6 +143,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitDefined(expression);
     } else if (expression is Parentheses) {
       visitParentheses(expression);
+    } else if (expression is NullLiteral) {
+      visitNullLiteral(expression);
     } else {
       throw new Exception("Unknown Expression Type: ${expression}");
     }
