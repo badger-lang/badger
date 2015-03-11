@@ -100,6 +100,10 @@ class BadgerWebSocket {
     return WebSocket.connect(url, protocols: protocols, headers: headers).then((x) => new BadgerWebSocket(x));
   }
 
+  static Future<BadgerWebSocket> upgrade(BadgerHttpServerRequest request) {
+    return WebSocketTransformer.upgrade(request.request).then((socket) => new BadgerWebSocket(socket));
+  }
+
   void send(dynamic value) {
     _socket.add(value);
   }

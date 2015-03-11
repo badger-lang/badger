@@ -288,8 +288,9 @@ class FeatureDeclaration extends Declaration {
 
 class ImportDeclaration extends Declaration {
   final StringLiteral location;
+  final String id;
 
-  ImportDeclaration(this.location);
+  ImportDeclaration(this.location, this.id);
 
   @override
   String toString() => "ImportDeclaration(${location})";

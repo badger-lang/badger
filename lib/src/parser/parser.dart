@@ -111,7 +111,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   importDeclaration() => super.importDeclaration().map((it) {
-    return new ImportDeclaration(it[2]);
+    return new ImportDeclaration(it[2], it[3] != null ? it[3][3] : null);
   });
 
   @override

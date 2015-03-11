@@ -1,4 +1,4 @@
-import "a.badger"
+import "a.badger" as a
 
-a()
-b()
+a.a()
+a.b()

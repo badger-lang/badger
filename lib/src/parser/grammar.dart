@@ -139,7 +139,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   importDeclaration() => ref(IMPORT) &
     whitespace().star() &
-    ref(stringLiteral);
+    ref(stringLiteral) & (
+      whitespace().plus() &
+      string("as") &
+      whitespace().plus() &
+      ref(identifier)
+  ).optional();
 
   bracketAccess() => ref(variableReference) &
     char("[") &

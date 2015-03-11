@@ -404,7 +404,7 @@ class JsAstVisitor extends AstVisitor {
 
   @override
   void visitMultiAssignment(MultiAssignment assignment) {
-    throw new Exception("Mult Assignment is not implemented yet.");
+    throw new Exception("Multi Assignment is not implemented yet.");
   }
 
   @override

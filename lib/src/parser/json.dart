@@ -86,7 +86,8 @@ class BadgerJsonBuilder {
   Map _generateImportDeclaration(ImportDeclaration decl) {
     return {
       "type": "import declaration",
-      "location": _generateStringLiteralComponents(decl.location.components)
+      "location": _generateStringLiteralComponents(decl.location.components),
+      "identifier": decl.id
     };
   }
 
@@ -452,7 +453,7 @@ class BadgerJsonParser {
     if (type == "feature declaration") {
       return new FeatureDeclaration(_buildStringLiteral(it["feature"]));
     } else if (type == "import declaration") {
-      return new ImportDeclaration(_buildStringLiteral(it["location"]));
+      return new ImportDeclaration(_buildStringLiteral(it["location"]), it["identifier"]);
     } else {
       throw new Exception("Invalid Declaration");
     }

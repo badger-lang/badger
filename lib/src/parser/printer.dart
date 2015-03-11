@@ -183,6 +183,12 @@ class BadgerAstPrinter extends AstVisitor {
     buff.write('import "');
     buff.write(declaration.location.components.join());
     buff.writeln('"');
+
+    if (declaration.id != null) {
+      buff.write(" ");
+      buff.write("as ");
+      buff.write(declaration.id);
+    }
   }
 
   @override

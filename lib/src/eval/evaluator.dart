@@ -51,20 +51,24 @@ class Evaluator {
 
         features.add(f);
       } else if (decl is ImportDeclaration) {
-        await _import(decl.location.components.join(), ctx, program);
+        await _import(decl.location.components.join(), decl.id, ctx, program);
       } else {
         throw new Exception("Unable to Process Declaration");
       }
     }
   }
 
-  _import(String location, Context ctx, Program source) async {
+  _import(String location, String id, Context ctx, Program source) async {
     var c = await ctx.createChild(() async {
       await environment.import(location, this, Context.current, source);
       return Context.current;
     });
 
-    ctx.merge(c);
+    if (id == null) {
+      ctx.merge(c);
+    } else {
+      ctx.setVariable(id, c);
+    }
   }
 
   _evaluateBlock(List<dynamic> statements, [bool allowBreak = false]) async {
@@ -496,10 +500,11 @@ class Evaluator {
         return (await a()) & (await b());
       case "in":
         var m = await b();
+        var c = await a();
         if (m is Map) {
-          return m.containsKey(await a());
+          return m.containsKey(c);
         } else {
-          return m.contains(await a());
+          return m.contains(c);
         }
         break;
       case "|":
