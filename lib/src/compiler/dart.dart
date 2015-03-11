@@ -343,7 +343,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitMultiAssignment(MultiAssignment assignment) {
-    // TODO: implement visitMultiAssignment
+
   }
 
   @override
@@ -354,5 +354,15 @@ class DartAstVisitor extends AstVisitor {
   @override
   void visitTypeBlock(TypeBlock block) {
     // TODO: implement visitTypeBlock
+  }
+
+  @override
+  void visitReferenceCreation(ReferenceCreation creation) {
+    // TODO: implement visitReferenceCreation
+  }
+
+  @override
+  void visitTryCatchStatement(TryCatchStatement statement) {
+    // TODO: implement visitTryCatchStatement
   }
 }

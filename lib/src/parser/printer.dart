@@ -37,9 +37,11 @@ class BadgerAstPrinter extends AstVisitor {
       visitStatement(function.block.statements.first);
     } else {
       buff.write("(${function.args.join(", ")}) -> {");
+      buff.writeln();
       buff.increment();
       visitStatements(function.block.statements);
       buff.decrement();
+      buff.writeln();
       buff.write("}");
     }
   }
@@ -421,6 +423,33 @@ class BadgerAstPrinter extends AstVisitor {
       buff.writeln();
       buff.writeIndent();
     }
+    buff.write("}");
+  }
+
+  @override
+  void visitReferenceCreation(ReferenceCreation creation) {
+    buff.write("&");
+    visitVariableReference(creation.variable);
+  }
+
+  @override
+  void visitTryCatchStatement(TryCatchStatement statement) {
+    buff.writeln("try {");
+    buff.increment();
+    visitStatements(statement.tryBlock.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
+    buff.write("}");
+
+    buff.write(" catch (");
+    buff.write(statement.identifier);
+    buff.writeln(") {");
+    buff.increment();
+    visitStatements(statement.catchBlock.statements);
+    buff.decrement();
+    buff.writeln();
+    buff.writeIndent();
     buff.write("}");
   }
 }

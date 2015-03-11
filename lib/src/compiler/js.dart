@@ -416,6 +416,16 @@ class JsAstVisitor extends AstVisitor {
   void visitTypeBlock(TypeBlock block) {
     throw new Exception("Types are not implemented yet.");
   }
+
+  @override
+  void visitReferenceCreation(ReferenceCreation creation) {
+    // TODO: implement visitReferenceCreation
+  }
+
+  @override
+  void visitTryCatchStatement(TryCatchStatement statement) {
+    // TODO: implement visitTryCatchStatement
+  }
 }
 
 class JsCompilerTarget extends CompilerTarget<String> {

@@ -33,6 +33,7 @@ abstract class AstVisitorBase {
   void visitHexadecimalLiteral(HexadecimalLiteral literal);
   void visitOperator(Operator operator);
   void visitDefined(Defined defined);
+  void visitReferenceCreation(ReferenceCreation creation);
   void visitAccess(Access access);
   void visitParentheses(Parentheses parens);
   void visitNativeCode(NativeCode code);
@@ -40,6 +41,7 @@ abstract class AstVisitorBase {
   void visitTernaryOperator(TernaryOperator operator);
   void visitAnonymousFunction(AnonymousFunction function);
   void visitSwitchStatement(SwitchStatement statement);
+  void visitTryCatchStatement(TryCatchStatement statement);
 }
 
 abstract class AstVisitor extends AstVisitorBase {
@@ -96,6 +98,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitAssignment(statement);
     } else if (statement is MethodCall) {
       visitMethodCall(statement);
+    } else if (statement is TryCatchStatement) {
+      visitTryCatchStatement(statement);
     } else if (statement is TypeBlock) {
       visitTypeBlock(statement);
     } else {
@@ -127,6 +131,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitAccess(expression);
     } else if (expression is ListDefinition) {
       visitListDefinition(expression);
+    } else if (expression is ReferenceCreation) {
+      visitReferenceCreation(expression);
     } else if (expression is MapDefinition) {
       visitMapDefinition(expression);
     } else if (expression is VariableReference) {
