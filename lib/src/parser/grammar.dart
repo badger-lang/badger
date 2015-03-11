@@ -146,6 +146,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expressionItem) &
     char("]");
 
+  reference() => char("&") & ref(variableReference);
+
   tryCatchStatement() => string("try") &
     whitespace().star() &
     ref(block) &
@@ -231,6 +233,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(reference) |
       ref(anonymousFunction) |
       ref(simpleAnonymousFunction) |
       ref(methodCall) |

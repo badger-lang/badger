@@ -229,6 +229,11 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  reference() => super.reference().map((it) {
+    return new ReferenceCreation(it[1]);
+  });
+
+  @override
   tryCatchStatement() => super.tryCatchStatement().map((it) {
     return new TryCatchStatement(it[2], it[7], it[10]);
   });

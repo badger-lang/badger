@@ -19,6 +19,21 @@ class _Unspecified {
   const _Unspecified();
 }
 
+class Reference {
+  final Context _ctx;
+  final String _name;
+
+  Reference(this._ctx, this._name);
+
+  void set(value) {
+    _ctx.setVariable(_name, value);
+  }
+
+  dynamic get() {
+    return _ctx.getVariable(_name);
+  }
+}
+
 class MergeSorter {
   Future<List> sort(List input, [compare]) async {
     if (input.length <= 1) return new List.from(input);
@@ -277,6 +292,10 @@ class Context extends BadgerObject {
 
   void defineType(String name, TypeCreator creator) {
     types[name] = creator;
+  }
+
+  Reference getReference(String name) {
+    return new Reference(this, name);
   }
 
   dynamic getVariable(String name) {

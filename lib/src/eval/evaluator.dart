@@ -194,8 +194,6 @@ class Evaluator {
           Context.current.setVariable(n, map[n]);
         }
 
-        var extensions = [];
-
         var x = statement.extension != null ? await Context.current.getType(statement.extension)([]) : null;
 
         return await Context.current.createChild(() async {
@@ -403,6 +401,8 @@ class Evaluator {
       return Context.current.hasVariable(expr.identifier);
     } else if (expr is NativeCode) {
       throw new Exception("Native Code is not supported on the evaluator.");
+    } else if (expr is ReferenceCreation) {
+      return Context.current.getReference(expr.variable.identifier);
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 

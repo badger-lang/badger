@@ -286,6 +286,11 @@ class BadgerJsonBuilder {
         "whenTrue": _generateExpression(expression.whenTrue),
         "whenFalse": _generateExpression(expression.whenFalse)
       };
+    } else if (expression is ReferenceCreation) {
+      return {
+        "type": "reference",
+        "value": _generateExpression(expression.variable)
+      };
     } else if (expression is AnonymousFunction) {
       return {
         "type": "anonymous function",
@@ -388,7 +393,8 @@ class BadgerTinyAst {
     "parts": "?",
     "extension": "_",
     "multiple assignment": "~",
-    "catch": "`"
+    "catch": "`",
+    "try": ","
   };
 
   static String demap(String key) {
@@ -547,6 +553,8 @@ class BadgerJsonParser {
         _buildExpression(it["whenTrue"]),
         _buildExpression(it["whenFalse"])
       );
+    } else if (type == "reference") {
+      return new ReferenceCreation(_buildExpression(it["value"]));
     } else if (type == "parentheses") {
       return new Parentheses(_buildExpression(it["expression"]));
     } else if (type == "access") {

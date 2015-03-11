@@ -1,0 +1,6 @@
+var x = 0
+
+let reference = &x
+reference.set(5)
+
+print(x)

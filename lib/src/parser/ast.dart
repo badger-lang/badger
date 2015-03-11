@@ -55,6 +55,12 @@ class TryCatchStatement extends Statement {
   TryCatchStatement(this.tryBlock, this.identifier, this.catchBlock);
 }
 
+class ReferenceCreation extends Expression {
+  final VariableReference variable;
+
+  ReferenceCreation(this.variable);
+}
+
 class FunctionDefinition extends Statement {
   final String name;
   final List<String> args;
