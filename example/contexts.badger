@@ -1,5 +1,32 @@
-let x = 1
-
-for i in 0..5 {
-  print("$(i): $(x)")
+namespace Test {
+  let x = 5
 }
+
+
+type Animal {
+  speak() {
+    print("<Insert Animal Noise Here>")
+  }
+
+  isCow() {
+    return instanceType == Cow
+  }
+}
+
+type Cow extends Animal {
+  speak() {
+    print("MOOO")
+  }
+}
+
+print("Contexts are like scopes, except that the developer has full control over them.")
+print("This comes from the namespace 'Test': $(Test.x)")
+print("What if I want to inherit the 'Test' namespace context?")
+
+inheritContext(Test)
+print(x)
+
+let cow = Cow()
+
+cow.speak()
+print("From Animal, is the type a cow? $(cow.isCow())")

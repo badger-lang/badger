@@ -214,7 +214,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   @override
   anonymousFunction() => super.anonymousFunction().map((it) {
     var x = it[1] != null ? it[1].where((it) => it is String).toList() : [];
-    return new AnonymousFunction(x, it[4]);
+    return new AnonymousFunction(x, it[5]);
   });
 
   @override
@@ -229,8 +229,13 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  tryCatchStatement() => super.tryCatchStatement().map((it) {
+    return new TryCatchStatement(it[2], it[7], it[10]);
+  });
+
+  @override
   block() => super.block().map((it) {
-    return new Block(it[3] == null ? [] : it[3].where((it) => it is Statement).toList());
+    return new Block(it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).toList());
   });
 
   @override

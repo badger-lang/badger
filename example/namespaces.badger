@@ -6,5 +6,16 @@ namespace Test {
   print("Test Namespace Defined")
 }
 
+namespace IRC {
+  namespace Client {
+    type Utils {
+      sayHello() {
+        print("Hello World")
+      }
+    }
+  }
+}
+
 print("Defined Namespace")
 Test.hi()
+IRC.Client.Utils().sayHello()

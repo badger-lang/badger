@@ -153,7 +153,7 @@ class BadgerStdin {
     }
 
     if (_lines == null) {
-      _lines = _stream.transform(new LineSplitter());
+      _lines = _utf.transform(new LineSplitter());
     }
 
     return new HandlerSubscription(_lines.listen(handler));

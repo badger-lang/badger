@@ -21,6 +21,7 @@ class CoreLibrary {
     context.proxy("void", VOID);
     context.proxy("eval", eval);
     context.proxy("EventBus", EventBus);
+    context.proxy("inheritContext", inheritContext);
   }
 
   static dynamic eval(String content) async {
@@ -29,6 +30,10 @@ class CoreLibrary {
     var env = new ImportMapEnvironment({});
     var evaluator = new Evaluator(program, env);
     return await evaluator.evaluate(Context.current);
+  }
+
+  static void inheritContext(Context ctx) {
+    Context.current.inherit(ctx);
   }
 
   /**

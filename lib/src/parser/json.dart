@@ -173,6 +173,13 @@ class BadgerJsonBuilder {
         "isInitialDefine": statement.isInitialDefine,
         "value": _generateExpression(statement.value)
       };
+    } else if (statement is TryCatchStatement) {
+      return {
+        "type": "try",
+        "identifier": statement.identifier,
+        "block": _generateStatements(statement.tryBlock.statements),
+        "catch": _generateStatements(statement.catchBlock.statements)
+      };
     } else if (statement is BreakStatement) {
       return {
         "type": "break"
@@ -362,7 +369,7 @@ class BadgerTinyAst {
     "double literal": "-",
     "hexadecimal literal": "@",
     "ternary operator": ">",
-    "boolean literal": ">",
+    "boolean literal": "<",
     "range literal": ".",
     "list definition": "|",
     "map definition": "[",
@@ -380,7 +387,8 @@ class BadgerTinyAst {
     "location": ")",
     "parts": "?",
     "extension": "_",
-    "multiple assignment": "~"
+    "multiple assignment": "~",
+    "catch": "`"
   };
 
   static String demap(String key) {
@@ -487,6 +495,12 @@ class BadgerJsonParser {
     } else if (type == "return") {
       return new ReturnStatement(
         it["value"] == null ? null : _buildExpression(it["value"])
+      );
+    } else if (type == "try") {
+      return new TryCatchStatement(
+        new Block(it["block"].map(_buildStatement).toList()),
+        it["identifier"],
+        new Block(it["catch"].map(_buildStatement).toList())
       );
     } else if (type == "break") {
       return new BreakStatement();

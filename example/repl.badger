@@ -1,0 +1,17 @@
+import "badger:io"
+
+stdout.write("> ")
+
+stdin.handleLine((line) -> {
+  if line == ":exit" {
+    exit(0)
+  }
+
+  try {
+    eval(line)
+  } catch (e) {
+    print(e)
+  }
+
+  stdout.write("> ")
+})

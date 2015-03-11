@@ -178,7 +178,8 @@ class Evaluator {
 
       Context.current.defineNamespace(statement.name, ctx);
     } else if (statement is TypeBlock) {
-      var creator = (args) async {
+      var creator;
+      creator = (args) async {
         var map = {};
         var i = 0;
 
@@ -200,9 +201,11 @@ class Evaluator {
         return await Context.current.createChild(() async {
           Context.current.typeName = statement.name;
           if (x != null) {
+            x.setVariable("extender", Context.current);
             Context.current.merge(x);
             Context.current.setVariable("super", x);
           }
+          Context.current.setVariable("this", Context.current);
           await _evaluateBlock(statement.block.statements);
           return Context.current;
         });
@@ -226,6 +229,20 @@ class Evaluator {
       });
 
       return v;
+    } else if (statement is TryCatchStatement) {
+      var block = statement.tryBlock.statements;
+      var catchBlock = statement.catchBlock.statements;
+
+      try {
+        await Context.current.createChild(() async {
+          await _evaluateBlock(block);
+        });
+      } catch (e) {
+        await Context.current.createChild(() async {
+          Context.current.setVariable(statement.identifier, e);
+          await _evaluateBlock(catchBlock);
+        });
+      }
     } else if (statement is WhileStatement) {
       while (BadgerUtils.asBoolean(await _resolveValue(statement.condition))) {
         var value = await Context.current.createChild(() async {

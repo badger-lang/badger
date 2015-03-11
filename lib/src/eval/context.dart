@@ -141,7 +141,7 @@ class Nullable extends BadgerObject {
 }
 
 class BadgerUtils {
-  static dynamic getProperty(String name, obj) {
+  static dynamic getProperty(String name, obj, [bool isFromContext = false]) {
     if (obj is ReturnValue) {
       obj = obj.value;
     }
@@ -154,7 +154,7 @@ class BadgerUtils {
       return obj[name];
     }
 
-    if (obj is Context) {
+    if (obj is Context && !isFromContext) {
       var prop = obj.getProperty(name);
 
       if (prop is Function) {
@@ -452,6 +452,10 @@ class Context extends BadgerObject {
     }
   }
 
+  void inherit(Context context) {
+    merge(context);
+  }
+
   TypeCreator getType(String name) {
     if (hasType(name)) {
       if (types.containsKey(name)) {
@@ -474,6 +478,16 @@ class Context extends BadgerObject {
       return getNamespace(name);
     } else if (hasType(name)) {
       return getType(name);
+    } else if (["inherit", "merge"].contains(name)) {
+      var x = reflect(this).getField(new Symbol(name)).reflectee;
+
+      if (x is Function) {
+        return (args) {
+          return Function.apply(x, args);
+        };
+      }
+
+      return x;
     } else {
       throw new Exception("Failed to get property ${name} on context.");
     }

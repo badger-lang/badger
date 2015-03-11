@@ -47,6 +47,14 @@ class TypeBlock extends Statement {
   TypeBlock(this.name, this.args, this.extension, this.block);
 }
 
+class TryCatchStatement extends Statement {
+  final Block tryBlock;
+  final String identifier;
+  final Block catchBlock;
+
+  TryCatchStatement(this.tryBlock, this.identifier, this.catchBlock);
+}
+
 class FunctionDefinition extends Statement {
   final String name;
   final List<String> args;

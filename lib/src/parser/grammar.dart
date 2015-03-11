@@ -17,12 +17,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(accessAssignment) |
       ref(assignment) |
       ref(methodCall) |
+      ref(ifStatement) |
       ref(whileStatement) |
       ref(breakStatement) |
       ref(forInStatement) |
       ref(returnStatement) |
-      ref(ifStatement) |
       ref(switchStatement) |
+      ref(tryCatchStatement) |
       ref(namespace) |
       ref(type) |
       ref(expression)
@@ -145,6 +146,18 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expressionItem) &
     char("]");
 
+  tryCatchStatement() => string("try") &
+    whitespace().star() &
+    ref(block) &
+    whitespace().star() &
+    string("catch") &
+    whitespace().star() &
+    char("(") &
+    ref(identifier) &
+    char(")") &
+    whitespace().star() &
+    ref(block);
+
   block() => whitespace().star() &
     char("{") &
     whitespace().star() &
@@ -218,6 +231,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expressionItem() => (
     (
+      ref(anonymousFunction) |
+      ref(simpleAnonymousFunction) |
       ref(methodCall) |
       ref(access) |
       ref(nullLiteral) |
@@ -227,8 +242,6 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(hexadecimalLiteral) |
       ref(doubleLiteral) |
       ref(integerLiteral) |
-      ref(simpleAnonymousFunction) |
-      ref(anonymousFunction) |
       ref(emptyListDefinition) |
       ref(listDefinition) |
       ref(stringLiteral) |
@@ -323,6 +336,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
         whitespace().star()
       )
     ).optional() & whitespace().star() & string(") ->") &
+    whitespace().star() &
     ref(block);
 
   integerLiteral() => (

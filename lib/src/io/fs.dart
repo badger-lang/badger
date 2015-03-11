@@ -34,7 +34,7 @@ class BadgerFile extends BadgerFileSystemEntity {
     }
 
     var of = new BadgerOpenFile(this);
-    of._f = await _file.open();
+    of._f = await _file.open(mode: m);
     return of;
   }
 
