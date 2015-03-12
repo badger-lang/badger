@@ -36,7 +36,7 @@ main(List<String> args) async {
       }
     }
 
-    var context = new Context();
+    var context = new Context(env);
     CoreLibrary.import(context);
     IOLibrary.import(context);
     importTesting(context, "Evaluator");
@@ -46,7 +46,7 @@ main(List<String> args) async {
       await context.invoke("runTests", []);
     });
 
-    context = new Context();
+    context = new Context(env);
     CoreLibrary.import(context);
     IOLibrary.import(context);
     importTesting(context, "JSON AST Compiler");
