@@ -21,6 +21,7 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
   @override
   Future<String> compile(Program program) async {
     var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
+    var simplify = options.containsKey("simplify") && options["simplify"] == true;
     var out = {};
     var locations = [];
 
@@ -43,7 +44,7 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
       out[location] = m;
     }
 
-    out["_"] = JSON.decode(await new TinyAstCompilerTarget().compile(program));
+    out["_"] = JSON.decode((await (new TinyAstCompilerTarget()..options["simplify"] = simplify).compile(program)));
 
     return encoder.convert(out);
   }
