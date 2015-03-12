@@ -12,7 +12,7 @@ It can be compiled to multiple languages or can be interpreted by the reference 
 ## Example:
 
 ```badger
-func greet(name) {
+greet(name) {
   return "Hello $(name)"
 }
 
