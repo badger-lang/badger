@@ -385,7 +385,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   mapDefinition() => char("{") &
     whitespace().star() &
-    ref(mapEntry).separatedBy(char(",").trim(), includeSeparators: false).optional() &
+    ref(mapEntry).separatedBy((char(",") | whitespace().star()).trim(), includeSeparators: false).optional() &
     char(",").optional() &
     whitespace().star() &
     char("}");
@@ -396,7 +396,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   mapEntry() => ref(expressionItem) &
     whitespace().star() &
-    char(":") &
+    (char(":") | string("->")) &
     whitespace().star() &
     ref(expression);
 

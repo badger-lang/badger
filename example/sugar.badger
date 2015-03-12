@@ -1,0 +1,6 @@
+let {value, message} = {
+  "value" -> 5
+  "message" -> "Value"
+}
+
+print("$(message): $(value)")
