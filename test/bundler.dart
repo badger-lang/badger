@@ -19,7 +19,7 @@ main(List<String> args) async {
   bundle = bundle.replaceAll("{{content}}", snapshot);
 
   await f.writeAsString(bundle);
-  var result = await Process.run("dart2js", ["--output-type=dart", "--categories=Server", "-m", "-o", of.path, f.path]);
+  var result = await Process.run("dart2js", ["--output-type=dart", "--categories=Server", /*"-m",*/ "-o", of.path, f.path]);
 
   if (result.exitCode != 0) {
     print("Failed to build bundle: Compiler exited with code: ${result.exitCode}");

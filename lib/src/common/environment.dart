@@ -8,17 +8,26 @@ abstract class Environment {
 
 class ImportMapEnvironment extends Environment {
   final Map<String, Program> programs;
+  Environment _c;
 
-  ImportMapEnvironment(this.programs);
+  ImportMapEnvironment(this.programs, [this._c]);
 
   @override
   Future import(String location, Evaluator evaluator, Context context, Program source) async {
+    if (_c != null && !programs.containsKey(location)) {
+      return _c.import(location, evaluator, context, source);
+    }
+
     var program = programs[location];
     await evaluator.evaluateProgram(program, context);
   }
 
   @override
   Future<Program> resolveProgram(String location) async {
+    if (_c != null && !programs.containsKey(location)) {
+      return _c.resolveProgram(location);
+    }
+
     return programs[location];
   }
 
@@ -66,8 +75,8 @@ abstract class BaseEnvironment extends Environment {
       if (json.containsKey("_")) {
         var p = new BadgerSnapshotParser(json);
         var m = p.parse();
-        _e = new ImportMapEnvironment(m)..properties = properties;
-        return m["_"];
+        _e = new ImportMapEnvironment(m, this)..properties = properties;
+        return (_e as ImportMapEnvironment).programs["_"];
       }
 
       return new BadgerJsonParser().build(json);

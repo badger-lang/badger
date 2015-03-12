@@ -44,7 +44,9 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
       out[location] = m;
     }
 
-    out["_"] = JSON.decode((await (new TinyAstCompilerTarget()..options["simplify"] = simplify).compile(program)));
+    var a = await (new TinyAstCompilerTarget()..options["simplify"] = simplify).compile(program);
+
+    out["_"] = JSON.decode(a);
 
     return encoder.convert(out);
   }
