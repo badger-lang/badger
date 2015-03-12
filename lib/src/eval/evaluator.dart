@@ -13,9 +13,13 @@ class Evaluator {
   Evaluator(this.mainProgram, this.environment);
 
   evaluate(Context ctx) async {
-    if (!ctx.hasVariable("runtime")) {
-      ctx.setVariable("runtime", "badger");
-    }
+    var props = await environment.getProperties();
+
+    props.addAll({
+      "runtime.name": "badger",
+      "runtime.features": SUPPORTED_FEATURES
+    });
+
     return await evaluateProgram(mainProgram, ctx);
   }
 

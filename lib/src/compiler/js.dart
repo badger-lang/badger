@@ -306,7 +306,28 @@ class JsAstVisitor extends AstVisitor {
       visitExpression(access.reference);
     }
     buff.write(".");
-    buff.write(access.identifiers.join("."));
+    var i = 0;
+    for (var it in access.parts) {
+      if (it is MethodCall) {
+        buff.write(it.reference);
+        buff.write("(");
+        var x = 0;
+        for (var arg in it.args) {
+          visitExpression(arg);
+          if (x != it.args.length - 1) {
+            buff.write(", ");
+          }
+        }
+        buff.write(")");
+      } else {
+        buff.write(it);
+      }
+
+      if (i != access.parts.length - 1) {
+        buff.write(".");
+      }
+    }
+    i++;
   }
 
   void visitBracketAccess(BracketAccess access) {

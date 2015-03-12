@@ -1,0 +1,3 @@
+let runtimeName = Runtime.getProperty("runtime.name")
+
+print("This script is running on the '$(runtimeName)' runtime.")

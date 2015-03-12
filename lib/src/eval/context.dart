@@ -263,8 +263,9 @@ typedef TypeCreator(List<dynamic> args);
 
 class Context extends BadgerObject {
   final Context parent;
+  final Environment env;
 
-  Context([this.parent]);
+  Context(this.env, [this.parent]);
 
   String typeName;
 
@@ -365,7 +366,7 @@ class Context extends BadgerObject {
   }
 
   Context fork() {
-    return new Context(this);
+    return new Context(env, this);
   }
 
   bool hasFunction(String name) {

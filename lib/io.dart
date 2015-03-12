@@ -19,3 +19,4 @@ part "src/io/fs.dart";
 part "src/io/server.dart";
 part "src/io/process.dart";
 part "src/io/stdio.dart";
+part "src/io/utils.dart";

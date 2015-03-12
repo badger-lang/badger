@@ -9,8 +9,6 @@ import "package:badger/io.dart";
 import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
 
-Directory tmpDir;
-
 Directory getHomeDirectory([String child]) => new Directory(
   Platform.environment["HOME"] + (
     child != null ? "${Platform.pathSeparator}${child}" : ""
@@ -32,6 +30,9 @@ main(List<String> args) async {
         ..addAll(externalCompilers.map((it) => it.name).toList()),
       help: "Compiles Badger Code");
 
+  argp.addOption("define",
+    abbr: "D", help: "Specifies an Runtime Property", allowMultiple: true);
+
   argp.addOption("compiler-opt",
       abbr: "O", help: "Specifies a Compiler Option", allowMultiple: true);
 
@@ -43,28 +44,12 @@ main(List<String> args) async {
     exit(1);
   }
 
-  var context = new Context();
-  CoreLibrary.import(context);
-
-  if (opts["test"]) {
-    TestingLibrary.import(context);
-  }
-
-  var argz = opts.rest.skip(1).toList();
-  context.setVariable("args", argz);
-
   var p = opts.rest[0];
 
   if (p == "-") {
-    var buff = new StringBuffer();
-    stdin.lineMode = false;
-    await for (var data in stdin) {
-      buff.write(UTF8.decode(data));
-    }
-    stdin.lineMode = true;
-    tmpDir = await Directory.systemTemp.createTemp("badger");
-    var f = new File("${tmpDir.path}/script");
-    await f.writeAsString(buff.toString());
+    var data = await IOUtils.readStdin();
+    var f = await IOUtils.createTempFile("badger-stdin");
+    await f.writeAsString(data);
     p = f.path;
   }
 
@@ -77,16 +62,27 @@ main(List<String> args) async {
 
   var env = new FileEnvironment(file);
 
+  env.properties = parseDefinitionOptions(opts["define"]);
+
+  var context = new Context(env);
+  CoreLibrary.import(context);
+
+  if (opts["test"]) {
+    TestingLibrary.import(context);
+  }
+
+  var argz = opts.rest.skip(1).toList();
+  context.setVariable("args", argz);
+
   if (opts["compile"] != null) {
-    if (
-      externalCompilers
-        .any((it) => it.name == opts["compile"])) {
-      var c = externalCompilers
-        .firstWhere((it) => it.name == opts["compile"]);
+    var isExternal = externalCompilers.any((c) => c.name == opts["compile"]);
+
+    if (isExternal) {
+      var c = externalCompilers.firstWhere((it) => it.name == opts["compile"]);
       var f = file;
+
       if (c.shouldProvideAst) {
-        tmpDir = await Directory.systemTemp.createTemp("badger");
-        f = new File("${tmpDir.path}/ast.json");
+        f = await IOUtils.createTempFile("badger-ast");
         await f.writeAsString(JSON.encode(await env.generateJSON()));
       }
 
@@ -98,15 +94,11 @@ main(List<String> args) async {
       var cm = cmd[0];
       var args = cmd.skip(1).toList();
       try {
-        var proc = await Process.start(cm, args);
-        proc.stdout.listen((x) => stdout.add(x));
-        proc.stderr.listen((x) => stderr.add(x));
-        stdin.pipe(proc.stdin);
-        var code = await proc.exitCode;
-        await tmpDir.delete(recursive: true);
+        var code = await IOUtils.inheritIO(await Process.start(cm, args));
+        await IOUtils.deleteTemporaryFiles();
         exit(code);
       } catch (e) {
-        await tmpDir.delete(recursive: true);
+        await IOUtils.deleteTemporaryFiles();
         rethrow;
       }
     } else {
@@ -129,7 +121,7 @@ main(List<String> args) async {
       }
 
       target
-        ..options = parseCompilerOptions(opts["compiler-opt"])
+        ..options = parseDefinitionOptions(opts["compiler-opt"])
         ..options.putIfAbsent("isTestSuite", () => opts["test"]);
 
       var program = await env.parse();
@@ -147,9 +139,7 @@ main(List<String> args) async {
     });
   }
 
-  if (tmpDir != null) {
-    await tmpDir.delete(recursive: true);
-  }
+  await IOUtils.deleteTemporaryFiles();
 }
 
 loadExternalCompilers() async {
@@ -196,7 +186,7 @@ loadExternalCompilers() async {
   }
 }
 
-Map<String, dynamic> parseCompilerOptions(List<String> opts) {
+Map<String, dynamic> parseDefinitionOptions(List<String> opts) {
   var out = {};
 
   for (var part in opts) {

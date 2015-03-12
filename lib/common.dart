@@ -11,3 +11,4 @@ import "package:badger/eval.dart";
 
 part "src/common/environment.dart";
 part "src/common/collection.dart";
+part "src/common/utils.dart";

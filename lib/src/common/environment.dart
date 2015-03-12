@@ -3,6 +3,7 @@ part of badger.common;
 abstract class Environment {
   Future import(String location, Evaluator evaluator, Context context, Program source);
   Future<Program> resolveProgram(String location);
+  Future<Map<String, dynamic>> getProperties();
 }
 
 class ImportMapEnvironment extends Environment {
@@ -20,6 +21,11 @@ class ImportMapEnvironment extends Environment {
   Future<Program> resolveProgram(String location) async {
     return programs[location];
   }
+
+  @override
+  Future<Map<String, dynamic>> getProperties() async => properties;
+
+  Map<String, dynamic> properties = {};
 }
 
 abstract class BaseEnvironment extends Environment {
@@ -60,7 +66,7 @@ abstract class BaseEnvironment extends Environment {
       if (json.containsKey("_")) {
         var p = new BadgerSnapshotParser(json);
         var m = p.parse();
-        _e = new ImportMapEnvironment(m);
+        _e = new ImportMapEnvironment(m)..properties = properties;
         return m["_"];
       }
 
@@ -72,5 +78,10 @@ abstract class BaseEnvironment extends Environment {
 
     return _parser.parse(content).value;
   }
+
+  @override
+  Future<Map<String, dynamic>> getProperties() async => properties;
+
+  Map<String, dynamic> properties = {};
 }
 

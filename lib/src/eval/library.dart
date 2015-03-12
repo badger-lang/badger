@@ -25,6 +25,7 @@ class CoreLibrary {
     context.proxy("eval", eval);
     context.proxy("EventBus", EventBus);
     context.proxy("inheritContext", inheritContext);
+    context.proxy("Runtime", BadgerRuntime);
   }
 
   static dynamic eval(String content) async {
@@ -52,7 +53,7 @@ class CoreLibrary {
   /**
    * Creates a new empty context.
    */
-  static Context newContext() => new Context();
+  static Context newContext() => new Context(Context.current.env);
 
   /**
    * Prints [line] to the console.
@@ -140,6 +141,14 @@ class BadgerJSON {
   String encode(input, [bool pretty = false]) {
     return pretty ? new JsonEncoder.withIndent("  ").convert(input) : JSON.encode(input);
   }
+}
+
+class BadgerRuntime {
+  static Future<Map<String, dynamic>> getProperties() async => await Context.current.env.getProperties();
+  static Future<dynamic> getProperty(String name) async => (await getProperties())[name];
+  static Future<bool> hasProperty(String name) async => (await getProperties()).containsKey(name);
+  static Future setProperty(String name, dynamic value) async => (await getProperties())[name] = value;
+  static Future addProperties(Map<String, dynamic> map) async => (await getProperties())..addAll(map);
 }
 
 class BadgerMath {
