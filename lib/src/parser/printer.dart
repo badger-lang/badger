@@ -231,7 +231,7 @@ class BadgerAstPrinter extends AstVisitor {
       visitExpression(x.value);
 
       if (i != definition.entries.length - 1) {
-        buff.write(",");
+        buff.writeln(",");
       }
       i++;
     }
