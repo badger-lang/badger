@@ -1,0 +1,11 @@
+namespace Geometry {
+  getDiameter(radius) {
+    return 2 * Math.PI * radius
+  }
+
+  getCircumference(radius) {
+    return Math.PI * getDiameter(radius)
+  }
+}
+
+print(Geometry.getCircumference(50))

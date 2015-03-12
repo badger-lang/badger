@@ -2,7 +2,6 @@ namespace Test {
   let x = 5
 }
 
-
 type Animal {
   speak() {
     print("<Insert Animal Noise Here>")

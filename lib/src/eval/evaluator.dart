@@ -427,7 +427,7 @@ class Evaluator {
     } else if (expr is Negate) {
       return !(await _resolveValue(expr.expression));
     } else if (expr is RangeLiteral) {
-      var step = expr.step != null ? await _resolveValue(expr.step): 1;
+      var step = expr.step != null ? await _resolveValue(expr.step) : 1;
       return _createRange(await _resolveValue(expr.left), await _resolveValue(expr.right), inclusive: !expr.exclusive, step: step);
     } else if (expr is TernaryOperator) {
       var value = await _resolveValue(expr.condition);

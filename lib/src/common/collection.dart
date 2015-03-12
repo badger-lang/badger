@@ -95,8 +95,7 @@ abstract class DelegatingMap<K, V> implements Map<K, V> {
   Iterable<V> get values => delegate.values;
 }
 
-abstract class DelegatingList<E> extends DelegatingIterable<E>
-implements List<E> {
+abstract class DelegatingList<E> extends DelegatingIterable<E> implements List<E> {
   List<E> get delegate;
 
   E operator [](int index) => delegate[index];
@@ -163,8 +162,7 @@ implements List<E> {
   List<E> sublist(int start, [int end]) => delegate.sublist(start, end);
 }
 
-abstract class DelegatingQueue<E> extends DelegatingIterable<E>
-implements Queue<E> {
+abstract class DelegatingQueue<E> extends DelegatingIterable<E> implements Queue<E> {
   Queue<E> get delegate;
 
   void add(E value) => delegate.add(value);
@@ -188,8 +186,7 @@ implements Queue<E> {
   void retainWhere(bool test(E element)) => delegate.retainWhere(test);
 }
 
-abstract class DelegatingSet<E> extends DelegatingIterable<E>
-implements Set<E> {
+abstract class DelegatingSet<E> extends DelegatingIterable<E> implements Set<E> {
   Set<E> get delegate;
 
   bool add(E value) => delegate.add(value);

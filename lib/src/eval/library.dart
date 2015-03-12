@@ -8,6 +8,9 @@ class CoreLibrary {
    */
   static void import(Context context) {
     context.proxy("print", print);
+    context.proxy("π", Math.PI);
+    context.proxy("Math", BadgerMath);
+    context.proxy("Random", Math.Random);
     context.proxy("getCurrentContext", getCurrentContext);
     context.alias("getCurrentContext", "currentContext");
     context.proxy("newContext", newContext);
@@ -137,6 +140,30 @@ class BadgerJSON {
   String encode(input, [bool pretty = false]) {
     return pretty ? new JsonEncoder.withIndent("  ").convert(input) : JSON.encode(input);
   }
+}
+
+class BadgerMath {
+  static double get PI => Math.PI;
+  static double get E => Math.E;
+  static double get LN2 => Math.LN2;
+  static double get LN10 => Math.LN10;
+  static double get LOG2E => Math.LOG2E;
+  static double get LOG10E => Math.LOG10E;
+  static double get SQRT1_2 => Math.SQRT1_2;
+  static double get SQRT2 => Math.SQRT2;
+  static num min(num a, num b) => Math.min(a, b);
+  static num max(num a, num b) => Math.max(a, b);
+  static num pow(num x, num exponent) => Math.pow(x, exponent);
+  static double sin(num x) => Math.sin(x);
+  static double cos(num x) => Math.cos(x);
+  static double tan(num x) => Math.tan(x);
+  static double acos(num x) => Math.acos(x);
+  static double asin(num x) => Math.asin(x);
+  static double atan(num x) => Math.atan(x);
+  static double atan2(num a, num b) => Math.atan2(a, b);
+  static double sqrt(num x) => Math.sqrt(x);
+  static double exp(num x) => Math.exp(x);
+  static double log(num x) => Math.log(x);
 }
 
 enum TestResultType {

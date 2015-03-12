@@ -1,6 +1,9 @@
-var x = 0
+var _currentFd = 0
 
-let reference = &x
-reference.set(5)
+getfd(fd) {
+  fd.set(_currentFd + 1)
+  _currentFd = _currentFd + 1
+}
 
-print(x)
+var x
+getfd(&x)
