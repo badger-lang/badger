@@ -240,7 +240,6 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     (
       ref(reference) |
       ref(anonymousFunction) |
-      ref(simpleAnonymousFunction) |
       ref(methodCall) |
       ref(access) |
       ref(nullLiteral) |
