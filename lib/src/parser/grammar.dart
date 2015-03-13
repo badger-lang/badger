@@ -127,7 +127,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   NEWLINE() => pattern('\n\r');
 
   singleLineComment() => string('//')
-    & ref(NEWLINE).neg().star()
+    & any().starLazy(ref(NEWLINE))
     & ref(NEWLINE).optional();
 
   declarations() => ref(declaration).separatedBy(char("\n"));
@@ -347,7 +347,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(block);
 
   integerLiteral() => (
-    anyIn(["-", "+"]).optional() &
+    pattern("-+").optional() &
     digit().plus()
   ).flatten();
 
@@ -369,7 +369,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   );
 
   doubleLiteral() => (
-    anyIn(["-", "+"]).optional() &
+    pattern("-+").optional() &
     digit().plus() &
     char(".") &
     digit().plus()
@@ -390,7 +390,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     char("}");
 
   nativeCode() => string("```") &
-    pattern("^```").star().flatten() &
+    any().starLazy(string("```")).flatten() &
     string("```");
 
   mapEntry() => ref(expressionItem) &
@@ -417,12 +417,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     pattern(_decodeTable.keys.join())
   ).flatten();
 
-  identifier() => (
-    pattern("A-Za-z_") | anyIn([
-      "\$",
-      "\u03A0", // Pi
-    ])
-  ).plus();
+  identifier() => pattern("A-Za-z_\$\u03A0").plus();
 
   BREAK() => ref(token, "break");
   CASE() => ref(token, "case");
