@@ -75,7 +75,12 @@ abstract class AstVisitor extends AstVisitorBase {
   }
 
   @override
-  void visitStatement(Statement statement) {
+  void visitStatement(statement) {
+    if (statement is Expression) {
+      visitExpression(statement);
+      return;
+    }
+
     if (statement is IfStatement) {
       visitIfStatement(statement);
     } else if (statement is WhileStatement) {
