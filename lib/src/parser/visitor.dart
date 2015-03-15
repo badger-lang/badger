@@ -107,6 +107,8 @@ abstract class AstVisitor extends AstVisitorBase {
       visitTryCatchStatement(statement);
     } else if (statement is TypeBlock) {
       visitTypeBlock(statement);
+    } else if (statement is VariableReference) {
+      visitVariableReference(statement);
     } else {
       throw new Exception("Unknown Statement Type: ${statement}");
     }
