@@ -6,6 +6,7 @@ class JsAstVisitor extends AstVisitor {
 
   JsAstVisitor(this.buff);
 
+  @override
   void visitForInStatement(ForInStatement statement) {
     useBreaker = true;
     buff.write('λfor(function(${statement.identifier}, λ){λlet(λ, "${statement.identifier}", ${statement.identifier});');
@@ -24,12 +25,17 @@ class JsAstVisitor extends AstVisitor {
     useBreaker = false;
   }
 
+  @override
   void visitImportDeclaration(ImportDeclaration declaration) {
+    throw new Exception("Imports are not implemented yet.");
   }
 
+  @override
   void visitFeatureDeclaration(FeatureDeclaration declaration) {
+    throw new Exception("Feature Declarations are not implemented yet.");
   }
 
+  @override
   void visitIfStatement(IfStatement statement) {
     if (
       (statement.condition is BooleanLiteral && (statement.condition as BooleanLiteral).value == false) ||
@@ -64,6 +70,7 @@ class JsAstVisitor extends AstVisitor {
     buff.write(")");
   }
 
+  @override
   void visitWhileStatement(WhileStatement statement) {
     if (
       (statement.condition is BooleanLiteral && (statement.condition as BooleanLiteral).value == false) ||
@@ -89,11 +96,13 @@ class JsAstVisitor extends AstVisitor {
     useBreaker = false;
   }
 
+  @override
   void visitReturnStatement(ReturnStatement statement) {
     this.buff.write("return ");
     this.visitExpression(statement.expression);
   }
 
+  @override
   void visitBreakStatement(BreakStatement statement) {
     if (useBreaker) {
       buff.write("throw λbreaker;");
@@ -102,6 +111,7 @@ class JsAstVisitor extends AstVisitor {
     }
   }
 
+  @override
   void visitAssignment(Assignment assignment) {
     if (assignment.immutable) {
       buff.write('λlet(λ,"${assignment.reference}",');
@@ -126,6 +136,7 @@ class JsAstVisitor extends AstVisitor {
     }
   }
 
+  @override
   void visitMethodCall(MethodCall call) {
     buff.write("λ.");
     if (call.reference is String) {
@@ -146,6 +157,7 @@ class JsAstVisitor extends AstVisitor {
     buff.write(")");
   }
 
+  @override
   void visitStringLiteral(StringLiteral literal) {
     if (literal.components.every((c) => c is Expression)) {
       var i = 0;
@@ -200,14 +212,17 @@ class JsAstVisitor extends AstVisitor {
     }
   }
 
+  @override
   void visitIntegerLiteral(IntegerLiteral literal) {
     this.buff.write(literal.value.toString());
   }
 
+  @override
   void visitDoubleLiteral(DoubleLiteral literal) {
     buff.write(literal.value);
   }
 
+  @override
   void visitRangeLiteral(RangeLiteral literal) {
     buff.write("λrange(");
     visitExpression(literal.left);
@@ -216,11 +231,13 @@ class JsAstVisitor extends AstVisitor {
     buff.write(")");
   }
 
+  @override
   void visitVariableReference(VariableReference reference, [bool isAccess = false]) {
     buff.write("λ.");
     buff.write("${reference.identifier}");
   }
 
+  @override
   void visitListDefinition(ListDefinition definition) {
     this.buff.write("[");
 
@@ -235,6 +252,7 @@ class JsAstVisitor extends AstVisitor {
     this.buff.write("]");
   }
 
+  @override
   void visitMapDefinition(MapDefinition definition) {
     buff.write("{");
     var i = 0;
@@ -252,20 +270,24 @@ class JsAstVisitor extends AstVisitor {
     buff.write("}");
   }
 
+  @override
   void visitNegate(Negate negate) {
     buff.write("!(");
     visitExpression(negate.expression);
     buff.write(")");
   }
 
+  @override
   void visitBooleanLiteral(BooleanLiteral literal) {
     buff.write(literal.value);
   }
 
+  @override
   void visitHexadecimalLiteral(HexadecimalLiteral literal) {
     buff.write(literal.asHex());
   }
 
+  @override
   void visitOperator(Operator operator) {
     if (operator.op == "in") {
       throw new Exception("Compiler does not yet support the in operator.");
@@ -299,6 +321,7 @@ class JsAstVisitor extends AstVisitor {
     }
   }
 
+  @override
   void visitAccess(Access access) {
     if (access.reference is VariableReference) {
       visitVariableReference(access.reference, true);
@@ -330,6 +353,7 @@ class JsAstVisitor extends AstVisitor {
     i++;
   }
 
+  @override
   void visitBracketAccess(BracketAccess access) {
     visitExpression(access.reference);
     buff.write("[");
@@ -337,6 +361,7 @@ class JsAstVisitor extends AstVisitor {
     buff.write("]");
   }
 
+  @override
   void visitTernaryOperator(TernaryOperator operator) {
     if (operator.condition is BooleanLiteral) {
       if ((operator.condition as BooleanLiteral).value) {
@@ -355,8 +380,9 @@ class JsAstVisitor extends AstVisitor {
     visitExpression(operator.whenFalse);
   }
 
+  @override
   void visitFunctionDefinition(FunctionDefinition function) {
-    this.buff.write("λ.${function.name} = function(");
+    this.buff.write('λ["${function.name}"] = function(');
 
     if (function.args != null) {
       this.buff.write(function.args.join(","));
@@ -372,6 +398,7 @@ class JsAstVisitor extends AstVisitor {
     this.buff.write("}");
   }
 
+  @override
   void visitAnonymousFunction(AnonymousFunction function) {
     this.buff.write("function(");
 
@@ -425,27 +452,42 @@ class JsAstVisitor extends AstVisitor {
 
   @override
   void visitMultiAssignment(MultiAssignment assignment) {
-    throw new Exception("Multi Assignment is not implemented yet.");
+    throw new Exception("Multi-Assignment is not implemented yet.");
   }
 
   @override
   void visitNamespaceBlock(NamespaceBlock block) {
-    throw new Exception("Namespaces are not implemented yet.");
+    buff.write('λnamespace(λ, "${block.name}", function(λ) {');
+    visitStatements(block.block.statements);
+    buff.write("})");
   }
 
   @override
   void visitTypeBlock(TypeBlock block) {
-    throw new Exception("Types are not implemented yet.");
+    buff.write('λtype(λ, "${block.name}", function(λ');
+    if (block.args != null && block.args.isNotEmpty) {
+      buff.write(",");
+      this.buff.write(block.args.join(","));
+    }
+
+    var m = ((block.args == null ? [] : block.args) as List).map((it) => '"${it}": ${it}').join(",");
+    buff.write("){  λload(λ, {${m}});");
+    visitStatements(block.block.statements);
+    buff.write("return λ;})");
   }
 
   @override
   void visitReferenceCreation(ReferenceCreation creation) {
-    // TODO: implement visitReferenceCreation
+    buff.write('λref(λ, "${creation.variable.identifier}")');
   }
 
   @override
   void visitTryCatchStatement(TryCatchStatement statement) {
-    // TODO: implement visitTryCatchStatement
+    buff.write("λtry(λ, function(λ) {");
+    visitStatements(statement.tryBlock.statements);
+    buff.write("}, function(λ) {");
+    visitStatements(statement.catchBlock.statements);
+    buff.write('}, "${statement.identifier}")');
   }
 }
 
@@ -515,6 +557,18 @@ class JsCompilerTarget extends CompilerTarget<String> {
       }
     """);
 
+    addHelper("λtry", """
+      function(λ, a, b, c) {
+        try {
+          a(Object.create(λ));
+        } catch (e) {
+          var l = Object.create(λ);
+          l[c] = e;
+          b(l);
+        }
+      }
+    """);
+
     addHelper("λrange", """
       function(l, u) {
         var m = [];
@@ -550,6 +604,37 @@ class JsCompilerTarget extends CompilerTarget<String> {
         Object.keys(m).forEach(function(k) {
           λ[k] = m[k];
         });
+      }
+    """);
+
+    addHelper("λref", """
+      function(λ, i) {
+        return {
+          "get": function() {
+            return λ[i];
+          },
+          "set": function(v) {
+            A[i] = v;
+          }
+        }
+      }
+    """);
+
+    addHelper("λnamespace", """
+      function(λ, n, b) {
+        var c = Object.create(λ);
+        b(c);
+        λ[n] = c;
+      }
+    """);
+
+    addHelper("λtype", """
+      function(λ, n, f) {
+        λ[n] = function() {
+          var args = Array.prototype.slice.call(arguments);
+          args.unshift(Object.create(λ));
+          return f.apply(null, args);
+        };
       }
     """);
 

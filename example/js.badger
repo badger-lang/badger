@@ -1,9 +1,13 @@
-func greet(name) {
-  return "Hello $(name)"
+type Test {
+  print("Test Created")
+
+  greet() {
+    print("Hello World")
+  }
 }
 
-let names = ["Kenneth", "Logan", "Sam", "Mike"]
-
-for name in names {
-  window.alert(name)
+type TestB(a, b) {
+  print("$(a): $(b)")
 }
+
+TestB(1, 2)
