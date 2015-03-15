@@ -8,9 +8,10 @@ class Evaluator {
 
   final Program mainProgram;
   final Environment environment;
+  final bool simplify;
   final Set<String> features = new Set<String>();
 
-  Evaluator(this.mainProgram, this.environment);
+  Evaluator(this.mainProgram, this.environment, {this.simplify: true});
 
   evaluate(Context ctx) async {
     var props = await environment.getProperties();
@@ -24,6 +25,10 @@ class Evaluator {
   }
 
   evaluateProgram(Program program, Context ctx) async {
+    if (simplify) {
+      program = new BadgerSimplifier().modify(program);
+    }
+
     return ctx.run(() async {
       await _processDeclarations(program.declarations, ctx, program);
       var result = await _evaluateBlock(program.statements);
