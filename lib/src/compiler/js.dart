@@ -739,7 +739,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     if (isTestSuite) {
       buff.write(";");
-      visitor.visitStatement(new MethodCall("runTests", []));
+      visitor.visitStatement(new ExpressionStatement(new MethodCall("runTests", [])));
     }
 
     return minify(generatePrelude() + buff.toString() + generatePostlude()).replaceAll(new RegExp(r"(\λ\.)+(\λ)"), "λ");
