@@ -8,6 +8,7 @@ import "package:args/args.dart";
 import "package:badger/io.dart";
 import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
+import "package:crypto/crypto.dart";
 
 Directory getHomeDirectory([String child]) => new Directory(
   Platform.environment["HOME"] + (
@@ -15,8 +16,16 @@ Directory getHomeDirectory([String child]) => new Directory(
   )
 );
 
+CacheManager cache;
+
+File getHomeFile(String path) => new File(Platform.environment["HOME"] + "${Platform.pathSeparator}${path}");
+
 main(List<String> args) async {
+  await loadPreferences();
   await loadExternalCompilers();
+
+  cache = new CacheManager();
+  await cache.init();
 
   var argp = new ArgParser();
   argp.addFlag("test",
@@ -53,7 +62,7 @@ main(List<String> args) async {
     p = f.path;
   }
 
-  var file = new File(p);
+  var file = await cache.getFromCache(new File(p));
 
   if (!await file.exists()) {
     print("ERROR: Unable to find script file '${file.path}'");
@@ -73,6 +82,10 @@ main(List<String> args) async {
 
   var argz = opts.rest.skip(1).toList();
   context.setVariable("args", argz);
+
+  if (prefs.enableCache) {
+    await cache.storeInCache(await env.readScriptContent(), JSON.encode(await env.generateJSON()));
+  }
 
   if (opts["compile"] != null) {
     var isExternal = externalCompilers.any((c) => c.name == opts["compile"]);
@@ -222,4 +235,79 @@ class ExternalCompiler {
   String name;
   String command;
   bool shouldProvideAst;
+}
+
+Preferences prefs;
+
+loadPreferences() async {
+  var file = getHomeFile(".badger/preferences.json");
+
+  if (!(await file.exists())) {
+    await file.create(recursive: true);
+    await file.writeAsString(new JsonEncoder.withIndent("  ").convert({
+      "enable_cache": false
+    }));
+  }
+
+  var content = await file.readAsString();
+  var json = JSON.decode(content);
+
+  prefs = new Preferences();
+  if (json.containsKey("enable_cache")) {
+    prefs.enableCache = json["enable_cache"];
+  }
+}
+
+class CacheManager {
+  Directory dir;
+
+  CacheManager() {
+    dir = getHomeDirectory(".badger/cache");
+  }
+
+  init() async {
+    if (!(await dir.exists())) {
+      await dir.create(recursive: true);
+    }
+  }
+
+  isInCache(String hash) async {
+    var f = new File("${dir.path}/${hash}");
+    return await f.exists();
+  }
+
+  getFromCache(File file) async {
+    if (!prefs.enableCache) {
+      return file;
+    }
+
+    var content = await file.readAsString();
+    var hash = createHash(content);
+
+    if (await isInCache(hash)) {
+      print("Using Cache");
+      return await new File("${dir.path}/${hash}");
+    } else {
+      return file;
+    }
+  }
+
+  storeInCache(String content, String c) async {
+    if (!prefs.enableCache) {
+      return;
+    }
+
+    var hash = createHash(content);
+    await new File("${dir.path}/${hash}").writeAsString(c);
+  }
+}
+
+String createHash(String c) {
+  var h = new SHA256();
+  h.add(c.codeUnits);
+  return CryptoUtils.bytesToHex(h.close());
+}
+
+class Preferences {
+  bool enableCache = false;
 }

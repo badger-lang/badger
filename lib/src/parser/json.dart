@@ -93,7 +93,10 @@ class BadgerJsonBuilder {
 
   Map _generateStatement(Statement statement) {
     if (statement is ExpressionStatement) {
-      return _generateExpression(statement.expression);
+      return {
+        "type": "expression statement",
+        "expression": _generateExpression(statement.expression)
+      };
     } else if (statement is Assignment) {
       return {
         "type": "assignment",
@@ -391,7 +394,8 @@ class BadgerTinyAst {
     "extension": "_",
     "multiple assignment": "~",
     "catch": "`",
-    "try": ","
+    "try": ",",
+    "expression statement": "ß"
   };
 
   static String demap(String key) {
@@ -509,8 +513,10 @@ class BadgerJsonParser {
       return new BreakStatement();
     } else if (type == "switch") {
       return new SwitchStatement(_buildExpression(it["expression"]), it["cases"].map(_buildStatement).toList());
+    } else if (type == "expression statement") {
+      return new ExpressionStatement(_buildExpression(it["expression"]));
     } else {
-      return _buildExpression(it);
+      throw new Exception("Unknown Statement Type: ${type}");
     }
   }
 

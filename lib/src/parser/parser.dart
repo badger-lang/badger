@@ -248,7 +248,15 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   block() => super.block().map((it) {
-    return new Block(it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).toList());
+    List statements = it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).map((it) {
+      if (it is Expression) {
+        return new ExpressionStatement(it);
+      } else {
+        return it;
+      }
+    }).toList();
+
+    return new Block(statements);
   });
 
   @override
