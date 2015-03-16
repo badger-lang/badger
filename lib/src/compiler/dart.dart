@@ -83,7 +83,6 @@ class DartAstVisitor extends AstVisitor {
 
   List<String> ctxids = [];
   String currentContext;
-  Map<String, String> _namespaces = {};
 
   DartAstVisitor(this.buff, this.target);
 

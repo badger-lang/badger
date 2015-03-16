@@ -5,8 +5,6 @@ class BadgerResolvedNode {
   final BadgerResolvedNode parent;
 
   Map<String, AstNode> variables = {};
-  Map<String, NamespaceBlock> namespaces = {};
-  Map<String, TypeBlock> types = {};
 
   List<BadgerResolvedNode> children = [];
 
