@@ -1,7 +1,6 @@
 # Badger
 
 Badger is an experimental programming language.
-
 It can be compiled to multiple languages or can be interpreted by the reference interpreter.
 
 ## Links
