@@ -46,13 +46,17 @@ class BadgerAstPrinter extends AstVisitor {
     }
   }
 
+  String keyword(String word) {
+    return word;
+  }
+
   @override
   void visitAssignment(Assignment assignment) {
     if (assignment.isInitialDefine) {
       if (assignment.immutable) {
-        buff.write("let");
+        buff.write(keyword("let"));
       } else {
-        buff.write("var");
+        buff.write(keyword("var"));
       }
 
       if (assignment.isNullable == true) {
@@ -88,7 +92,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitBreakStatement(BreakStatement statement) {
-    buff.write("break");
+    buff.write(keyword("break"));
   }
 
   @override
@@ -98,7 +102,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitDoubleLiteral(DoubleLiteral literal) {
-    buff.write(literal.value);
+    buff.write(number(literal.value.toString()));
   }
 
   @override
@@ -108,7 +112,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitForInStatement(ForInStatement statement) {
-    buff.write("for ${statement.identifier} in ");
+    buff.write("${keyword('for')} ${statement.identifier} in ");
     visitExpression(statement.value);
     buff.writeln(" {");
     buff.increment();
@@ -138,7 +142,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitFunctionDefinition(FunctionDefinition definition) {
-    buff.write("func ${definition.name}(${definition.args.join(", ")}) {");
+    buff.write("${definition.name}(${definition.args.join(", ")}) {");
     buff.increment();
     buff.writeln();
     visitStatements(definition.block.statements);
@@ -150,12 +154,12 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitHexadecimalLiteral(HexadecimalLiteral literal) {
-    buff.write("0x" + literal.value.toRadixString(16));
+    buff.write(number("0x" + literal.value.toRadixString(16)));
   }
 
   @override
   void visitIfStatement(IfStatement statement) {
-    buff.write("if ");
+    buff.write("${keyword('if')} ");
     visitExpression(statement.condition);
     buff.writeln(" {");
     buff.increment();
@@ -169,7 +173,7 @@ class BadgerAstPrinter extends AstVisitor {
       buff.writeln();
     } else {
       buff.increment();
-      buff.writeln(" else {");
+      buff.writeln(" ${keyword('else')} {");
       visitStatements(statement.elseBlock.statements);
       buff.decrement();
       buff.writeln();
@@ -180,20 +184,20 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitImportDeclaration(ImportDeclaration declaration) {
-    buff.write('import "');
+    buff.write('${keyword('import')} "');
     buff.write(declaration.location.components.join());
     buff.writeln('"');
 
     if (declaration.id != null) {
       buff.write(" ");
-      buff.write("as ");
+      buff.write("${keyword('as')} ");
       buff.write(declaration.id);
     }
   }
 
   @override
   void visitIntegerLiteral(IntegerLiteral literal) {
-    buff.write(literal.value);
+    buff.write(number(literal.value.toString()));
   }
 
   @override
@@ -276,7 +280,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitNullLiteral(NullLiteral literal) {
-    buff.write("null");
+    buff.write(keyword("null"));
   }
 
   @override
@@ -311,7 +315,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitReturnStatement(ReturnStatement statement) {
-    buff.write("return");
+    buff.write(keyword("return"));
 
     if (statement.expression != null) {
       buff.write(" ");
@@ -321,22 +325,22 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitStringLiteral(StringLiteral literal) {
-    buff.write('"');
+    buff.write(string('"'));
     for (var x in literal.components) {
       if (x is String) {
-        buff.write(x);
+        buff.write(string(x));
       } else {
         buff.write("\$(");
         visitExpression(x);
         buff.write(")");
       }
     }
-    buff.write('"');
+    buff.write(string('"'));
   }
 
   @override
   void visitSwitchStatement(SwitchStatement statement) {
-    buff.write("switch ");
+    buff.write("${keyword('switch')} ");
     visitExpression(statement.expression);
     buff.write(" {");
     if (statement.cases.isNotEmpty) {
@@ -344,7 +348,7 @@ class BadgerAstPrinter extends AstVisitor {
       for (var c in statement.cases) {
         buff.writeln();
         buff.writeIndent();
-        buff.write("case ");
+        buff.write("${keyword('case')} ");
         visitExpression(c.expression);
         buff.write(":");
         buff.increment();
@@ -371,7 +375,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitWhileStatement(WhileStatement statement) {
-    buff.write("while ");
+    buff.write("${keyword('while')} ");
     visitExpression(statement.condition);
     buff.writeln(" {");
     buff.increment();
@@ -385,7 +389,7 @@ class BadgerAstPrinter extends AstVisitor {
   @override
   void visitMultiAssignment(MultiAssignment assignment) {
     if (assignment.isInitialDefine) {
-      buff.write(assignment.immutable ? "let" : "var");
+      buff.write(keyword(assignment.immutable ? "let" : "var"));
 
       if (assignment.isNullable) {
         buff.write("?");
@@ -400,7 +404,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitNamespaceBlock(NamespaceBlock block) {
-    buff.write("namespace ${block.name} {");
+    buff.write("${keyword('namespace')} ${block.name} {");
     buff.increment();
     buff.writeln();
     visitStatements(block.block.statements);
@@ -412,7 +416,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitTypeBlock(TypeBlock block) {
-    buff.write("type ${block.name}");
+    buff.write("${keyword('type')} ${block.name}");
 
     if (block.args.isNotEmpty) {
       buff.write("(");
@@ -440,7 +444,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitTryCatchStatement(TryCatchStatement statement) {
-    buff.writeln("try {");
+    buff.writeln("${keyword('try')} {");
     buff.increment();
     visitStatements(statement.tryBlock.statements);
     buff.decrement();
@@ -448,7 +452,7 @@ class BadgerAstPrinter extends AstVisitor {
     buff.writeIndent();
     buff.write("}");
 
-    buff.write(" catch (");
+    buff.write(" ${keyword('catch')} (");
     buff.write(statement.identifier);
     buff.writeln(") {");
     buff.increment();
@@ -457,5 +461,13 @@ class BadgerAstPrinter extends AstVisitor {
     buff.writeln();
     buff.writeIndent();
     buff.write("}");
+  }
+
+  String number(String l) {
+    return l;
+  }
+
+  String string(String l) {
+    return l;
   }
 }
