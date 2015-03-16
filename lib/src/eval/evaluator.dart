@@ -119,8 +119,8 @@ class Evaluator {
   }
 
   _evaluateStatement(Statement statement, [bool allowBreak = false]) async {
-    if (statement is MethodCall) {
-      return await _callMethod(statement);
+    if (statement is ExpressionStatement) {
+      return await _resolveValue(statement.expression);
     } else if (statement is Assignment) {
       var value = await _resolveValue(statement.value);
 

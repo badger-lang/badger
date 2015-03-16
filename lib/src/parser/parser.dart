@@ -3,9 +3,17 @@ part of badger.parser;
 class BadgerParserDefinition extends BadgerGrammarDefinition {
   @override
   start() => super.start().map((it) {
+    List statements = it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).map((it) {
+      if (it is Expression) {
+        return new ExpressionStatement(it);
+      } else {
+        return it;
+      }
+    }).toList();
+
     return new Program(
       it[1] == null ? [] : it[1].where((it) => it is Declaration).toList(),
-      it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).toList()
+      statements
     );
   });
 

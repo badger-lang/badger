@@ -63,8 +63,8 @@ class BadgerModifier {
   }
 
   Statement modifyStatement(Statement statement) {
-    if (statement is MethodCall) {
-      return modifyMethodCall(statement);
+    if (statement is ExpressionStatement) {
+      return modifyExpressionStatement(statement);
     } else if (statement is Assignment) {
       return modifyAssignment(statement);
     } else if (statement is MultiAssignment) {
@@ -80,6 +80,11 @@ class BadgerModifier {
     } else {
       return statement;
     }
+  }
+
+  Statement modifyExpressionStatement(ExpressionStatement statement) {
+    var c = modifyExpression(statement.expression);
+    return new ExpressionStatement(c);
   }
 
   Statement modifyForInStatement(ForInStatement statement) {

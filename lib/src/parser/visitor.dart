@@ -42,6 +42,7 @@ abstract class AstVisitorBase {
   void visitAnonymousFunction(AnonymousFunction function);
   void visitSwitchStatement(SwitchStatement statement);
   void visitTryCatchStatement(TryCatchStatement statement);
+  void visitExpressionStatement(ExpressionStatement statement);
 }
 
 abstract class AstVisitor extends AstVisitorBase {
@@ -64,24 +65,17 @@ abstract class AstVisitor extends AstVisitorBase {
     }
   }
 
-  void visitStatements(List statements) {
+  void visitStatements(List<Statement> statements) {
     for (var statement in statements) {
-      if (statement is Statement) {
-        visitStatement(statement);
-      } else {
-        visitExpression(statement);
-      }
+      visitStatement(statement);
     }
   }
 
   @override
   void visitStatement(statement) {
-    if (statement is Expression) {
-      visitExpression(statement);
-      return;
-    }
-
-    if (statement is IfStatement) {
+    if (statement is ExpressionStatement) {
+      visitExpressionStatement(statement);
+    } else if (statement is IfStatement) {
       visitIfStatement(statement);
     } else if (statement is WhileStatement) {
       visitWhileStatement(statement);
@@ -161,5 +155,10 @@ abstract class AstVisitor extends AstVisitorBase {
     } else {
       throw new Exception("Unknown Expression Type: ${expression}");
     }
+  }
+
+  @override
+  void visitExpressionStatement(ExpressionStatement statement) {
+    visitExpression(statement.expression);
   }
 }

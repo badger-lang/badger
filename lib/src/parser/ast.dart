@@ -8,6 +8,12 @@ abstract class Expression extends AstNode {}
 
 abstract class Declaration extends AstNode {}
 
+class ExpressionStatement extends Statement {
+  final Expression expression;
+
+  ExpressionStatement(this.expression);
+}
+
 class MethodCall extends Expression {
   final dynamic reference;
   final List<Expression> args;
@@ -322,7 +328,7 @@ class MultiAssignment extends Statement {
 }
 
 class Program extends AstNode {
-  final List<dynamic> statements;
+  final List<Statement> statements;
   final List<Declaration> declarations;
 
   /**

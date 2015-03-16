@@ -91,13 +91,9 @@ class BadgerJsonBuilder {
     };
   }
 
-  Map _generateStatement(dynamic statement) {
-    if (statement is MethodCall) {
-      return {
-        "type": "method call",
-        "reference": statement.reference is String ? statement.reference : _generateExpression(statement.reference),
-        "args": _generateExpressions(statement.args)
-      };
+  Map _generateStatement(Statement statement) {
+    if (statement is ExpressionStatement) {
+      return _generateExpression(statement.expression);
     } else if (statement is Assignment) {
       return {
         "type": "assignment",
@@ -186,7 +182,7 @@ class BadgerJsonBuilder {
         "type": "break"
       };
     } else {
-      return _generateExpression(statement);
+      throw new Exception("Unknown Statement: ${statement}");
     }
   }
 
