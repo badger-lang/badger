@@ -290,7 +290,12 @@ class JsAstVisitor extends AstVisitor {
   @override
   void visitOperator(Operator operator) {
     if (operator.op == "in") {
-      throw new Exception("Compiler does not yet support the in operator.");
+      buff.write("λin(");
+      visitExpression(operator.left);
+      buff.write(",");
+      visitExpression(operator.right);
+      buff.write(")");
+      return;
     }
 
     if (operator.op == "~/") {
@@ -625,6 +630,18 @@ class JsCompilerTarget extends CompilerTarget<String> {
         var c = Object.create(λ);
         b(c);
         λ[n] = c;
+      }
+    """);
+
+    addHelper("λin", """
+      function(a, b) {
+        if (typeof b === "object") {
+          return b.hasOwnProperty(a);
+        } else if (typeof b === "array" || typeof b === "string") {
+          return b.indexOf(a) != -1;
+        } else {
+          throw new Error("Unable to perform in operation on the value: " + b);
+        }
       }
     """);
 
