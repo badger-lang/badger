@@ -267,13 +267,10 @@ class Context extends BadgerObject {
 
   Context(this.env, [this.parent]);
 
-  String typeName;
-
-  Map<String, BadgerFunction> functions = {};
-  Map<String, dynamic> variables = {};
+  Map<String, dynamic> elements = {};
   Map<String, dynamic> meta = {};
-  Map<String, dynamic> namespaces = {};
-  Map<String, TypeCreator> types = {};
+
+  String typeName;
 
   dynamic getMetadata(String name) {
     return meta[name];
@@ -288,11 +285,11 @@ class Context extends BadgerObject {
   }
 
   void defineNamespace(String name, Context context) {
-    namespaces[name] = context;
+    elements[name] = context;
   }
 
   void defineType(String name, TypeCreator creator) {
-    types[name] = creator;
+    elements[name] = creator;
   }
 
   Reference getReference(String name) {
@@ -300,8 +297,8 @@ class Context extends BadgerObject {
   }
 
   dynamic getVariable(String name) {
-    if (variables.containsKey(name)) {
-      var x = variables[name];
+    if (elements.containsKey(name)) {
+      var x = elements[name];
 
       if (x is Nullable) {
         x = x.value;
@@ -322,16 +319,14 @@ class Context extends BadgerObject {
   }
 
   void define(String name, Function function, {bool wrap: true}) {
-    functions[name] = wrap ? ((args) {
+    elements[name] = wrap ? ((args) {
       return Function.apply(function, args);
     }) : function;
   }
 
   void alias(String from, String to) {
-    if (functions.containsKey(from)) {
-      functions[to] = functions[from];
-    } else if (variables.containsKey(from)) {
-      variables[to] = variables[from];
+    if (elements.containsKey(from)) {
+      elements[to] = elements[from];
     } else {
       throw new Exception("Failed to alias ${from} to ${to}, ${from} is not defined.");
     }
@@ -339,29 +334,17 @@ class Context extends BadgerObject {
 
   void proxy(String name, dynamic value) {
     if (value is Function) {
-      functions[name] = (args) {
+      elements[name] = (args) {
         return Function.apply(value, args);
       };
     } else {
-      variables[name] = value;
+      elements[name] = value;
     }
   }
 
   void merge(Context ctx) {
-    ctx.variables.keys.where((it) => !it.startsWith("_")).forEach((x) {
-      variables[x] = ctx.variables[x];
-    });
-
-    ctx.functions.keys.where((it) => !it.startsWith("_")).forEach((x) {
-      functions[x] = ctx.functions[x];
-    });
-
-    ctx.namespaces.keys.where((it) => !it.startsWith("_")).forEach((x) {
-      namespaces[x] = ctx.namespaces[x];
-    });
-
-    ctx.types.keys.where((it) => !it.startsWith("_")).forEach((x) {
-      types[x] = ctx.types[x];
+    ctx.elements.keys.where((it) => !it.startsWith("_")).forEach((x) {
+      elements[x] = ctx.elements[x];
     });
   }
 
@@ -370,9 +353,7 @@ class Context extends BadgerObject {
   }
 
   bool hasFunction(String name) {
-    if (functions.containsKey(name)) {
-      return true;
-    } else if (variables.containsKey(name) && variables[name] is Function) {
+    if (elements.containsKey(name) && elements[name] is Function) {
       return true;
     } else if (parent != null && parent.hasFunction(name)) {
       return true;
@@ -382,31 +363,23 @@ class Context extends BadgerObject {
   }
 
   dynamic invoke(String name, List<dynamic> args) {
-    if (functions.containsKey(name)) {
-      return functions[name](args);
-    } else if (hasType(name)) {
-      if (types.containsKey(name)) {
-        return types[name](args);
-      } else {
-        return parent.invoke(name, args);
-      }
-    } else if (variables.containsKey(name) && variables[name] is Function) {
-      return variables[name](args);
-    } else if (variables.containsKey(name) && variables[name] is Type) {
-      var c = reflectClass(variables[name]);
-      return c.newInstance(MirrorSystem.getSymbol(""), args).reflectee;
-    } else if (parent != null && parent.hasFunction(name)) {
-      return parent.invoke(name, args);
-    } else {
+    if (!hasFunction(name)) {
       throw new Exception("Method ${name} is not defined.");
+    }
+
+    var v = getProperty(name);
+
+    if (v is Type) {
+      var c = reflectClass(v);
+      return c.newInstance(MirrorSystem.getSymbol(""), args).reflectee;
+    } else {
+      return v(args);
     }
   }
 
   Function getFunction(String name) {
-    if (functions.containsKey(name)) {
-      return functions[name];
-    } else if (variables.containsKey(name) && variables[name] is Function) {
-      return variables[name];
+    if (elements.containsKey(name)) {
+      return elements[name];
     } else if (parent != null && parent.hasFunction(name)) {
       return parent.getFunction(name);
     } else {
@@ -415,15 +388,15 @@ class Context extends BadgerObject {
   }
 
   bool hasVariable(String name) {
-    return variables.containsKey(name) || (parent != null && parent.hasVariable(name));
+    return elements.containsKey(name) || (parent != null && parent.hasVariable(name));
   }
 
   bool hasNamespace(String name) {
-    return namespaces.containsKey(name) || (parent != null && parent.hasNamespace(name));
+    return elements.containsKey(name) || (parent != null && parent.hasNamespace(name));
   }
 
   bool hasType(String name) {
-    return types.containsKey(name) || (parent != null && parent.hasType(name));
+    return elements.containsKey(name) || (parent != null && parent.hasType(name));
   }
 
   dynamic setVariable(String name, dynamic value, [bool checkExists = false]) {
@@ -434,8 +407,8 @@ class Context extends BadgerObject {
     if (parent != null && parent.hasVariable(name)) {
       return parent.setVariable(name, value);
     } else {
-      if (variables.containsKey(name)) {
-        var v = variables[name];
+      if (elements.containsKey(name)) {
+        var v = elements[name];
 
         if (value == null && v is! Nullable) {
           throw new Exception("Unable to set ${name} to null, it is not nullable.");
@@ -448,7 +421,7 @@ class Context extends BadgerObject {
         }
       }
 
-      return variables[name] = value;
+      return elements[name] = value;
     }
   }
 
@@ -462,8 +435,8 @@ class Context extends BadgerObject {
 
   Context getNamespace(String name) {
     if (hasNamespace(name)) {
-      if (namespaces.containsKey(name)) {
-        return namespaces[name];
+      if (elements.containsKey(name)) {
+        return elements[name];
       } else {
         return parent.getNamespace(name);
       }
@@ -478,8 +451,8 @@ class Context extends BadgerObject {
 
   TypeCreator getType(String name) {
     if (hasType(name)) {
-      if (types.containsKey(name)) {
-        return types[name];
+      if (elements.containsKey(name)) {
+        return elements[name];
       } else {
         return parent.getType(name);
       }

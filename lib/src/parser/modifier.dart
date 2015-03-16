@@ -4,7 +4,7 @@ class BadgerModifier {
   Program modify(Program program) {
     var declarations = program.declarations.map(modifyDeclaration).where((it) => it != null).toList();
     var statements = program.statements
-      .map((it) => it is Statement ? modifyStatement(it) : modifyExpression(it))
+      .map(modifyStatement)
       .where((it) => it != null)
       .toList();
 
