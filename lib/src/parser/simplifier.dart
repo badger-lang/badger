@@ -17,6 +17,18 @@ class BadgerSimplifier extends BadgerModifier {
   }
 
   @override
+  modifyExpressionStatement(ExpressionStatement statement) {
+    var expr = statement.expression;
+
+    // Method Calls are the only expressions that have any effect on anything when it is used as a statement.
+    if (expr is! MethodCall) {
+      return null;
+    }
+
+    return statement;
+  }
+
+  @override
   modifyWhileStatement(WhileStatement statement) {
     statement = super.modifyWhileStatement(statement);
 

@@ -1,0 +1,3 @@
+"Hello World"
+
+print("Above was a hello world, but it was stripped away.")
