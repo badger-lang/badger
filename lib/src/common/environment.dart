@@ -22,6 +22,8 @@ class ImportMapEnvironment extends Environment {
     await evaluator.evaluateProgram(program, context);
   }
 
+  Program get main => programs["_"];
+
   @override
   Future<Program> resolveProgram(String location) async {
     if (_c != null && !programs.containsKey(location)) {
