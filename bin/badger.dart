@@ -285,7 +285,6 @@ class CacheManager {
     var hash = createHash(content);
 
     if (await isInCache(hash)) {
-      print("Using Cache");
       return await new File("${dir.path}/${hash}");
     } else {
       return file;
