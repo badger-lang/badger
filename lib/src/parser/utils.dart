@@ -9,6 +9,9 @@ class IndentedStringBuffer extends StringBuffer {
   @override
   void writeln([Object obj = ""]) {
     super.writeln(obj);
+    if (autoIndent) {
+      writeIndent();
+    }
   }
 
   void writeIndent() {
@@ -22,6 +25,8 @@ class IndentedStringBuffer extends StringBuffer {
   void decrement() {
     level--;
   }
+
+  bool autoIndent = false;
 }
 
 final Map<String, String> _decodeTable = const {

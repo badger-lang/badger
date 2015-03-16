@@ -1,12 +1,14 @@
 part of badger.parser;
 
-abstract class Statement {}
+abstract class AstNode {}
 
-abstract class Expression {}
+abstract class Statement extends AstNode {}
 
-abstract class Declaration {}
+abstract class Expression extends AstNode {}
 
-class MethodCall extends Expression with Statement {
+abstract class Declaration extends AstNode {}
+
+class MethodCall extends Expression {
   final dynamic reference;
   final List<Expression> args;
 
@@ -16,7 +18,7 @@ class MethodCall extends Expression with Statement {
   String toString() => "MethodCall(reference: ${reference}, args: ${args})";
 }
 
-class Block {
+class Block extends AstNode {
   final List<Statement> statements;
 
   Block(this.statements);
@@ -296,13 +298,6 @@ class ImportDeclaration extends Declaration {
   String toString() => "ImportDeclaration(${location})";
 }
 
-class RecordDefinition extends Statement {
-  final String name;
-  final List<RecordEntry> entries;
-
-  RecordDefinition(this.name, this.entries);
-}
-
 class MapDefinition extends Expression {
   final List<MapEntry> entries;
 
@@ -316,13 +311,6 @@ class MapEntry extends Expression {
   MapEntry(this.key, this.value);
 }
 
-class RecordEntry {
-  final String type;
-  final String name;
-
-  RecordEntry(this.type, this.name);
-}
-
 class MultiAssignment extends Statement {
   final bool immutable;
   final List<String> ids;
@@ -333,7 +321,7 @@ class MultiAssignment extends Statement {
   MultiAssignment(this.ids, this.value, this.immutable, this.isInitialDefine, this.isNullable);
 }
 
-class Program {
+class Program extends AstNode {
   final List<dynamic> statements;
   final List<Declaration> declarations;
 
