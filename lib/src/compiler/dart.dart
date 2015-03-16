@@ -1,11 +1,31 @@
 part of badger.compiler;
 
+const String _DART_CODE = r"""
+@BEGIN boolean helper
+$boolean(value) {
+  if (value == null) {
+    return false;
+  } else if (value is int) {
+    return value != 0;
+  } else if (value is double) {
+    return value != 0.0;
+  } else if (value is String) {
+    return value.isNotEmpty;
+  } else if (value is bool) {
+    return value;
+  } else {
+    return true;
+  }
+}
+@END
+""";
+
 class DartCompilerTarget extends CompilerTarget<String> {
   @override
   Future<String> compile(Program program) async {
     var buff = new StringBuffer();
     writeHeader(buff);
-    var visitor = new DartAstVisitor(buff);
+    var visitor = new DartAstVisitor(buff, this);
     visitor.visit(program);
     writeFooter(buff);
     return buff.toString();
@@ -18,48 +38,116 @@ class DartCompilerTarget extends CompilerTarget<String> {
   void writeFooter(StringBuffer buff) {
     buff.write("}");
 
-    var str = buff.toString();
-
-    if (str.contains("\$boolean")) {
-      buff.write("""
-      \$boolean(value) {
-        if (value == null) {
-          return false;
-        } else if (value is int) {
-          return value != 0;
-        } else if (value is double) {
-          return value != 0.0;
-        } else if (value is String) {
-          return value.isNotEmpty;
-        } else if (value is bool) {
-          return value;
-        } else {
-          return true;
-        }
+    var map = {};
+    var lines = _DART_CODE.split("\n");
+    lines.removeWhere((it) => it.trim().isEmpty);
+    var current = "";
+    for (var line in lines) {
+      var trimmed = line.trim();
+      if (trimmed.startsWith("@BEGIN ")) {
+        var name = trimmed.substring(7);
+        current = name;
+        map[current] = [];
+      } else if (trimmed == "@END") {
+        current = "";
+      } else if (trimmed.isEmpty) {
+        continue;
+      } else if (current.isEmpty) {
+        throw new Exception(
+          "Tried to write line '${line}' as code line," +
+          " but no name was given. Try adding '@BEGIN my name'" +
+          " at the top and '@END' at the bottom"
+        );
+      } else {
+        map[current].add(line);
       }
-      """.split("\n").map((it) => it.trim()).join("").trim());
     }
 
-    buff.write('final runtime = "dart";');
+    for (var code in _codes) {
+      var lns = map[code];
+
+      if (lns == null) {
+        throw new Exception("Unknown code: ${code}");
+      }
+
+      buff.write(lns.join("\n"));
+    }
   }
+
+  final Set<String> _codes = new Set<String>();
 }
 
 class DartAstVisitor extends AstVisitor {
   final StringBuffer buff;
+  final DartCompilerTarget target;
 
-  DartAstVisitor(this.buff);
+  List<String> ctxids = [];
+  String currentContext;
+  Map<String, String> _namespaces = {};
+
+  DartAstVisitor(this.buff, this.target);
+
+  String enterContext([Map<String, String> vars = const {}]) {
+    if (ctxids.isEmpty) {
+      ctxids.add("a");
+      currentContext = "a";
+      buff.write("var a = {};");
+      return "a";
+    }
+
+    var last = currentContext;
+    var lastctx = last;
+    var c = last[last.length - 1];
+
+    if (c == "z") {
+      last += "a";
+    } else {
+      last = last.substring(0, last.length - 1);
+      last += ALPHABET[ALPHABET.indexOf(c) + 1];
+    }
+
+    currentContext = last;
+    ctxids.add(last);
+
+    buff.write("var ${currentContext} = new Map.from(${lastctx});");
+
+    for (var v in vars.keys) {
+      buff.write('${currentContext}["${v}"] = ${vars[v]};');
+    }
+
+    return last;
+  }
+
+  String exitContext() {
+    var idx = ctxids.indexOf(currentContext);
+
+    if (idx == 0) {
+      currentContext = null;
+      return null;
+    }
+
+    var now = ctxids[idx - 1];
+    currentContext = now;
+    return currentContext;
+  }
+
+  @override
+  void visit(Program program) {
+    enterContext();
+    super.visit(program);
+    exitContext();
+  }
 
   @override
   void visitAccess(Access access) {
-/*    visitExpression(access.reference);
-    buff.write(".");
-    buff.write(access.identifiers.join("."));*/
   }
 
   @override
   void visitAnonymousFunction(AnonymousFunction function) {
     buff.write("(${function.args.join(", ")}) {");
+    enterContext();
     visitStatements(function.block.statements);
+    exitContext();
     buff.write("}");
   }
 
@@ -73,16 +161,9 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitAssignment(Assignment assignment) {
-    if (assignment.isInitialDefine) {
-      if (assignment.immutable) {
-        buff.write("final ");
-      } else {
-        buff.write("var ");
-      }
-    }
-
     if (assignment.reference is String) {
-      buff.write("${assignment.reference} = ");
+      buff.write('${currentContext}');
+      buff.write('["${assignment.reference}"] = ');
       visitExpression(assignment.value);
     } else {
       visitExpression(assignment.reference);
@@ -98,6 +179,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitBracketAccess(BracketAccess access) {
+    buff.write("${currentContext}.");
     visitExpression(access.reference);
     buff.write("[");
     visitExpression(access.index);
@@ -123,6 +205,7 @@ class DartAstVisitor extends AstVisitor {
     buff.write("for (var ${statement.identifier} in ");
     visitExpression(statement.value);
     buff.write(" {");
+    enterContext();
     visitStatements(statement.block.statements);
     buff.write("}");
   }
@@ -141,6 +224,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitIfStatement(IfStatement statement) {
+    target._codes.add("boolean helper");
     buff.write("if (\$boolean(");
     visitExpression(statement.condition);
     buff.write(")) {");
@@ -213,6 +297,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitNegate(Negate negate) {
+    target._codes.add("boolean helper");
     buff.write("!(\$boolean(");
     visitExpression(negate.expression);
     buff.write("))");
@@ -231,7 +316,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitRangeLiteral(RangeLiteral literal) {
-    buff.write("λrange(");
+    buff.write(r"$range(");
     visitExpression(literal.left);
     buff.write(", ");
     visitExpression(literal.right);
@@ -283,6 +368,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitTernaryOperator(TernaryOperator operator) {
+    target._codes.add("boolean helper");
     buff.write("\$boolean(");
     visitExpression(operator.condition);
     buff.write(") ? ");
@@ -293,11 +379,14 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitVariableReference(VariableReference reference) {
+    buff.write('${currentContext}["');
     buff.write(reference.identifier);
+    buff.write('"]');
   }
 
   @override
   void visitWhileStatement(WhileStatement statement) {
+    target._codes.add("boolean helper");
     buff.write("while (\$boolean(");
     visitExpression(statement.condition);
     buff.write(")) {");
@@ -312,6 +401,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitDefined(Defined defined) {
+    buff.write('${currentContext}.containsKey("${defined.identifier}")');
     throw new Exception("Defined operator (${defined.identifier}?) is not yet implemented.");
   }
 
@@ -348,7 +438,9 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitNamespaceBlock(NamespaceBlock block) {
-    // TODO: implement visitNamespaceBlock
+    var name = enterContext();
+    visitStatements(block.block.statements);
+    exitContext();
   }
 
   @override

@@ -1,21 +1,5 @@
 namespace Test {
-  func hi() {
-    print("Hello World")
-  }
-
-  print("Test Namespace Defined")
+  let x = 0
 }
 
-namespace IRC {
-  namespace Client {
-    type Utils {
-      sayHello() {
-        print("Hello World")
-      }
-    }
-  }
-}
-
-print("Defined Namespace")
-Test.hi()
-IRC.Client.Utils().sayHello()
+print(Test.x)
