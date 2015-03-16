@@ -4,7 +4,8 @@ abstract class BadgerHighlighterScheme {
   String keyword();
   String string();
   String end();
-  String number();
+  String constant();
+  String operator();
 }
 
 class ConsoleBadgerHighlighterScheme extends BadgerHighlighterScheme {
@@ -14,7 +15,7 @@ class ConsoleBadgerHighlighterScheme extends BadgerHighlighterScheme {
   }
 
   @override
-  String number() {
+  String constant() {
     return "\x1b[36m";
   }
 
@@ -26,6 +27,11 @@ class ConsoleBadgerHighlighterScheme extends BadgerHighlighterScheme {
   @override
   String string() {
    return "\x1b[32m";
+  }
+
+  @override
+  String operator() {
+    return "\x1b[31m";
   }
 }
 
@@ -40,12 +46,17 @@ class BadgerHighlighter extends BadgerAstPrinter {
   }
 
   @override
-  String number(String n) {
-    return "${scheme.number()}${n}${scheme.end()}";
+  String constant(String n) {
+    return "${scheme.constant()}${n}${scheme.end()}";
   }
 
   @override
   String string(String n) {
     return "${scheme.string()}${n}${scheme.end()}";
+  }
+
+  @override
+  String operator(String n) {
+    return "${scheme.operator()}${n}${scheme.end()}";
   }
 }

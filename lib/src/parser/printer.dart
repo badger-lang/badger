@@ -79,7 +79,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitBooleanLiteral(BooleanLiteral literal) {
-    buff.write(literal.value);
+    buff.write(constant(literal.value.toString()));
   }
 
   @override
@@ -102,7 +102,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitDoubleLiteral(DoubleLiteral literal) {
-    buff.write(number(literal.value.toString()));
+    buff.write(constant(literal.value.toString()));
   }
 
   @override
@@ -112,7 +112,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitForInStatement(ForInStatement statement) {
-    buff.write("${keyword('for')} ${statement.identifier} in ");
+    buff.write("${keyword('for')} ${statement.identifier} ${keyword('in')} ");
     visitExpression(statement.value);
     buff.writeln(" {");
     buff.increment();
@@ -154,7 +154,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitHexadecimalLiteral(HexadecimalLiteral literal) {
-    buff.write(number("0x" + literal.value.toRadixString(16)));
+    buff.write(constant("0x" + literal.value.toRadixString(16)));
   }
 
   @override
@@ -197,7 +197,7 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitIntegerLiteral(IntegerLiteral literal) {
-    buff.write(number(literal.value.toString()));
+    buff.write(constant(literal.value.toString()));
   }
 
   @override
@@ -284,10 +284,10 @@ class BadgerAstPrinter extends AstVisitor {
   }
 
   @override
-  void visitOperator(Operator operator) {
-    visitExpression(operator.left);
-    buff.write(" ${operator.op} ");
-    visitExpression(operator.right);
+  void visitOperator(Operator o) {
+    visitExpression(o.left);
+    buff.write(" ${operator(o.op)} ");
+    visitExpression(o.right);
   }
 
   @override
@@ -330,9 +330,9 @@ class BadgerAstPrinter extends AstVisitor {
       if (x is String) {
         buff.write(string(x));
       } else {
-        buff.write("\$(");
+        buff.write(operator("\$("));
         visitExpression(x);
-        buff.write(")");
+        buff.write(operator(")"));
       }
     }
     buff.write(string('"'));
@@ -370,7 +370,11 @@ class BadgerAstPrinter extends AstVisitor {
 
   @override
   void visitVariableReference(VariableReference reference) {
-    buff.write(reference.identifier);
+    if (["this", "super"].contains(reference.identifier)) {
+      buff.write(keyword(reference.identifier));
+    } else {
+      buff.write(reference.identifier);
+    }
   }
 
   @override
@@ -463,11 +467,15 @@ class BadgerAstPrinter extends AstVisitor {
     buff.write("}");
   }
 
-  String number(String l) {
+  String string(String l) {
     return l;
   }
 
-  String string(String l) {
+  String constant(String l) {
+    return l;
+  }
+
+  String operator(String l) {
     return l;
   }
 }

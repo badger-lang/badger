@@ -1,14 +1,32 @@
 import "package:badger/parser.dart";
 
-const String input = """
+const String input = r"""
 let x = 0
 
-for l in [1, 2, 3] {
-  print(l)
+let list = [
+  "Hello",
+  "World",
+  1,
+  2,
+  3,
+  0xDEADBEEF,
+  2.0
+]
+
+for n in list {
+  print(n)
+}
+
+if true {
+  print("True!")
+}
+
+if false {
+  print("Wut?")
 }
 
 print(x)
-print("Done")
+print("This is a string: $(x)")
 """;
 
 void main() {
