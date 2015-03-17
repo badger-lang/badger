@@ -35,6 +35,37 @@ class ConsoleBadgerHighlighterScheme extends BadgerHighlighterScheme {
   }
 }
 
+class HtmlBadgerHighlighterScheme extends BadgerHighlighterScheme {
+  @override
+  String keyword() {
+    return c("blue");
+  }
+
+  String c(String color) {
+    return '<span style="color: ${color};">';
+  }
+
+  @override
+  String constant() {
+    return c("cyan");
+  }
+
+  @override
+  String end() {
+    return r"</span>";
+  }
+
+  @override
+  String string() {
+    return c("green");
+  }
+
+  @override
+  String operator() {
+    return c("red");
+  }
+}
+
 class BadgerHighlighter extends BadgerAstPrinter {
   final BadgerHighlighterScheme scheme;
 
