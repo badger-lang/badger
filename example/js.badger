@@ -1,4 +1,4 @@
-type Test {
+class Test {
   print("Test Created")
 
   greet() {
@@ -6,7 +6,7 @@ type Test {
   }
 }
 
-type TestB(a, b) {
+class TestB(a, b) {
   print("$(a): $(b)")
 }
 

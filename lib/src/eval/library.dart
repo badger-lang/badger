@@ -127,7 +127,7 @@ class CoreLibrary {
 class ParserLibrary {
   static void import(Context context) {
     context.proxy("BadgerParser", BadgerParser);
-    context.proxy("BadgerPrinter", BadgerAstPrinter);
+    context.proxy("BadgerPrinter", BadgerPrinter);
     context.proxy("BadgerJsonBuilder", BadgerJsonBuilder);
     context.proxy("BadgerJsonParser", BadgerJsonParser);
   }

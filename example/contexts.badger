@@ -2,7 +2,7 @@ namespace Test {
   let x = 5
 }
 
-type Animal {
+class Animal {
   speak() {
     print("<Insert Animal Noise Here>")
   }
@@ -12,7 +12,7 @@ type Animal {
   }
 }
 
-type Cow extends Animal {
+class Cow extends Animal {
   speak() {
     print("MOOO")
   }

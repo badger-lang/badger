@@ -32,7 +32,7 @@ print("This is a string: $(x)")
 void main() {
   var parser = new BadgerParser();
   var program = parser.parse(input).value;
-  var highlighter = new BadgerHighlighter(new ConsoleBadgerHighlighterScheme(), program);
+  var highlighter = new BadgerHighlighter(new ConsoleHighlighterScheme(), program);
   var out = highlighter.print();
   print(out);
 }

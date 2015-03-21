@@ -443,7 +443,7 @@ class DartAstVisitor extends AstVisitor {
   }
 
   @override
-  void visitTypeBlock(TypeBlock block) {
+  void visitClassBlock(ClassBlock block) {
     // TODO: implement visitTypeBlock
   }
 

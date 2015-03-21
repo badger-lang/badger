@@ -46,13 +46,13 @@ class NamespaceBlock extends Statement {
   NamespaceBlock(this.name, this.block);
 }
 
-class TypeBlock extends Statement {
+class ClassBlock extends Statement {
   final String name;
   final List<String> args;
   final Block block;
   final String extension;
 
-  TypeBlock(this.name, this.args, this.extension, this.block);
+  ClassBlock(this.name, this.args, this.extension, this.block);
 }
 
 class TryCatchStatement extends Statement {

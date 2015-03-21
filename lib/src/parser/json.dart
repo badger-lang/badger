@@ -151,9 +151,9 @@ class BadgerJsonBuilder {
         "name": statement.name,
         "block": _generateStatements(statement.block.statements)
       };
-    } else if (statement is TypeBlock) {
+    } else if (statement is ClassBlock) {
       return {
-        "type": "type",
+        "type": "class",
         "name": statement.name,
         "args": statement.args,
         "extension": statement.extension,
@@ -395,7 +395,8 @@ class BadgerTinyAst {
     "multiple assignment": "~",
     "catch": "`",
     "try": ",",
-    "expression statement": "ß"
+    "expression statement": "ß",
+    "class": "∆"
   };
 
   static String demap(String key) {
@@ -490,8 +491,8 @@ class BadgerJsonParser {
       );
     } else if (type == "multiple assignment") {
       return new MultiAssignment(it["ids"], _buildExpression(it["value"]), it["immutable"], it["isInitialDefine"], it["isNullable"]);
-    } else if (type == "type") {
-      return new TypeBlock(
+    } else if (type == "class") {
+      return new ClassBlock(
         it["name"],
         it["args"],
         it["extension"],

@@ -1,21 +1,21 @@
-type A {}
-type B extends A {}
+class A {}
+class B extends A {}
 
 namespace Test {
-  type Example {
+  class Example {
     describe() {
       return "Example Instance A"
     }
   }
 }
 
-type Example {
+class Example {
   describe() {
     return "Example Instance B"
   }
 }
 
-type ExampleB extends Example {
+class ExampleB extends Example {
 }
 
 example() {

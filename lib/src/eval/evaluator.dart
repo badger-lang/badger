@@ -190,7 +190,7 @@ class Evaluator {
       });
 
       Context.current.defineNamespace(statement.name, ctx);
-    } else if (statement is TypeBlock) {
+    } else if (statement is ClassBlock) {
       var creator;
       creator = (args) async {
         var map = {};

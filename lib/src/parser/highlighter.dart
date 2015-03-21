@@ -1,6 +1,6 @@
 part of badger.parser;
 
-abstract class BadgerHighlighterScheme {
+abstract class HighlighterScheme {
   String keyword();
   String string();
   String end();
@@ -8,7 +8,7 @@ abstract class BadgerHighlighterScheme {
   String operator();
 }
 
-class ConsoleBadgerHighlighterScheme extends BadgerHighlighterScheme {
+class ConsoleHighlighterScheme extends HighlighterScheme {
   @override
   String keyword() {
     return "\x1b[34m";
@@ -35,39 +35,45 @@ class ConsoleBadgerHighlighterScheme extends BadgerHighlighterScheme {
   }
 }
 
-class HtmlBadgerHighlighterScheme extends BadgerHighlighterScheme {
-  @override
-  String keyword() {
-    return c("blue");
-  }
-
-  String c(String color) {
-    return '<span style="color: ${color};">';
-  }
-
+/**
+ * Highlighter Scheme for marking highlights of code for easy interpretation.
+ *
+ * Every highlight being with it's specified beginning and ends with \u0000
+ *
+ * Constants: \u0001
+ * Keyword: \u0002
+ * Operator: \u0003
+ * String: \u0004
+ */
+class MarkerHighlighterScheme extends HighlighterScheme {
   @override
   String constant() {
-    return c("cyan");
+    return "\u0001";
   }
 
   @override
-  String end() {
-    return r"</span>";
-  }
-
-  @override
-  String string() {
-    return c("green");
+  String keyword() {
+    return "\u0002";
   }
 
   @override
   String operator() {
-    return c("red");
+    return "\u0003";
+  }
+
+  @override
+  String string() {
+    return "\u0004";
+  }
+
+  @override
+  String end() {
+    return "\u0000";
   }
 }
 
-class BadgerHighlighter extends BadgerAstPrinter {
-  final BadgerHighlighterScheme scheme;
+class BadgerHighlighter extends BadgerPrinter {
+  final HighlighterScheme scheme;
 
   BadgerHighlighter(this.scheme, Program program) : super(program);
 

@@ -25,7 +25,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       ref(switchStatement) |
       ref(tryCatchStatement) |
       ref(namespace) |
-      ref(type) |
+      ref(classBlock) |
       ref(expression)
     ) & char(";").optional()
   ).pick(0);
@@ -278,7 +278,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(block);
 
-  type() => ref(token, "type") &
+  classBlock() => ref(token, "class") &
     whitespace().plus() &
     ref(identifier) &
     (

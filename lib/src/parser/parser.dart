@@ -33,8 +33,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
-  type() => super.type().map((it) {
-    return new TypeBlock(it[2], it[3] == null ? [] : it[3].where((it) => it is String).toList(), it[5] != null ? it[5][2] : null, it[7]);
+  classBlock() => super.classBlock().map((it) {
+    return new ClassBlock(it[2], it[3] == null ? [] : it[3].where((it) => it is String).toList(), it[5] != null ? it[5][2] : null, it[7]);
   });
 
   @override

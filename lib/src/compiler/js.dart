@@ -468,7 +468,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   @override
-  void visitTypeBlock(TypeBlock block) {
+  void visitClassBlock(ClassBlock block) {
     buff.write('λtype(λ, "${block.name}", function(λ');
     if (block.args != null && block.args.isNotEmpty) {
       buff.write(",");

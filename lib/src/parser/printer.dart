@@ -1,11 +1,11 @@
 part of badger.parser;
 
-class BadgerAstPrinter extends AstVisitor {
+class BadgerPrinter extends AstVisitor {
   final Program program;
 
   IndentedStringBuffer buff = new IndentedStringBuffer();
 
-  BadgerAstPrinter(this.program);
+  BadgerPrinter(this.program);
 
   String print() {
     visit(program);
@@ -419,8 +419,8 @@ class BadgerAstPrinter extends AstVisitor {
   }
 
   @override
-  void visitTypeBlock(TypeBlock block) {
-    buff.write("${keyword('type')} ${block.name}");
+  void visitClassBlock(ClassBlock block) {
+    buff.write("${keyword('class')} ${block.name}");
 
     if (block.args.isNotEmpty) {
       buff.write("(");
