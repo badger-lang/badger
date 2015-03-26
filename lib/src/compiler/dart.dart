@@ -53,6 +53,8 @@ class DartCompilerTarget extends CompilerTarget<String> {
       out = new dartFormatter.CodeFormatterImpl(
         new dartFormatter.FormatterOptions()
       ).format(dartFormatter.CodeKind.COMPILATION_UNIT, out).source;
+    } else {
+      out = analyzer.parseCompilationUnit(out).toSource();
     }
 
     return out.trim();

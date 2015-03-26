@@ -3,6 +3,7 @@ library badger.compiler;
 import "dart:async";
 import "dart:convert";
 
+import "package:analyzer/analyzer.dart" as analyzer;
 import "package:analyzer/src/services/formatter_impl.dart" as dartFormatter;
 
 import "package:badger/common.dart";
