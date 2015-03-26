@@ -3,9 +3,7 @@ part of badger.parser;
 abstract class AstNode {}
 
 abstract class Statement extends AstNode {}
-
 abstract class Expression extends AstNode {}
-
 abstract class Declaration extends AstNode {}
 
 class ExpressionStatement extends Statement {
@@ -37,6 +35,9 @@ class BooleanLiteral extends Expression {
   final bool value;
 
   BooleanLiteral(this.value);
+
+  bool get isTrue => value == true;
+  bool get isFalse => value == false;
 }
 
 class NamespaceBlock extends Statement {
@@ -50,9 +51,11 @@ class ClassBlock extends Statement {
   final Identifier name;
   final List<Identifier> args;
   final Block block;
-  final String extension;
+  final Identifier extension;
 
   ClassBlock(this.name, this.args, this.extension, this.block);
+
+
 }
 
 class TryCatchStatement extends Statement {
@@ -112,6 +115,13 @@ class RangeLiteral extends Expression {
   final Expression step;
   final bool exclusive;
 
+  RangeLiteral.create(int left, int right, {int step, bool exclusive}) :
+    this(
+      new IntegerLiteral(left),
+      new IntegerLiteral(right),
+      exclusive,
+      step != null ? new IntegerLiteral(step) : null
+    );
   RangeLiteral(this.left, this.right, this.exclusive, this.step);
 }
 
@@ -171,6 +181,9 @@ class StringLiteral extends Expression {
 
   @override
   String toString() => "StringLiteral(${components})";
+
+  bool get isSimpleString => components.every((x) => x is String);
+  String asSimpleString() => components.join();
 }
 
 class NativeCode extends Expression {
@@ -215,6 +228,7 @@ class Defined extends Expression {
   final Identifier identifier;
 
   Defined(this.identifier);
+  Defined.forName(String name) : this(new Identifier(name));
 }
 
 class SwitchStatement extends Statement {
@@ -249,9 +263,9 @@ class Parentheses extends Expression {
 class HexadecimalLiteral extends NumberLiteral<int> {
   final int value;
 
-  String asHex() => "0x${value.toRadixString(16)}";
-
   HexadecimalLiteral(this.value);
+
+  String asHex() => "0x${value.toRadixString(16)}";
 }
 
 class VariableReference extends Expression {
@@ -283,6 +297,10 @@ class ListDefinition extends Expression {
 
   @override
   String toString() => "ListDefinition(${elements.join(", ")})";
+
+  bool get isEmpty => elements.isEmpty;
+  bool get isNotEmpty => elements.isNotEmpty;
+  int get length => elements.length;
 }
 
 class BracketAccess extends Expression {
@@ -293,6 +311,8 @@ class BracketAccess extends Expression {
 
   @override
   String toString() => "BracketAccess(receiver: ${reference}, index: ${index})";
+
+  bool get isNumberIndex => index is NumberLiteral;
 }
 
 class FeatureDeclaration extends Declaration {
@@ -312,6 +332,8 @@ class ImportDeclaration extends Declaration {
 
   @override
   String toString() => "ImportDeclaration(${location})";
+
+  Uri asUri() => Uri.parse(location.components.join());
 }
 
 class MapDefinition extends Expression {

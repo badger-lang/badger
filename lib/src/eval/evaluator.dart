@@ -208,7 +208,7 @@ class Evaluator {
           Context.current.setVariable(n, map[n]);
         }
 
-        var x = statement.extension != null ? await Context.current.getType(statement.extension)([]) : null;
+        var x = statement.extension != null ? await Context.current.getType(statement.extension.name)([]) : null;
 
         return await Context.current.createChild(() async {
           Context.current.typeName = statement.name.name;

@@ -156,7 +156,7 @@ class BadgerJsonBuilder {
         "type": "class",
         "name": statement.name.name,
         "args": statement.args,
-        "extension": statement.extension,
+        "extension": statement.extension.name,
         "block": _generateStatements(statement.block.statements)
       };
     } else if (statement is ReturnStatement) {
@@ -474,7 +474,7 @@ class BadgerJsonParser {
         it["isNullable"]
       );
     } else if (type == "function definition") {
-      return new FunctionDefinition(it["identifier"], it["args"], new Block(it["block"].map(_buildStatement).toList()));
+      return new FunctionDefinition(it["identifier"], it["args"].map((x) => new Identifier(x)).toList(), new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "while") {
       return new WhileStatement(_buildExpression(it["condition"]), new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "if") {
@@ -494,8 +494,8 @@ class BadgerJsonParser {
     } else if (type == "class") {
       return new ClassBlock(
         new Identifier(it["name"]),
-        it["args"],
-        it["extension"],
+        it["args"].map((x) => new Identifier(x)).toList(),
+        new Identifier(it["extension"]),
         new Block(it["block"].map(_buildStatement).toList())
       );
     } else if (type == "namespace") {
@@ -572,7 +572,7 @@ class BadgerJsonParser {
     } else if (type == "bracket access") {
       return new BracketAccess(_buildExpression(it["reference"]), _buildExpression(it["index"]));
     } else if (type == "anonymous function") {
-      return new AnonymousFunction(it["args"], new Block(it["block"].map(_buildStatement).toList()));
+      return new AnonymousFunction(it["args"].map((x) => new Identifier(x)).toList(), new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "native code") {
       return new NativeCode(it["code"]);
     } else if (type == "defined") {
