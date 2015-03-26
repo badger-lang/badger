@@ -11,7 +11,9 @@ abstract class AstVisitorBase {
   void visitWhileStatement(WhileStatement statement);
   void visitReturnStatement(ReturnStatement statement);
   void visitBreakStatement(BreakStatement statement);
-  void visitAssignment(Assignment assignment);
+  void visitVariableDeclaration(VariableDeclaration decl);
+  void visitFlatAssignment(FlatAssignment assignment);
+  void visitAccessAssignment(AccessAssignment assignment);
   void visitClassBlock(ClassBlock block);
   void visitNamespaceBlock(NamespaceBlock block);
   void visitMultiAssignment(MultiAssignment assignment);
@@ -105,8 +107,12 @@ abstract class AstVisitor extends AstVisitorBase {
       visitNamespaceBlock(statement);
     } else if (statement is MultiAssignment) {
       visitMultiAssignment(statement);
-    } else if (statement is Assignment) {
-      visitAssignment(statement);
+    } else if (statement is FlatAssignment) {
+      visitFlatAssignment(statement);
+    } else if (statement is VariableDeclaration) {
+      visitVariableDeclaration(statement);
+    } else if (statement is AccessAssignment) {
+      visitAccessAssignment(statement);
     } else if (statement is MethodCall) {
       visitMethodCall(statement);
     } else if (statement is TryCatchStatement) {

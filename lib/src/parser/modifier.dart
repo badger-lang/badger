@@ -57,15 +57,18 @@ class BadgerModifier {
     return reference;
   }
 
-  Statement modifyAssignment(Assignment assignment) {
-    var value = modifyExpression(assignment.value);
-    var ref = assignment.reference;
+  Statement modifyVariableDeclaration(VariableDeclaration decl) {
+    var value = modifyExpression(decl.value);
 
-    if (ref is Expression) {
-      ref = modifyExpression(ref);
-    }
+    return new VariableDeclaration(decl.name, value, decl.isImmutable, decl.isNullable);
+  }
 
-    return new Assignment(ref, value, assignment.immutable, assignment.isInitialDefine, assignment.isNullable);
+  Statement modifyAccessAssignment(AccessAssignment assignment) {
+    return new AccessAssignment(modifyExpression(assignment.reference), modifyExpression(assignment.value));
+  }
+
+  Statement modifyFlatAssignment(FlatAssignment assignment) {
+    return new FlatAssignment(assignment.name, modifyExpression(assignment.value));
   }
 
   Statement modifyMultiAssignment(MultiAssignment assignment) {
@@ -79,8 +82,12 @@ class BadgerModifier {
   Statement modifyStatement(Statement statement) {
     if (statement is ExpressionStatement) {
       return modifyExpressionStatement(statement);
-    } else if (statement is Assignment) {
-      return modifyAssignment(statement);
+    } else if (statement is VariableDeclaration) {
+      return modifyVariableDeclaration(statement);
+    } else if (statement is AccessAssignment) {
+      return modifyAccessAssignment(statement);
+    } else if (statement is FlatAssignment) {
+      return modifyFlatAssignment(statement);
     } else if (statement is MultiAssignment) {
       return modifyMultiAssignment(statement);
     } else if (statement is FunctionDefinition) {

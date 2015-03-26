@@ -112,20 +112,38 @@ class JsAstVisitor extends AstVisitor {
   }
 
   @override
-  void visitAssignment(Assignment assignment) {
-    if (assignment.immutable) {
-      buff.write('λlet(λ,"${assignment.reference}",');
+  void visitFlatAssignment(FlatAssignment assignment) {
+    buff.write("λ.${assignment.name} =");
+
+    if (assignment.value != null) {
       visitExpression(assignment.value);
+    } else {
+      buff.write("null");
+    }
+  }
+
+  @override
+  void visitVariableDeclaration(VariableDeclaration decl) {
+    if (decl.isImmutable) {
+      buff.write('λlet(λ,"${decl.name.name}",');
+      visitExpression(decl.value);
       buff.write(")");
     } else {
-      buff.write("λ.${assignment.reference} =");
+      buff.write("λ.${decl.name.name} =");
 
-      if (assignment.value != null) {
-        visitExpression(assignment.value);
+      if (decl.value != null) {
+        visitExpression(decl.value);
       } else {
         buff.write("null");
       }
     }
+  }
+
+  @override
+  void visitAccessAssignment(AccessAssignment assignment) {
+    visitExpression(assignment.reference);
+    buff.write(" = ");
+    visitExpression(assignment.value);
   }
 
   @override
@@ -139,7 +157,7 @@ class JsAstVisitor extends AstVisitor {
   @override
   void visitMethodCall(MethodCall call) {
     buff.write("λ.");
-    if (call.reference is String) {
+    if (call.reference is Identifier) {
       buff.write("${call.reference}(");
     } else {
       visitExpression(call.reference);

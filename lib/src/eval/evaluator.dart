@@ -121,10 +121,14 @@ class Evaluator {
   _evaluateStatement(Statement statement, [bool allowBreak = false]) async {
     if (statement is ExpressionStatement) {
       return await _resolveValue(statement.expression);
-    } else if (statement is Assignment) {
+    } else if (statement is FlatAssignment) {
+      var value = await _resolveValue(statement.value);
+      Context.current.setVariable(statement.name.name, value);
+      return value;
+    } else if (statement is VariableDeclaration) {
       var value = await _resolveValue(statement.value);
 
-      if (statement.immutable) {
+      if (statement.isImmutable) {
         value = new Immutable(value);
       }
 
@@ -132,19 +136,38 @@ class Evaluator {
         value = new Nullable(value);
       }
 
+      Context.current.setVariable(statement.name.name, value, true);
+      return value;
+    } else if (statement is AccessAssignment) {
+      var value = await _resolveValue(statement.value);
+
       var ref = statement.reference;
+      var c = await _resolveValue(ref.reference);
 
-      if (ref is Identifier) {
-        Context.current.setVariable(ref.name, value, statement.isInitialDefine);
-      } else {
-        var n = ref.identifier;
-        var x = await _resolveValue(ref.reference);
+      var parts = new List.from(ref.parts);
+      var lp = parts.removeLast();
 
-        if (x is BadgerObject) {
-          x.setProperty(n, value);
+      if (lp is! Identifier) {
+        throw new Exception("Unable to continue assignment: The last part of an access assignment must be an identifier!");
+      }
+
+      for (var p in parts) {
+        if (p is Identifier) {
+          if (value is BadgerObject) {
+            c = await value.getProperty(p.name);
+          } else {
+            c = await BadgerUtils.getProperty(p.name, c);
+          }
         } else {
-          BadgerUtils.setProperty(n, value, x);
+          MethodCall ca = p;
+          c = await _callMethod(ca, c);
         }
+      }
+
+      if (c is BadgerObject) {
+        c.setProperty(lp.name, value);
+      } else {
+        BadgerUtils.setProperty(lp.name, value, c);
       }
 
       return value;

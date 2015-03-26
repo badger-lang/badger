@@ -188,19 +188,6 @@ class DartAstVisitor extends AstVisitor {
   }
 
   @override
-  void visitAssignment(Assignment assignment) {
-    if (assignment.reference is String) {
-      buff.write('${currentContext}');
-      buff.write('["${assignment.reference}"] = ');
-      visitExpression(assignment.value);
-    } else {
-      visitExpression(assignment.reference);
-      buff.write(" = ");
-      visitExpression(assignment.value);
-    }
-  }
-
-  @override
   void visitBooleanLiteral(BooleanLiteral literal) {
     buff.write(literal.value);
   }
@@ -478,7 +465,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitNamespaceBlock(NamespaceBlock block) {
-    var name = enterContext();
+    enterContext();
     visitStatements(block.block.statements);
     exitContext();
   }
@@ -493,5 +480,30 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitTryCatchStatement(TryCatchStatement statement) {
+  }
+
+  @override
+  void visitAccessAssignment(AccessAssignment assignment) {
+    visitAccess(assignment.reference);
+    buff.write("=");
+    visitExpression(assignment.value);
+  }
+
+  @override
+  void visitFlatAssignment(FlatAssignment assignment) {
+    buff.write('${currentContext}["');
+    buff.write(assignment.name);
+    buff.write('"]');
+    buff.write("=");
+    visitExpression(assignment.value);
+  }
+
+  @override
+  void visitVariableDeclaration(VariableDeclaration decl) {
+    buff.write('${currentContext}["');
+    buff.write(decl.name);
+    buff.write('"]');
+    buff.write("=");
+    visitExpression(decl.value);
   }
 }

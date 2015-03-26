@@ -18,8 +18,13 @@ abstract class AstNode {
   Map encode() => new BadgerJsonBuilder(this).build();
 }
 
-abstract class Statement extends AstNode {}
-abstract class Expression extends AstNode {}
+abstract class Statement extends AstNode {
+  Token token;
+}
+
+abstract class Expression extends AstNode {
+  Token token;
+}
 abstract class Declaration extends AstNode {}
 
 class ExpressionStatement extends Statement {
@@ -277,6 +282,8 @@ class Identifier extends AstNode {
 
   @override
   String toString() => name;
+
+  Token token;
 }
 
 class CaseStatement extends Statement {
@@ -311,17 +318,27 @@ class VariableReference extends Expression {
   String toString() => "VariableReference(${identifier})";
 }
 
-class Assignment extends Statement {
-  final bool immutable;
-  final dynamic reference;
-  final Expression value;
-  final bool isInitialDefine;
+class VariableDeclaration extends Statement {
+  final bool isImmutable;
   final bool isNullable;
+  final Identifier name;
+  final Expression value;
 
-  Assignment(this.reference, this.value, this.immutable, this.isInitialDefine, this.isNullable);
+  VariableDeclaration(this.name, this.value, this.isImmutable, this.isNullable);
+}
 
-  @override
-  String toString() => "Assignment(identifier: ${reference}, value: ${value})";
+class AccessAssignment extends Statement {
+  final Access reference;
+  final Expression value;
+
+  AccessAssignment(this.reference, this.value);
+}
+
+class FlatAssignment extends Statement {
+  final Identifier name;
+  final Expression value;
+
+  FlatAssignment(this.name, this.value);
 }
 
 class ListDefinition extends Expression {

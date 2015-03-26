@@ -3,18 +3,31 @@ part of badger.parser;
 class BadgerParserDefinition extends BadgerGrammarDefinition {
   @override
   start() => super.start().map((it) {
-    List statements = it[3] == null ? [] : it[3].where((it) => it is Statement || it is Expression).map((it) {
-      if (it is Expression) {
-        return new ExpressionStatement(it);
-      } else {
-        return it;
-      }
-    }).toList();
+    List<Statement> statements = it[3] == null ? [] : it[3];
 
     return new Program(
       it[1] == null ? [] : it[1].where((it) => it is Declaration).toList(),
       statements
     );
+  });
+
+  @override
+  operation() => super.operation().map((it) {
+    var e = it.value;
+    e.token = it;
+    return e;
+  });
+
+  @override
+  expressionItem() => super.expressionItem().map((it) {
+    var e = it.value;
+    e.token = it;
+    return e;
+  });
+
+  @override
+  expressionStatement() => super.expressionStatement().map((it) {
+    return new ExpressionStatement(it);
   });
 
   @override
@@ -84,7 +97,9 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   statement() => super.statement().map((it) {
-    return it;
+    var e = it.value;
+    e.token = it;
+    return e;
   });
 
   @override
@@ -138,11 +153,15 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
-  assignment() => super.assignment().map((it) {
-    var isInitialDefine = it[0] != null;
-    var isNullable = it[0] == null ? null : it[0][0].endsWith("?");
+  flatAssignment() => super.flatAssignment().map((it) {
+    return new FlatAssignment(it[0], it[4]);
+  });
+
+  @override
+  variableDeclaration() => super.variableDeclaration().map((it) {
+    var isNullable = it[0][0].endsWith("?");
     var isImmutable = it[0] != null && it[0][0].startsWith("let");
-    return new Assignment(it[1], it[5], isImmutable, isInitialDefine, isNullable);
+    return new VariableDeclaration(it[2], it[6], isImmutable, isNullable);
   });
 
   @override
@@ -155,7 +174,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   accessAssignment() => super.accessAssignment().map((it) {
-    return new Assignment(it[0], it[4], false, false, true);
+    return new AccessAssignment(it[0], it[4]);
   });
 
   @override
@@ -266,7 +285,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   identifier() => super.identifier().map((it) {
-    return new Identifier(it.join());
+    var e = it.value;
+    return new Identifier(e.join())..token = it;
   });
 }
 

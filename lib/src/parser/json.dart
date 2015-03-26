@@ -122,14 +122,25 @@ class BadgerJsonBuilder {
         "type": "expression statement",
         "expression": _generateExpression(statement.expression)
       };
-    } else if (statement is Assignment) {
+    } else if (statement is VariableDeclaration) {
       return {
-        "type": "assignment",
-        "reference": statement.reference is String ? statement.reference : _generateExpression(statement.reference),
+        "type": "variable declaration",
+        "identifier": statement.name.name,
         "value": _generateExpression(statement.value),
-        "immutable": statement.immutable,
-        "isInitialDefine": statement.isInitialDefine,
+        "isImmutable": statement.isImmutable,
         "isNullable": statement.isNullable
+      };
+    } else if (statement is FlatAssignment) {
+      return {
+        "type": "flat assignment",
+        "identifier": statement.name.name,
+        "value": _generateExpression(statement.value)
+      };
+    } else if (statement is AccessAssignment) {
+      return {
+        "type": "access assignment",
+        "reference": _generateExpression(statement.reference),
+        "value": _generateExpression(statement.value)
       };
     } else if (statement is FunctionDefinition) {
       return {
@@ -240,7 +251,7 @@ class BadgerJsonBuilder {
     } else if (expression is MethodCall) {
       return {
         "type": "method call",
-        "reference": expression.reference is String ? expression.reference : _generateExpression(expression.reference),
+        "reference": expression.reference is Identifier ? expression.reference.name : _generateExpression(expression.reference),
         "args": _generateExpressions(expression.args)
       };
     } else if (expression is Defined) {
@@ -490,13 +501,17 @@ class BadgerJsonParser {
 
     if (type == "method call") {
       return _buildMethodCall(it);
-    } else if (type == "assignment") {
-      return new Assignment(
-        it["reference"] is String ? it["reference"] : _buildExpression(it["reference"]),
+    } else if (type == "variable declaration") {
+      return new VariableDeclaration(
+        new Identifier(it["identifier"]),
         _buildExpression(it["value"]),
-        it["immutable"],
-        it["isInitialDefine"],
+        it["isImmutable"],
         it["isNullable"]
+      );
+    } else if (type == "flat assignment") {
+      return new FlatAssignment(
+        new Identifier(it["identifier"]),
+        _buildExpression(it["value"])
       );
     } else if (type == "function definition") {
       return new FunctionDefinition(it["identifier"], it["args"].map((x) => new Identifier(x)).toList(), new Block(it["block"].map(_buildStatement).toList()));
@@ -613,6 +628,8 @@ class BadgerJsonParser {
 
     if (ref is Map) {
       ref = _buildExpression(ref);
+    } else {
+      ref = new Identifier(ref);
     }
 
     return new MethodCall(ref, args);

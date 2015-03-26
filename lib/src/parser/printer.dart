@@ -58,33 +58,6 @@ class BadgerPrinter extends AstVisitor {
   }
 
   @override
-  void visitAssignment(Assignment assignment) {
-    if (assignment.isInitialDefine) {
-      if (assignment.immutable) {
-        buff.write(keyword("let"));
-      } else {
-        buff.write(keyword("var"));
-      }
-
-      if (assignment.isNullable == true) {
-        buff.write("?");
-      }
-
-      buff.write(" ");
-    }
-
-    if (assignment.reference is String) {
-      buff.write(assignment.reference);
-    } else {
-      visitExpression(assignment.reference);
-    }
-
-    buff.write(" = ");
-
-    visitExpression(assignment.value);
-  }
-
-  @override
   void visitBooleanLiteral(BooleanLiteral literal) {
     buff.write(constant(literal.value.toString()));
   }
@@ -605,5 +578,52 @@ class BadgerPrinter extends AstVisitor {
 
   String operator(String l) {
     return l;
+  }
+
+  @override
+  void visitAccessAssignment(AccessAssignment assignment) {
+    visitAccess(assignment.reference);
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("=");
+    if (pretty) {
+      buff.write(" ");
+    }
+    visitExpression(assignment.value);
+  }
+
+  @override
+  void visitFlatAssignment(FlatAssignment assignment) {
+    buff.write(assignment.name);
+    buff.write(" = ");
+    visitExpression(assignment.value);
+  }
+
+  @override
+  void visitVariableDeclaration(VariableDeclaration decl) {
+    if (decl.isImmutable) {
+      buff.write(keyword("let"));
+    } else {
+      buff.write(keyword("var"));
+    }
+
+    if (decl.isNullable == true) {
+      buff.write("?");
+    }
+
+    buff.write(" ");
+
+    buff.write(decl.name);
+
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("=");
+    if (pretty) {
+      buff.write(" ");
+    }
+
+    visitExpression(decl.value);
   }
 }

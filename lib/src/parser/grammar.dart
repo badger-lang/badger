@@ -19,12 +19,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     includeSeparators: false
   );
 
-  statement() => (
+  statement() => ref(
+    token,
     ref(functionDefinition) |
     ref(multipleAssign) |
     ref(accessAssignment) |
-    ref(assignment) |
-    ref(methodCall) |
+    ref(flatAssignment) |
+    ref(variableDeclaration) |
     ref(ifStatement) |
     ref(whileStatement) |
     ref(breakStatement) |
@@ -34,8 +35,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(tryCatchStatement) |
     ref(namespace) |
     ref(classBlock) |
-    ref(expression)
+    ref(expressionStatement)
   );
+
+  expressionStatement() => ref(expression);
 
   breakStatement() => ref(BREAK);
   booleanLiteral() => ref(TRUE) | ref(FALSE);
@@ -54,7 +57,23 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     char("=") & whitespace().star() &
     ref(expression);
 
-  methodCall() => (ref(identifier) | ref(access)) &
+  variableDeclaration() =>
+  (
+    (
+      (ref(LET) | ref(VAR)) & char("?").optional()
+    ).flatten().optional() &
+    whitespace().plus()
+  ) &
+  ref(identifier) &
+  whitespace().star() &
+  ref(token, "=") &
+  whitespace().star() &
+  ref(expression);
+
+  methodCall() => (
+    ref(identifier) |
+    ref(access)
+  ) &
     char("(") &
     ref(arguments).optional() &
     char(")");
@@ -192,14 +211,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   emptyListDefinition() => string("[]");
 
-  assignment() =>
-  (
-    (
-      (ref(LET) | ref(VAR)) & char("?").optional()
-    ).flatten().optional() &
-    whitespace().plus()
-  ).optional() &
-    ref(identifier) &
+  flatAssignment() => ref(identifier) &
     whitespace().star() &
     ref(token, "=") &
     whitespace().star() &
@@ -213,7 +225,13 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(expression);
 
   variableReference() => ref(identifier);
+
   expression() =>
+    ref(operation) |
+    ref(expressionItem);
+
+  operation() => ref(
+    token,
     ref(inOperator) |
     ref(definedOperator) |
     ref(ternaryOperator) |
@@ -234,37 +252,39 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(notEqualOperator) |
     ref(bitShiftLeft) |
     ref(bitShiftRight) |
-    ref(negate) |
-    ref(expressionItem);
+    ref(negate)
+  );
 
-  callable() => ref(stringLiteral) | ref(simpleMethodCall) | ref(variableReference);
+  callable() =>
+    ref(stringLiteral) |
+    ref(simpleMethodCall) |
+    ref(variableReference);
 
   access() => ref(callable) & char(".") & (
     ref(simpleMethodCall) | ref(identifier)
   ).separatedBy(char(".")).optional();
 
-  expressionItem() => (
-    (
-      ref(reference) |
-      ref(anonymousFunction) |
-      ref(methodCall) |
-      ref(access) |
-      ref(nullLiteral) |
-      ref(nativeCode) |
-      ref(rangeLiteral) |
-      ref(mapDefinition) |
-      ref(hexadecimalLiteral) |
-      ref(doubleLiteral) |
-      ref(integerLiteral) |
-      ref(emptyListDefinition) |
-      ref(listDefinition) |
-      ref(stringLiteral) |
-      ref(parens) |
-      ref(bracketAccess) |
-      ref(booleanLiteral) |
-      ref(variableReference)
-    ) & char(";").optional()
-  ).pick(0);
+  expressionItem() => ref(
+    token,
+    ref(reference) |
+    ref(anonymousFunction) |
+    ref(methodCall) |
+    ref(access) |
+    ref(nullLiteral) |
+    ref(nativeCode) |
+    ref(rangeLiteral) |
+    ref(mapDefinition) |
+    ref(hexadecimalLiteral) |
+    ref(doubleLiteral) |
+    ref(integerLiteral) |
+    ref(emptyListDefinition) |
+    ref(listDefinition) |
+    ref(stringLiteral) |
+    ref(parens) |
+    ref(bracketAccess) |
+    ref(booleanLiteral) |
+    ref(variableReference)
+  );
 
   negate() => char("!") & ref(expressionItem);
   definedOperator() => ref(identifier) & char("?");
@@ -424,7 +444,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     pattern(_decodeTable.keys.join())
   ).flatten();
 
-  identifier() => pattern("A-Za-z_\$\u03A0").plus();
+  identifier() => ref(
+    token,
+    pattern("A-Za-z_\$\u03A0").plus()
+  );
 
   BREAK() => ref(token, "break");
   CASE() => ref(token, "case");
