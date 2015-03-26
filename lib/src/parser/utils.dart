@@ -3,6 +3,7 @@ part of badger.parser;
 class IndentedStringBuffer extends StringBuffer {
   final String indent;
   int level = 0;
+  bool enableIndent = true;
 
   IndentedStringBuffer({this.indent: "  "});
 
@@ -15,6 +16,9 @@ class IndentedStringBuffer extends StringBuffer {
   }
 
   void writeIndent() {
+    if (!enableIndent) {
+      return;
+    }
     write(indent * level);
   }
 

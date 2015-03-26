@@ -1,14 +1,17 @@
 part of badger.parser;
 
 class BadgerPrinter extends AstVisitor {
-  final Program program;
+  final AstNode rootNode;
+  final bool pretty;
 
   IndentedStringBuffer buff = new IndentedStringBuffer();
 
-  BadgerPrinter([this.program]);
+  BadgerPrinter(this.rootNode, {this.pretty: true}) {
+    buff.enableIndent = pretty;
+  }
 
   String print() {
-    visitProgram(program);
+    visitProgram(rootNode);
     return buff.toString();
   }
 
@@ -37,11 +40,15 @@ class BadgerPrinter extends AstVisitor {
       visitStatement(function.block.statements.first);
     } else {
       buff.write("(${function.args.join(", ")}) -> {");
-      buff.writeln();
+      if (pretty) {
+        buff.writeln();
+      }
       buff.increment();
       visitStatements(function.block.statements);
       buff.decrement();
-      buff.writeln();
+      if (pretty) {
+        buff.writeln();
+      }
       buff.write("}");
     }
   }
@@ -112,13 +119,24 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitForInStatement(ForInStatement statement) {
-    buff.write("${keyword('for')} ${statement.identifier} ${keyword('in')} ");
+    buff.write(keyword("for"));
+    buff.write(" ");
+    buff.write(statement.identifier);
+    buff.write(" ");
+    buff.write(keyword("in"));
+    buff.write(" ");
     visitExpression(statement.value);
-    buff.writeln(" {");
+    if (pretty) {
+      buff.writeln(" {");
+    } else {
+      buff.write("{");
+    }
     buff.increment();
     visitStatements(statement.block.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
   }
@@ -128,13 +146,13 @@ class BadgerPrinter extends AstVisitor {
     var i = 0;
     for (var statement in statements) {
       buff.writeIndent();
-      if (statement is Statement) {
-        visitStatement(statement);
-      } else {
-        visitExpression(statement);
-      }
+      visitStatement(statement);
       if (i != statements.length - 1) {
-        buff.writeln();
+        if (pretty) {
+          buff.writeln();
+        } else {
+          buff.write(";");
+        }
       }
       i++;
     }
@@ -142,12 +160,22 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitFunctionDefinition(FunctionDefinition definition) {
-    buff.write("${definition.name}(${definition.args.join(", ")}) {");
+    var sep = pretty ? ", " : ",";
+    buff.write("${definition.name}(${definition.args.join(sep)})");
+    if (pretty) {
+      buff.write(" {");
+    } else {
+      buff.write("{");
+    }
     buff.increment();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     visitStatements(definition.block.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
   }
@@ -159,24 +187,41 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitIfStatement(IfStatement statement) {
-    buff.write("${keyword('if')} ");
+    buff.write(keyword('if'));
+    if (pretty) {
+      buff.write(" ");
+    }
     visitExpression(statement.condition);
-    buff.writeln(" {");
+    if (pretty) {
+      buff.writeln(" {");
+    } else {
+      buff.write("{");
+    }
     buff.increment();
     visitStatements(statement.block.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
 
     if (statement.elseBlock == null) {
-      buff.writeln();
+      if (pretty) {
+        buff.writeln();
+      }
     } else {
       buff.increment();
-      buff.writeln(" ${keyword('else')} {");
+      buff.write(keyword("else"));
+      if (pretty) {
+        buff.write(" ");
+      }
+      buff.write("{");
       visitStatements(statement.elseBlock.statements);
       buff.decrement();
-      buff.writeln();
+      if (pretty) {
+        buff.writeln();
+      }
       buff.writeIndent();
       buff.write("}");
     }
@@ -186,7 +231,7 @@ class BadgerPrinter extends AstVisitor {
   void visitImportDeclaration(ImportDeclaration declaration) {
     buff.write('${keyword('import')} "');
     buff.write(declaration.location.components.join());
-    buff.writeln('"');
+    buff.write('"');
 
     if (declaration.id != null) {
       buff.write(" ");
@@ -207,13 +252,17 @@ class BadgerPrinter extends AstVisitor {
       buff.increment();
       var i = 0;
       for (var e in definition.elements) {
-        buff.writeln();
+        if (pretty) {
+          buff.writeln();
+        }
         buff.writeIndent();
         visitExpression(e);
         if (i != definition.elements.length - 1) {
           buff.write(",");
         } else {
-          buff.writeln();
+          if (pretty) {
+            buff.writeln();
+          }
         }
         i++;
       }
@@ -225,22 +274,35 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitMapDefinition(MapDefinition definition) {
-    buff.writeln("{");
+    if (pretty) {
+      buff.writeln("{");
+    } else {
+      buff.write("{");
+    }
     buff.increment();
     var i = 0;
     for (var x in definition.entries) {
       buff.writeIndent();
       visitExpression(x.key);
-      buff.write(": ");
+      buff.write(":");
+      if (pretty) {
+        buff.write(" ");
+      }
       visitExpression(x.value);
 
       if (i != definition.entries.length - 1) {
-        buff.writeln(",");
+        if (pretty) {
+          buff.writeln(",");
+        } else {
+          buff.write(",");
+        }
       }
       i++;
     }
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
   }
@@ -258,7 +320,10 @@ class BadgerPrinter extends AstVisitor {
     for (var x in call.args) {
       visitExpression(x);
       if (i != call.args.length - 1) {
-        buff.write(", ");
+        buff.write(",");
+        if (pretty) {
+          buff.write(" ");
+        }
       }
       i++;
     }
@@ -286,7 +351,13 @@ class BadgerPrinter extends AstVisitor {
   @override
   void visitOperator(Operation o) {
     visitExpression(o.left);
-    buff.write(" ${operator(o.op)} ");
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("${operator(o.op)}");
+    if (pretty) {
+      buff.write(" ");
+    }
     visitExpression(o.right);
   }
 
@@ -346,7 +417,9 @@ class BadgerPrinter extends AstVisitor {
     if (statement.cases.isNotEmpty) {
       buff.increment();
       for (var c in statement.cases) {
-        buff.writeln();
+        if (pretty) {
+          buff.writeln();
+        }
         buff.writeIndent();
         buff.write("${keyword('case')} ");
         visitExpression(c.expression);
@@ -362,9 +435,21 @@ class BadgerPrinter extends AstVisitor {
   @override
   void visitTernaryOperator(TernaryOperator operator) {
     visitExpression(operator.condition);
-    buff.write(" ? ");
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("?");
+    if (pretty) {
+      buff.write(" ");
+    }
     visitExpression(operator.whenTrue);
-    buff.write(" : ");
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write(":");
+    if (pretty) {
+      buff.write(" ");
+    }
     visitExpression(operator.whenFalse);
   }
 
@@ -381,11 +466,17 @@ class BadgerPrinter extends AstVisitor {
   void visitWhileStatement(WhileStatement statement) {
     buff.write("${keyword('while')} ");
     visitExpression(statement.condition);
-    buff.writeln(" {");
+    if (pretty) {
+      buff.writeln(" {");
+    } else {
+      buff.write("{");
+    }
     buff.increment();
     visitStatements(statement.block.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
   }
@@ -408,12 +499,22 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitNamespaceBlock(NamespaceBlock block) {
-    buff.write("${keyword('namespace')} ${block.name} {");
+    buff.write(keyword("namespace"));
+    buff.write(" ");
+    buff.write(block.name);
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("{");
     buff.increment();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     visitStatements(block.block.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
   }
@@ -431,10 +532,14 @@ class BadgerPrinter extends AstVisitor {
     buff.write(" {");
     if (block.block.statements.isNotEmpty) {
       buff.increment();
-      buff.writeln();
+      if (pretty) {
+        buff.writeln();
+      }
       visitStatements(block.block.statements);
       buff.decrement();
-      buff.writeln();
+      if (pretty) {
+        buff.writeln();
+      }
       buff.writeIndent();
     }
     buff.write("}");

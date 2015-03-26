@@ -1,9 +1,9 @@
 part of badger.parser;
 
 abstract class AstNode {
-  String toSource() =>
+  String toSource({bool pretty: true}) =>
     (
-      new BadgerPrinter(this)
+      new BadgerPrinter(this, pretty: pretty)
         ..visit(this)
     ).buff.toString();
 
