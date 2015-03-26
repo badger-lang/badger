@@ -44,7 +44,7 @@ class DartCompilerTarget extends CompilerTarget<String> {
     var buff = new StringBuffer();
     writeHeader(buff);
     var visitor = new DartAstVisitor(buff, this);
-    visitor.visit(program);
+    visitor.visitProgram(program);
     writeFooter(buff);
 
     var out = buff.toString();
@@ -160,9 +160,9 @@ class DartAstVisitor extends AstVisitor {
   }
 
   @override
-  void visit(Program program) {
+  void visitProgram(Program program) {
     enterContext();
-    super.visit(program);
+    super.visitProgram(program);
     exitContext();
   }
 

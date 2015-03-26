@@ -735,7 +735,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
     }
 
     var visitor = new JsAstVisitor(buff);
-    visitor.visit(program);
+    visitor.visitProgram(program);
 
     if (isTestSuite) {
       buff.write(";");

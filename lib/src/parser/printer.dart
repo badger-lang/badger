@@ -5,10 +5,10 @@ class BadgerPrinter extends AstVisitor {
 
   IndentedStringBuffer buff = new IndentedStringBuffer();
 
-  BadgerPrinter(this.program);
+  BadgerPrinter([this.program]);
 
   String print() {
-    visit(program);
+    visitProgram(program);
     return buff.toString();
   }
 

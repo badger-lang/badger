@@ -46,7 +46,19 @@ abstract class AstVisitorBase {
 }
 
 abstract class AstVisitor extends AstVisitorBase {
-  void visit(Program program) {
+  void visit(AstNode node) {
+    if (node is Program) {
+      visitProgram(node);
+    } else if (node is Statement) {
+      visitStatement(node);
+    } else if (node is Expression) {
+      visitExpression(node);
+    } else {
+      throw new Exception("Unknown AST Node");
+    }
+  }
+
+  void visitProgram(Program program) {
     for (var declaration in program.declarations) {
       visitDeclaration(declaration);
     }

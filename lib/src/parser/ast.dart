@@ -1,6 +1,10 @@
 part of badger.parser;
 
-abstract class AstNode {}
+abstract class AstNode {
+  String toSource() {
+    return (new BadgerPrinter(this)..visit(this)).buff.toString();
+  }
+}
 
 abstract class Statement extends AstNode {}
 abstract class Expression extends AstNode {}

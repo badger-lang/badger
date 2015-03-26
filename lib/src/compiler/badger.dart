@@ -7,6 +7,6 @@ class BadgerCompilerTarget extends CompilerTarget<String> {
       program = new BadgerSimplifier().modify(program);
     }
 
-    return (new BadgerPrinter(program)..visit(program)).buff.toString();
+    return (new BadgerPrinter(program)..visitProgram(program)).buff.toString();
   }
 }
