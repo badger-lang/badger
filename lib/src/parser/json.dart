@@ -109,7 +109,7 @@ class BadgerJsonBuilder {
     } else if (statement is FunctionDefinition) {
       return {
         "type": "function definition",
-        "identifier": statement.name,
+        "identifier": statement.name.name,
         "block": _generateStatements(statement.block.statements),
         "args": statement.args
       };
@@ -141,20 +141,20 @@ class BadgerJsonBuilder {
     } else if (statement is ForInStatement) {
       return {
         "type": "for in",
-        "identifier": statement.identifier,
+        "identifier": statement.identifier.toString(),
         "value": _generateExpression(statement.value),
         "block": _generateStatements(statement.block.statements)
       };
     } else if (statement is NamespaceBlock) {
       return {
         "type": "namespace",
-        "name": statement.name,
+        "name": statement.name.name,
         "block": _generateStatements(statement.block.statements)
       };
     } else if (statement is ClassBlock) {
       return {
         "type": "class",
-        "name": statement.name,
+        "name": statement.name.name,
         "args": statement.args,
         "extension": statement.extension,
         "block": _generateStatements(statement.block.statements)
@@ -176,7 +176,7 @@ class BadgerJsonBuilder {
     } else if (statement is TryCatchStatement) {
       return {
         "type": "try",
-        "identifier": statement.identifier,
+        "identifier": statement.identifier.name,
         "block": _generateStatements(statement.tryBlock.statements),
         "catch": _generateStatements(statement.catchBlock.statements)
       };
@@ -221,7 +221,7 @@ class BadgerJsonBuilder {
     } else if (expression is Defined) {
       return {
         "type": "defined",
-        "identifier": expression.identifier
+        "identifier": expression.identifier.name
       };
     } else if (expression is Parentheses) {
       return {
@@ -260,7 +260,7 @@ class BadgerJsonBuilder {
     } else if (expression is VariableReference) {
       return {
         "type": "variable reference",
-        "identifier": expression.identifier
+        "identifier": expression.identifier.name
       };
     } else if (expression is MapDefinition) {
       return {
@@ -493,13 +493,13 @@ class BadgerJsonParser {
       return new MultiAssignment(it["ids"], _buildExpression(it["value"]), it["immutable"], it["isInitialDefine"], it["isNullable"]);
     } else if (type == "class") {
       return new ClassBlock(
-        it["name"],
+        new Identifier(it["name"]),
         it["args"],
         it["extension"],
         new Block(it["block"].map(_buildStatement).toList())
       );
     } else if (type == "namespace") {
-      return new NamespaceBlock(it["name"], new Block(it["block"].map(_buildStatement).toList()));
+      return new NamespaceBlock(new Identifier(it["name"]), new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "return") {
       return new ReturnStatement(
         it["value"] == null ? null : _buildExpression(it["value"])

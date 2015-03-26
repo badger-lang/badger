@@ -371,7 +371,7 @@ class BadgerPrinter extends AstVisitor {
   @override
   void visitVariableReference(VariableReference reference) {
     if (["this", "super"].contains(reference.identifier)) {
-      buff.write(keyword(reference.identifier));
+      buff.write(keyword(reference.identifier.name));
     } else {
       buff.write(reference.identifier);
     }

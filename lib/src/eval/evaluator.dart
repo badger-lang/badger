@@ -134,8 +134,8 @@ class Evaluator {
 
       var ref = statement.reference;
 
-      if (ref is String) {
-        Context.current.setVariable(ref, value, statement.isInitialDefine);
+      if (ref is Identifier) {
+        Context.current.setVariable(ref.name, value, statement.isInitialDefine);
       } else {
         var n = ref.identifier;
         var x = await _resolveValue(ref.reference);
@@ -155,6 +155,7 @@ class Evaluator {
 
       var i = 0;
       for (var id in ids) {
+        id = id.name;
         var v = r is List ? r[i] : r[id];
         if (statement.immutable) {
           v = new Immutable(v);
@@ -189,7 +190,7 @@ class Evaluator {
         return Context.current;
       });
 
-      Context.current.defineNamespace(statement.name, ctx);
+      Context.current.defineNamespace(statement.name.name, ctx);
     } else if (statement is ClassBlock) {
       var creator;
       creator = (args) async {
@@ -210,7 +211,7 @@ class Evaluator {
         var x = statement.extension != null ? await Context.current.getType(statement.extension)([]) : null;
 
         return await Context.current.createChild(() async {
-          Context.current.typeName = statement.name;
+          Context.current.typeName = statement.name.name;
           if (x != null) {
             x.setVariable("extender", Context.current);
             Context.current.merge(x);
@@ -222,7 +223,7 @@ class Evaluator {
         });
       };
 
-      Context.current.defineType(statement.name, creator);
+      Context.current.defineType(statement.name.name, creator);
 
       return creator;
     } else if (statement is IfStatement) {
@@ -250,7 +251,7 @@ class Evaluator {
         });
       } catch (e) {
         await Context.current.createChild(() async {
-          Context.current.setVariable(statement.identifier, e);
+          Context.current.setVariable(statement.identifier.name, e);
           await _evaluateBlock(catchBlock);
         });
       }
@@ -267,7 +268,7 @@ class Evaluator {
         }
       }
     } else if (statement is ForInStatement) {
-      var i = statement.identifier;
+      var i = statement.identifier.name;
       var n = await _resolveValue(statement.value);
 
       call(value) async {
@@ -291,7 +292,7 @@ class Evaluator {
         }
       }
     } else if (statement is FunctionDefinition) {
-      var name = statement.name;
+      var name = statement.name.name;
       var argnames = statement.args;
       var block = statement.block;
 
@@ -305,7 +306,7 @@ class Evaluator {
           if (i >= argnames.length) {
             break;
           }
-          inputs[argnames[i]] = n;
+          inputs[argnames[i].name] = n;
           i++;
         }
 
@@ -366,7 +367,7 @@ class Evaluator {
     } else if (expr is HexadecimalLiteral) {
       return expr.value;
     } else if (expr is VariableReference) {
-      return Context.current.getProperty(expr.identifier);
+      return Context.current.getProperty(expr.identifier.name);
     } else if (expr is Parentheses) {
       return await _resolveValue(expr.expression);
     } else if (expr is AnonymousFunction) {
@@ -411,20 +412,20 @@ class Evaluator {
     } else if (expr is MethodCall) {
       return await _callMethod(expr);
     } else if (expr is Defined) {
-      return Context.current.hasVariable(expr.identifier);
+      return Context.current.hasVariable(expr.identifier.name);
     } else if (expr is NativeCode) {
       throw new Exception("Native Code is not supported on the evaluator.");
     } else if (expr is ReferenceCreation) {
-      return Context.current.getReference(expr.variable.identifier);
+      return Context.current.getReference(expr.variable.identifier.name);
     } else if (expr is Access) {
       var value = await _resolveValue(expr.reference);
 
       for (var p in expr.parts) {
-        if (p is String) {
+        if (p is Identifier) {
           if (value is BadgerObject) {
-            value = await value.getProperty(p);
+            value = await value.getProperty(p.name);
           } else {
-            value = await BadgerUtils.getProperty(p, value);
+            value = await BadgerUtils.getProperty(p.name, value);
           }
         } else {
           MethodCall c = p;
@@ -536,8 +537,8 @@ class Evaluator {
 
     var ref = call.reference;
 
-    if (ref is String && obj == null) {
-      return await Context.current.invoke(ref, args);
+    if (ref is Identifier && obj == null) {
+      return await Context.current.invoke(ref.name, args);
     } else {
       var v = obj == null ? await _resolveValue(ref.reference) : obj;
 

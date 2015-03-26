@@ -34,7 +34,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   classBlock() => super.classBlock().map((it) {
-    return new ClassBlock(it[2], it[3] == null ? [] : it[3].where((it) => it is String).toList(), it[5] != null ? it[5][2] : null, it[7]);
+    return new ClassBlock(it[2], it[3] == null ? [] : it[3].where((it) => it is Identifier).toList(), it[5] != null ? it[5][2] : null, it[7]);
   });
 
   @override
@@ -221,7 +221,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   anonymousFunction() => super.anonymousFunction().map((it) {
-    var x = it[1] != null ? it[1].where((it) => it is String).toList() : [];
+    var x = it[1] != null ? it[1].where((it) => it is Identifier).toList() : [];
     return new AnonymousFunction(x, it[5]);
   });
 
@@ -232,7 +232,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   functionDefinition() => super.functionDefinition().map((it) {
-    var argnames = it[4] != null ? it[4].where((it) => it is String).toList() : [];
+    var argnames = it[4] != null ? it[4].where((it) => it is Identifier).toList() : [];
     return new FunctionDefinition(it[2], argnames, it[6]);
   });
 
@@ -261,7 +261,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   identifier() => super.identifier().map((it) {
-    return it.join();
+    return new Identifier(it.join());
   });
 }
 

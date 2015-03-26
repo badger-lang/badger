@@ -40,15 +40,15 @@ class BooleanLiteral extends Expression {
 }
 
 class NamespaceBlock extends Statement {
-  final String name;
+  final Identifier name;
   final Block block;
 
   NamespaceBlock(this.name, this.block);
 }
 
 class ClassBlock extends Statement {
-  final String name;
-  final List<String> args;
+  final Identifier name;
+  final List<Identifier> args;
   final Block block;
   final String extension;
 
@@ -57,7 +57,7 @@ class ClassBlock extends Statement {
 
 class TryCatchStatement extends Statement {
   final Block tryBlock;
-  final String identifier;
+  final Identifier identifier;
   final Block catchBlock;
 
   TryCatchStatement(this.tryBlock, this.identifier, this.catchBlock);
@@ -70,8 +70,8 @@ class ReferenceCreation extends Expression {
 }
 
 class FunctionDefinition extends Statement {
-  final String name;
-  final List<String> args;
+  final Identifier name;
+  final List<Identifier> args;
   final Block block;
 
   FunctionDefinition(this.name, this.args, this.block);
@@ -81,7 +81,7 @@ class FunctionDefinition extends Statement {
 }
 
 class AnonymousFunction extends Expression {
-  final List<String> args;
+  final List<Identifier> args;
   final Block block;
 
   AnonymousFunction(this.args, this.block);
@@ -133,7 +133,7 @@ class Operator extends Expression {
 }
 
 class ForInStatement extends Statement {
-  final String identifier;
+  final Identifier identifier;
   final Expression value;
   final Block block;
 
@@ -211,7 +211,7 @@ class DoubleLiteral extends NumberLiteral<double> {
 }
 
 class Defined extends Expression {
-  final String identifier;
+  final Identifier identifier;
 
   Defined(this.identifier);
 }
@@ -221,6 +221,15 @@ class SwitchStatement extends Statement {
   final List<CaseStatement> cases;
 
   SwitchStatement(this.expression, this.cases);
+}
+
+class Identifier extends AstNode {
+  final String name;
+
+  Identifier(this.name);
+
+  @override
+  String toString() => name;
 }
 
 class CaseStatement extends Statement {
@@ -245,7 +254,7 @@ class HexadecimalLiteral extends NumberLiteral<int> {
 }
 
 class VariableReference extends Expression {
-  final String identifier;
+  final Identifier identifier;
 
   VariableReference(this.identifier);
 
@@ -319,7 +328,7 @@ class MapEntry extends Expression {
 
 class MultiAssignment extends Statement {
   final bool immutable;
-  final List<String> ids;
+  final List<Identifier> ids;
   final Expression value;
   final bool isInitialDefine;
   final bool isNullable;
