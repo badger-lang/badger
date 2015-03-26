@@ -16,15 +16,16 @@ abstract class AstNode {
   AstNode simplify() => new BadgerSimplifier().modify(this);
   String encodeJSON({bool pretty: false}) => new BadgerJsonBuilder(this).encode(pretty: pretty);
   Map encode() => new BadgerJsonBuilder(this).build();
+
+  Token token;
 }
 
 abstract class Statement extends AstNode {
-  Token token;
 }
 
 abstract class Expression extends AstNode {
-  Token token;
 }
+
 abstract class Declaration extends AstNode {}
 
 class ExpressionStatement extends Statement {
@@ -282,8 +283,6 @@ class Identifier extends AstNode {
 
   @override
   String toString() => name;
-
-  Token token;
 }
 
 class CaseStatement extends Statement {
