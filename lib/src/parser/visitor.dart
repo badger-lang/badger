@@ -33,7 +33,7 @@ abstract class AstVisitorBase {
   void visitNegate(Negate negate);
   void visitBooleanLiteral(BooleanLiteral literal);
   void visitHexadecimalLiteral(HexadecimalLiteral literal);
-  void visitOperator(Operation operator);
+  void visitOperation(Operation operation);
   void visitDefined(Defined defined);
   void visitReferenceCreation(ReferenceCreation creation);
   void visitAccess(Access access);
@@ -141,7 +141,7 @@ abstract class AstVisitor extends AstVisitorBase {
     } else if (expression is HexadecimalLiteral) {
       visitHexadecimalLiteral(expression);
     } else if (expression is Operation) {
-      visitOperator(expression);
+      visitOperation(expression);
     } else if (expression is BracketAccess) {
       visitBracketAccess(expression);
     } else if (expression is AnonymousFunction) {

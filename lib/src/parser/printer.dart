@@ -177,11 +177,7 @@ class BadgerPrinter extends AstVisitor {
     buff.writeIndent();
     buff.write("}");
 
-    if (statement.elseBlock == null) {
-      if (pretty) {
-        buff.writeln();
-      }
-    } else {
+    if (statement.elseBlock != null) {
       buff.increment();
       buff.write(keyword("else"));
       if (pretty) {
@@ -320,7 +316,7 @@ class BadgerPrinter extends AstVisitor {
   }
 
   @override
-  void visitOperator(Operation o) {
+  void visitOperation(Operation o) {
     visitExpression(o.left);
     if (pretty) {
       buff.write(" ");
