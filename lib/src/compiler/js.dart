@@ -288,7 +288,7 @@ class JsAstVisitor extends AstVisitor {
   }
 
   @override
-  void visitOperator(Operator operator) {
+  void visitOperator(Operation operator) {
     if (operator.op == "in") {
       buff.write("λin(");
       visitExpression(operator.left);

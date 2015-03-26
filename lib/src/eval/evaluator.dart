@@ -26,7 +26,7 @@ class Evaluator {
 
   evaluateProgram(Program program, Context ctx) async {
     if (simplify) {
-      program = new BadgerSimplifier().modify(program);
+      program = new BadgerSimplifier().modifyProgram(program);
     }
 
     return ctx.run(() async {
@@ -470,7 +470,7 @@ class Evaluator {
       var index = await _resolveValue(expr.index);
 
       return (await _resolveValue(expr.reference))[index];
-    } else if (expr is Operator) {
+    } else if (expr is Operation) {
       var op = expr.op;
 
       return await _handleOperation(expr.left, expr.right, op);

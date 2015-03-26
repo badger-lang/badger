@@ -1,9 +1,19 @@
 part of badger.parser;
 
 abstract class AstNode {
-  String toSource() {
-    return (new BadgerPrinter(this)..visit(this)).buff.toString();
-  }
+  String toSource() =>
+    (
+      new BadgerPrinter(this)
+        ..visit(this)
+    ).buff.toString();
+
+  String toHighlightedSource([HighlighterScheme scheme = const ConsoleHighlighterScheme()]) =>
+    (
+      new BadgerHighlighter(scheme)
+        ..visit(this)
+    ).buff.toString();
+
+  AstNode simplify() => new BadgerSimplifier().modify(this);
 }
 
 abstract class Statement extends AstNode {}
@@ -147,12 +157,13 @@ class Negate extends Expression {
 class NullLiteral extends Expression {
 }
 
-class Operator extends Expression {
+class Operation extends Expression {
   final Expression left;
   final Expression right;
   final String op;
 
-  Operator(this.left, this.right, this.op);
+  Operation(this.left, this.right, this.op);
+  Operation.add(this.left, this.right) : op = "+";
 }
 
 class ForInStatement extends Statement {

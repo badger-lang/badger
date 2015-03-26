@@ -284,7 +284,7 @@ class BadgerPrinter extends AstVisitor {
   }
 
   @override
-  void visitOperator(Operator o) {
+  void visitOperator(Operation o) {
     visitExpression(o.left);
     buff.write(" ${operator(o.op)} ");
     visitExpression(o.right);

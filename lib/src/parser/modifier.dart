@@ -1,7 +1,19 @@
 part of badger.parser;
 
 class BadgerModifier {
-  Program modify(Program program) {
+  AstNode modify(AstNode node) {
+    if (node is Program) {
+      return modifyProgram(node);
+    } else if (node is Statement) {
+      return modifyStatement(node);
+    } else if (node is Expression) {
+      return modifyExpression(node);
+    } else {
+      throw new Exception("Unknown AST Node");
+    }
+  }
+
+  Program modifyProgram(Program program) {
     var declarations = program.declarations.map(modifyDeclaration).where((it) => it != null).toList();
     var statements = program.statements
       .map(modifyStatement)
@@ -116,7 +128,7 @@ class BadgerModifier {
       return modifyDoubleLiteral(expression);
     } else if (expression is StringLiteral) {
       return modifyStringLiteral(expression);
-    } else if (expression is Operator) {
+    } else if (expression is Operation) {
       return modifyOperator(expression);
     } else if (expression is HexadecimalLiteral) {
       return modifyHexadecimalLiteral(expression);
@@ -131,11 +143,11 @@ class BadgerModifier {
     }
   }
 
-  Expression modifyOperator(Operator operator) {
+  Expression modifyOperator(Operation operator) {
     var left = modifyExpression(operator.left);
     var right = modifyExpression(operator.right);
 
-    return new Operator(left, right, operator.op);
+    return new Operation(left, right, operator.op);
   }
 
   Expression modifyIntegerLiteral(IntegerLiteral literal) {

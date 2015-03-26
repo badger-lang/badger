@@ -16,8 +16,8 @@ class BadgerDiffer {
     }
 
     var simplifier = new BadgerSimplifier();
-    var a = new BadgerJsonBuilder(simplifier.modify(left)).build();
-    var b = new BadgerJsonBuilder(simplifier.modify(right)).build();
+    var a = new BadgerJsonBuilder(simplifier.modifyProgram(left)).build();
+    var b = new BadgerJsonBuilder(simplifier.modifyProgram(right)).build();
     var differ = new JsonDiffer(JSON.encode(a), JSON.encode(b));
     _node = differ.diff();
 

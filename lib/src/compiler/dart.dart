@@ -332,7 +332,7 @@ class DartAstVisitor extends AstVisitor {
   }
 
   @override
-  void visitOperator(Operator operator) {
+  void visitOperator(Operation operator) {
     if (operator.op == "in") {
       throw new Exception("Compiler does not yet support the in operator.");
     } else {

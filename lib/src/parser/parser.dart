@@ -109,7 +109,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   OPERATOR(String n) => super.OPERATOR(n).map((it) {
-    return new Operator(it[0], it[4], it[2]);
+    return new Operation(it[0], it[4], it[2]);
   });
 
   @override

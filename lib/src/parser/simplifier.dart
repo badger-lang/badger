@@ -44,7 +44,7 @@ class BadgerSimplifier extends BadgerModifier {
   }
 
   @override
-  modifyOperator(Operator operator) {
+  modifyOperator(Operation operator) {
     operator = super.modifyOperator(operator);
     if (operator.left is NumberLiteral && operator.right is NumberLiteral) {
       var left = (operator.left as NumberLiteral).value;

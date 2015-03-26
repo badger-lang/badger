@@ -228,7 +228,7 @@ class BadgerJsonBuilder {
         "type": "parentheses",
         "expression": _generateExpression(expression.expression)
       };
-    } else if (expression is Operator) {
+    } else if (expression is Operation) {
       return {
         "type": "operator",
         "left": _generateExpression(expression.left),
@@ -535,7 +535,7 @@ class BadgerJsonParser {
     } else if (type == "double literal") {
       return new DoubleLiteral(it["value"]);
     } else if (type == "operator") {
-      return new Operator(_buildExpression(it["left"]), _buildExpression(it["right"]), it["op"]);
+      return new Operation(_buildExpression(it["left"]), _buildExpression(it["right"]), it["op"]);
     } else if (type == "negate") {
       return new Negate(_buildExpression(it["value"]));
     } else if (type == "null") {

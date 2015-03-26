@@ -1,6 +1,8 @@
 part of badger.parser;
 
 abstract class HighlighterScheme {
+  const HighlighterScheme();
+
   String keyword();
   String string();
   String end();
@@ -9,6 +11,8 @@ abstract class HighlighterScheme {
 }
 
 class ConsoleHighlighterScheme extends HighlighterScheme {
+  const ConsoleHighlighterScheme();
+
   @override
   String keyword() {
     return "\x1b[34m";
@@ -75,7 +79,7 @@ class MarkerHighlighterScheme extends HighlighterScheme {
 class BadgerHighlighter extends BadgerPrinter {
   final HighlighterScheme scheme;
 
-  BadgerHighlighter(this.scheme, Program program) : super(program);
+  BadgerHighlighter(this.scheme, [Program program]) : super(program);
 
   @override
   String keyword(String word) {
