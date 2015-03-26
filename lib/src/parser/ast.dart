@@ -31,6 +31,8 @@ class Block extends AstNode {
   final List<Statement> statements;
 
   Block(this.statements);
+  Block.forSingle(Statement statement) : this([statement]);
+  Block.forSingleExpression(Expression expr) : this.forSingle(new ExpressionStatement(expr));
 
   @override
   String toString() => "Block(${statements})";
@@ -43,6 +45,8 @@ class BooleanLiteral extends Expression {
 
   bool get isTrue => value == true;
   bool get isFalse => value == false;
+
+  BooleanLiteral negate() => new BooleanLiteral(!value);
 }
 
 class NamespaceBlock extends Statement {
@@ -189,6 +193,10 @@ class StringLiteral extends Expression {
 
   bool get isSimpleString => components.every((x) => x is String);
   String asSimpleString() => components.join();
+
+  StringLiteral modify(String modifier(String input)) {
+    return new StringLiteral.forString(modifier(asSimpleString()));
+  }
 }
 
 class NativeCode extends Expression {
@@ -197,7 +205,7 @@ class NativeCode extends Expression {
   NativeCode(this.code);
 }
 
-abstract class NumberLiteral<T> extends Expression {
+abstract class NumberLiteral<T extends num> extends Expression {
   static NumberLiteral create(num value) {
     if (value is double) {
       return new DoubleLiteral(value);
@@ -209,6 +217,8 @@ abstract class NumberLiteral<T> extends Expression {
   }
 
   T get value;
+
+  NumberLiteral<T> abs() => NumberLiteral.create(value.abs());
 }
 
 class IntegerLiteral extends NumberLiteral<int> {
@@ -269,6 +279,7 @@ class HexadecimalLiteral extends NumberLiteral<int> {
   final int value;
 
   HexadecimalLiteral(this.value);
+  HexadecimalLiteral.forString(String input) : this(int.parse(input, radix: 16));
 
   String asHex() => "0x${value.toRadixString(16)}";
 }
@@ -277,6 +288,7 @@ class VariableReference extends Expression {
   final Identifier identifier;
 
   VariableReference(this.identifier);
+  VariableReference.forString(String name) : this(new Identifier(name));
 
   @override
   String toString() => "VariableReference(${identifier})";
