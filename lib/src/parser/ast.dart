@@ -10,6 +10,10 @@ class ExpressionStatement extends Statement {
   final Expression expression;
 
   ExpressionStatement(this.expression);
+  
+  factory ExpressionStatement.forMethodCall(dynamic ref, [List<Expression> args = const []]) {
+    return new ExpressionStatement(new MethodCall(ref, args));
+  }
 }
 
 class MethodCall extends Expression {
@@ -17,6 +21,7 @@ class MethodCall extends Expression {
   final List<Expression> args;
 
   MethodCall(this.reference, this.args);
+  MethodCall.withNoArguments(this.reference) : args = [];
 
   @override
   String toString() => "MethodCall(reference: ${reference}, args: ${args})";
@@ -55,7 +60,7 @@ class ClassBlock extends Statement {
 
   ClassBlock(this.name, this.args, this.extension, this.block);
 
-
+  String get className => name.name;
 }
 
 class TryCatchStatement extends Statement {
