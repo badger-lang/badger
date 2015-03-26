@@ -188,9 +188,7 @@ class BadgerPrinter extends AstVisitor {
   @override
   void visitIfStatement(IfStatement statement) {
     buff.write(keyword('if'));
-    if (pretty) {
-      buff.write(" ");
-    }
+    buff.write(" ");
     visitExpression(statement.condition);
     if (pretty) {
       buff.writeln(" {");
@@ -553,21 +551,46 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitTryCatchStatement(TryCatchStatement statement) {
-    buff.writeln("${keyword('try')} {");
+    buff.write(keyword("try"));
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("{");
+    if (pretty) {
+      buff.writeln();
+    }
     buff.increment();
     visitStatements(statement.tryBlock.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
 
-    buff.write(" ${keyword('catch')} (");
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write(keyword("catch"));
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("(");
     buff.write(statement.identifier);
-    buff.writeln(") {");
+    buff.write(")");
+    if (pretty) {
+      buff.write(" ");
+    }
+    buff.write("{");
+    if (pretty) {
+      buff.writeln();
+    }
     buff.increment();
     visitStatements(statement.catchBlock.statements);
     buff.decrement();
-    buff.writeln();
+    if (pretty) {
+      buff.writeln();
+    }
     buff.writeIndent();
     buff.write("}");
   }

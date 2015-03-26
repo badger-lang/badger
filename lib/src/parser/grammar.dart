@@ -6,29 +6,36 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star().optional() &
     ref(declarations).optional() &
     whitespace().star().optional() &
-    ref(statement).separatedBy(whitespace().plus() & char(";").optional() & whitespace().plus().optional(), includeSeparators: false) &
+    ref(statements) &
     whitespace().star().optional()
   ).end();
 
-  statement() => (
+  statements() => ref(statement).separatedBy(
+    whitespace().starLazy(char(";") | char("\n")).optional() &
     (
-      ref(functionDefinition) |
-      ref(multipleAssign) |
-      ref(accessAssignment) |
-      ref(assignment) |
-      ref(methodCall) |
-      ref(ifStatement) |
-      ref(whileStatement) |
-      ref(breakStatement) |
-      ref(forInStatement) |
-      ref(returnStatement) |
-      ref(switchStatement) |
-      ref(tryCatchStatement) |
-      ref(namespace) |
-      ref(classBlock) |
-      ref(expression)
-    ) & char(";").optional()
-  ).pick(0);
+      char(";") | char("\n").plus()
+    ) &
+    whitespace().star().optional(),
+    includeSeparators: false
+  );
+
+  statement() => (
+    ref(functionDefinition) |
+    ref(multipleAssign) |
+    ref(accessAssignment) |
+    ref(assignment) |
+    ref(methodCall) |
+    ref(ifStatement) |
+    ref(whileStatement) |
+    ref(breakStatement) |
+    ref(forInStatement) |
+    ref(returnStatement) |
+    ref(switchStatement) |
+    ref(tryCatchStatement) |
+    ref(namespace) |
+    ref(classBlock) |
+    ref(expression)
+  );
 
   breakStatement() => ref(BREAK);
   booleanLiteral() => ref(TRUE) | ref(FALSE);
@@ -99,28 +106,28 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(expression);
 
-  plusOperator() => ref(OPERATOR, "+");
-  minusOperator() => ref(OPERATOR, "-");
-  divideOperator() => ref(OPERATOR, "/");
-  divideIntOperator() => ref(OPERATOR, "~/");
-  multiplyOperator() => ref(OPERATOR, "*");
-  andOperator() => ref(OPERATOR, "&&");
-  orOperator() => ref(OPERATOR, "||");
-  bitwiseAndOperator() => ref(OPERATOR, "&");
-  bitwiseOrOperator() => ref(OPERATOR, "|");
-  lessThanOperator() => ref(OPERATOR, "<");
-  greaterThanOperator() => ref(OPERATOR, ">");
-  lessThanOrEqualOperator() => ref(OPERATOR, "<=");
-  greaterThanOrEqualOperator() => ref(OPERATOR, ">=");
-  bitShiftLeft() => ref(OPERATOR, "<<");
-  bitShiftRight() => ref(OPERATOR, ">>");
-  equalOperator() => ref(OPERATOR, "==");
-  notEqualOperator() => ref(OPERATOR, "!=");
-  inOperator() => ref(OPERATOR, "in");
+  plusOperator() => ref(OPERATION, "+");
+  minusOperator() => ref(OPERATION, "-");
+  divideOperator() => ref(OPERATION, "/");
+  divideIntOperator() => ref(OPERATION, "~/");
+  multiplyOperator() => ref(OPERATION, "*");
+  andOperator() => ref(OPERATION, "&&");
+  orOperator() => ref(OPERATION, "||");
+  bitwiseAndOperator() => ref(OPERATION, "&");
+  bitwiseOrOperator() => ref(OPERATION, "|");
+  lessThanOperator() => ref(OPERATION, "<");
+  greaterThanOperator() => ref(OPERATION, ">");
+  lessThanOrEqualOperator() => ref(OPERATION, "<=");
+  greaterThanOrEqualOperator() => ref(OPERATION, ">=");
+  bitShiftLeft() => ref(OPERATION, "<<");
+  bitShiftRight() => ref(OPERATION, ">>");
+  equalOperator() => ref(OPERATION, "==");
+  notEqualOperator() => ref(OPERATION, "!=");
+  inOperator() => ref(OPERATION, "in");
 
-  OPERATOR(String x) => ref(expressionItem) &
+  OPERATION(String x) => ref(expressionItem) &
     whitespace().star() &
-    string(x) &
+    ref(token, x) &
     whitespace().star() &
     ref(expression);
 
@@ -141,7 +148,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star() &
     ref(stringLiteral) & (
       whitespace().plus() &
-      string("as") &
+      ref(token, "as") &
       whitespace().plus() &
       ref(identifier)
   ).optional();
@@ -153,11 +160,11 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   reference() => char("&") & ref(variableReference);
 
-  tryCatchStatement() => string("try") &
+  tryCatchStatement() => ref(token, "try") &
     whitespace().star() &
     ref(block) &
     whitespace().star() &
-    string("catch") &
+    ref(token, "catch") &
     whitespace().star() &
     char("(") &
     ref(identifier) &
@@ -168,7 +175,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   block() => whitespace().star() &
     char("{") &
     whitespace().star() &
-    ref(statement).separatedBy(whitespace().star()).optional() &
+    ref(statements).optional() &
     whitespace().star() &
     char("}");
 
@@ -265,7 +272,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   ifStatement() => ref(IF) &
     whitespace().plus() &
     ref(expression) &
-    whitespace().plus() &
+    whitespace().star() &
     ref(block) & (
     whitespace().star() &
     ref(ELSE) &
@@ -332,7 +339,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   whileStatement() => ref(WHILE) &
     whitespace().plus() &
     ref(expression) &
-    whitespace().plus() &
+    whitespace().star() &
     ref(block);
 
   anonymousFunction() => char("(") &

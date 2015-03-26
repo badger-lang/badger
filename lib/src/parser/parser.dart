@@ -34,7 +34,12 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   classBlock() => super.classBlock().map((it) {
-    return new ClassBlock(it[2], it[3] == null ? [] : it[3].where((it) => it is Identifier).toList(), it[5] != null ? it[5][2] : null, it[7]);
+    return new ClassBlock(
+      it[2],
+      it[3] == null ? [] : it[3].where((it) => it is Identifier).toList(),
+      it[5] != null ? it[5][2] : null,
+      it[7]
+    );
   });
 
   @override
@@ -108,8 +113,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
-  OPERATOR(String n) => super.OPERATOR(n).map((it) {
-    return new Operation(it[0], it[4], it[2]);
+  OPERATION(String n) => super.OPERATION(n).map((it) {
+    return new Operation(it[0], it[4], it[2].value);
   });
 
   @override
