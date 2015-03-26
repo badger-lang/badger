@@ -10,7 +10,7 @@ class ExpressionStatement extends Statement {
   final Expression expression;
 
   ExpressionStatement(this.expression);
-  
+
   factory ExpressionStatement.forMethodCall(dynamic ref, [List<Expression> args = const []]) {
     return new ExpressionStatement(new MethodCall(ref, args));
   }
@@ -182,7 +182,7 @@ class StringLiteral extends Expression {
   final List<dynamic> components;
 
   StringLiteral(this.components);
-  StringLiteral.fromString(String input) : components = [input];
+  StringLiteral.forString(String input) : components = [input];
 
   @override
   String toString() => "StringLiteral(${components})";
