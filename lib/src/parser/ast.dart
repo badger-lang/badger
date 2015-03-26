@@ -167,6 +167,7 @@ class StringLiteral extends Expression {
   final List<dynamic> components;
 
   StringLiteral(this.components);
+  StringLiteral.fromString(String input) : components = [input];
 
   @override
   String toString() => "StringLiteral(${components})";

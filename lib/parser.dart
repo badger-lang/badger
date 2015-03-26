@@ -16,4 +16,4 @@ part "src/parser/highlighter.dart";
 part "src/parser/simplifier.dart";
 part "src/parser/modifier.dart";
 part "src/parser/diff.dart";
-
+part "src/parser/builder.dart";

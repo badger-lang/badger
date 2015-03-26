@@ -247,7 +247,7 @@ class BadgerPrinter extends AstVisitor {
 
   @override
   void visitMethodCall(MethodCall call) {
-    if (call.reference is String) {
+    if (call.reference is Identifier) {
       buff.write("${call.reference}");
     } else {
       visitExpression(call.reference);
