@@ -18,6 +18,24 @@ $boolean(value) {
   }
 }
 @END
+
+@BEGIN range helper
+$range(int lower, int upper, [bool inclusive = true, int step = 1]) {
+  if (step == 1) {
+    if (inclusive) {
+      return new Iterable<int>.generate(upper - lower + 1, (i) => lower + i).toList();
+    } else {
+      return new Iterable<int>.generate(upper - lower - 1, (i) => lower + i + 1).toList();
+    }
+  } else {
+    var list = [];
+    for (var i = inclusive ? lower : lower + step; inclusive ? i <= upper : i < upper; i += step) {
+      list.add(i);
+    }
+    return list;
+  }
+}
+@END
 """;
 
 class DartCompilerTarget extends CompilerTarget<String> {
@@ -28,7 +46,16 @@ class DartCompilerTarget extends CompilerTarget<String> {
     var visitor = new DartAstVisitor(buff, this);
     visitor.visit(program);
     writeFooter(buff);
-    return buff.toString();
+
+    var out = buff.toString();
+
+    if (options["pretty"] == true) {
+      out = new dartFormatter.CodeFormatterImpl(
+        new dartFormatter.FormatterOptions()
+      ).format(dartFormatter.CodeKind.COMPILATION_UNIT, out).source;
+    }
+
+    return out.trim();
   }
 
   void writeHeader(StringBuffer buff) {
@@ -315,10 +342,23 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitRangeLiteral(RangeLiteral literal) {
+    target._codes.add("range helper");
     buff.write(r"$range(");
-    visitExpression(literal.left);
-    buff.write(", ");
-    visitExpression(literal.right);
+    var r = literal.right as IntegerLiteral;
+    var l = literal.left as IntegerLiteral;
+
+    var x = [l.value.toString(), r.value.toString()];
+    if (literal.exclusive != null) {
+      x.add((!literal.exclusive).toString());
+    }
+
+    if (literal.step != null) {
+      var step = literal.step as IntegerLiteral;
+      x.add(step.value.toString());
+    }
+
+    buff.write(x.join(", "));
+
     buff.write(")");
   }
 

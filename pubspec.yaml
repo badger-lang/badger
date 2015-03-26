@@ -2,7 +2,11 @@ name: badger
 description: Experimental Programming Language
 version: 0.1.0
 dependencies:
-  args: ">=0.13.0 <0.14.0"
+  analyzer:
+    git:
+      url: https://github.com/dart-lang/ddc_analyzer.git
+      ref: 901ecfffe7c29db4ac4db2f8ac90ea790b995895
+  args: ">=0.12.0 <0.14.0"
   crypto: ">=0.9.0 <0.10.0"
   petitparser: ">=1.3.7 <2.0.0"
   path: ">=1.3.3 <2.0.0"
