@@ -43,11 +43,36 @@ class BadgerSnapshotParser {
 }
 
 class BadgerJsonBuilder {
-  final Program program;
+  final AstNode rootNode;
 
-  BadgerJsonBuilder(this.program);
+  BadgerJsonBuilder(this.rootNode);
 
-  Map build() {
+  String encode({bool pretty: false}) {
+    var out = build();
+    if (pretty) {
+      return new JsonEncoder.withIndent("  ").convert(out);
+    } else {
+      return JSON.encode(out);
+    }
+  }
+
+  Map build([AstNode node]) {
+    if (node == null) {
+      node = rootNode;
+    }
+
+    if (node is Program) {
+      return buildProgram(node);
+    } else if (node is Statement) {
+      return _generateStatement(node);
+    } else if (node is Expression) {
+      return _generateExpression(node);
+    } else {
+      throw new Exception("Unknown AST Node");
+    }
+  }
+
+  Map buildProgram(Program program) {
     return {
       "declarations": _generateDeclarations(program.declarations),
       "statements": _generateStatements(program.statements)

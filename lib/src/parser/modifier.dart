@@ -8,6 +8,8 @@ class BadgerModifier {
       return modifyStatement(node);
     } else if (node is Expression) {
       return modifyExpression(node);
+    } else if (node is Block) {
+      return new Block(node.statements.map(modifyStatement).toList());
     } else {
       throw new Exception("Unknown AST Node");
     }

@@ -14,6 +14,8 @@ abstract class AstNode {
     ).buff.toString();
 
   AstNode simplify() => new BadgerSimplifier().modify(this);
+  String encodeJSON({bool pretty: false}) => new BadgerJsonBuilder(this).encode(pretty: pretty);
+  Map encode() => new BadgerJsonBuilder(this).build();
 }
 
 abstract class Statement extends AstNode {}

@@ -18,4 +18,5 @@ void main() {
 
   var o = new Operation.add(NumberLiteral.create(1), NumberLiteral.create(2));
   print(o.simplify());
+  print(o.encodeJSON(pretty: true));
 }
