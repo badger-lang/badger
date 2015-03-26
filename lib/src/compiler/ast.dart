@@ -4,7 +4,7 @@ class AstCompilerTarget extends CompilerTarget<String> {
   @override
   Future<String> compile(Program program) async {
     var ast = new BadgerJsonBuilder(program);
-    var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
+    var encoder = getBooleanOption("pretty") ? new JsonEncoder.withIndent("  ") : JSON.encoder;
 
     return encoder.convert(ast.build());
   }
@@ -20,8 +20,8 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
 
   @override
   Future<String> compile(Program program) async {
-    var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
-    var simplify = options.containsKey("simplify") && options["simplify"] == true;
+    var encoder = getBooleanOption("pretty") ? new JsonEncoder.withIndent("  ") : JSON.encoder;
+    var simplify = getBooleanOption("simplify");
     var out = {};
     var locations = [];
 

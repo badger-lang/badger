@@ -3,7 +3,7 @@ part of badger.compiler;
 class BadgerCompilerTarget extends CompilerTarget<String> {
   @override
   Future<String> compile(Program program) async {
-    if (options.containsKey("simplify") && options["simplify"] == true) {
+    if (getBooleanOption("simplify")) {
       program = new BadgerSimplifier().modify(program);
     }
 

@@ -506,9 +506,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
   @override
   Future<String> compile(Program program) async {
-    var isTestSuite = options["isTestSuite"] == true;
-    var addHooks = options["hooks"] == true;
-    var generateTeamCityTests = options["teamcity"] == true;
+    var isTestSuite = getBooleanOption("isTestSuite");
+    var addHooks = getBooleanOption("hooks");
+    var generateTeamCityTests = getBooleanOption("teamcity");
 
     addHelper("λlet", """
       function(context, name, value) {

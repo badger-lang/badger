@@ -15,4 +15,16 @@ abstract class CompilerTarget<T> {
    * Compiler Options
    */
   Map<String, dynamic> options = {};
+
+  bool hasOption(String name) {
+    return options.containsKey(name);
+  }
+
+  dynamic getOption(String name) {
+    return options[name];
+  }
+
+  bool getBooleanOption(String name, [bool defaultValue = false]) {
+    return options.containsKey(name) ? options[name] == true : defaultValue;
+  }
 }

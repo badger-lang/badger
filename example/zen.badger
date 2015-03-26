@@ -1,0 +1,8 @@
+import "badger:io"
+
+let x = getCurrentContext()
+print(x.variables)
+
+let client = HttpClient()
+
+print(client.get("https://api.github.com/zen").body)
