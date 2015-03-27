@@ -157,7 +157,11 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     & ref(NEWLINE).optional();
 
   declarations() => ref(declaration).separatedBy(char("\n"));
-  declaration() => ref(importDeclaration) | ref(featureDeclaration);
+  declaration() => ref(
+    token,
+    ref(importDeclaration) |
+    ref(featureDeclaration)
+  );
 
   featureDeclaration() => ref(USING_FEATURE) &
     whitespace().plus()
