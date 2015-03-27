@@ -3,10 +3,7 @@ part of badger.compiler;
 class AstCompilerTarget extends CompilerTarget<String> {
   @override
   Future<String> compile(Program program) async {
-    var ast = new BadgerJsonBuilder(program);
-    var encoder = getBooleanOption("pretty") ? new JsonEncoder.withIndent("  ") : JSON.encoder;
-
-    return encoder.convert(ast.build());
+    return program.encodeJSON(pretty: getBooleanOption("pretty"));
   }
 }
 

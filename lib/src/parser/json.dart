@@ -147,7 +147,7 @@ class BadgerJsonBuilder {
         "type": "function definition",
         "identifier": statement.name.name,
         "block": _generateStatements(statement.block.statements),
-        "args": statement.args
+        "args": statement.args.map((it) => it.name).toList()
       };
     } else if (statement is SwitchStatement) {
       return {
