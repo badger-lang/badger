@@ -35,6 +35,9 @@ for x in 5..10 {
   print(x)
 }
 
+("Hello World").substring(1)
+"Hello World".substring(1)
+
 print(5 * 5)
 print(5 + 5)
 print(5 / 5)

@@ -145,6 +145,13 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  callable() => super.callable().map((it) {
+    var e = it.value;
+    e.token = it;
+    return e;
+  });
+
+  @override
   importDeclaration() => super.importDeclaration().map((it) {
     return new ImportDeclaration(it[2], it[3] != null ? it[3][3] : null);
   });

@@ -260,9 +260,12 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   );
 
   callable() =>
-    ref(stringLiteral) |
-    ref(simpleMethodCall) |
-    ref(variableReference);
+    ref(token,
+      ref(stringLiteral) |
+      ref(simpleMethodCall) |
+      ref(variableReference) |
+      ref(parens)
+    );
 
   access() => ref(callable) & char(".") & (
     ref(simpleMethodCall) | ref(identifier)
