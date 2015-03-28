@@ -79,7 +79,7 @@ class MarkerHighlighterScheme extends HighlighterScheme {
 class BadgerHighlighter extends BadgerPrinter {
   final HighlighterScheme scheme;
 
-  BadgerHighlighter(this.scheme, [Program program]) : super(program);
+  BadgerHighlighter(this.scheme, {Program program, bool pretty: true}) : super(program, pretty: pretty);
 
   @override
   String keyword(String word) {

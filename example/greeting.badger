@@ -1,4 +1,4 @@
-func greet(name) {
+greet(name) {
   return "Hello $(name)"
 }
 

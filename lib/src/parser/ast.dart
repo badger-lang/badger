@@ -18,6 +18,11 @@ abstract class AstNode {
   Map encode() => new BadgerJsonBuilder(this).build();
 
   Token token;
+
+  @override
+  String toString() {
+    return toSource();
+  }
 }
 
 abstract class Statement extends AstNode {
@@ -44,9 +49,6 @@ class MethodCall extends Expression {
 
   MethodCall(this.reference, this.args);
   MethodCall.withNoArguments(this.reference) : args = [];
-
-  @override
-  String toString() => "MethodCall(reference: ${reference}, args: ${args})";
 }
 
 class Block extends AstNode {
@@ -55,9 +57,6 @@ class Block extends AstNode {
   Block(this.statements);
   Block.forSingle(Statement statement) : this([statement]);
   Block.forSingleExpression(Expression expr) : this.forSingle(new ExpressionStatement(expr));
-
-  @override
-  String toString() => "Block(${statements})";
 }
 
 class BooleanLiteral extends Expression {
@@ -109,9 +108,6 @@ class FunctionDefinition extends Statement {
   final Block block;
 
   FunctionDefinition(this.name, this.args, this.block);
-
-  @override
-  String toString() => "FunctionDefinition(name: ${name}, args: ${args}, block: ${block})";
 }
 
 class AnonymousFunction extends Expression {
@@ -193,9 +189,6 @@ class ReturnStatement extends Statement {
   final Expression expression;
 
   ReturnStatement(this.expression);
-
-  @override
-  String toString() => "ReturnStatement(${expression})";
 }
 
 class Access extends Expression {
@@ -210,9 +203,6 @@ class StringLiteral extends Expression {
 
   StringLiteral(this.components);
   StringLiteral.forString(String input) : components = [input];
-
-  @override
-  String toString() => "StringLiteral(${components})";
 
   bool get isSimpleString => components.every((x) => x is String);
   String asSimpleString() => components.join();
@@ -248,18 +238,12 @@ class IntegerLiteral extends NumberLiteral<int> {
   final int value;
 
   IntegerLiteral(this.value);
-
-  @override
-  String toString() => "IntegerLiteral(${value})";
 }
 
 class DoubleLiteral extends NumberLiteral<double> {
   final double value;
 
   DoubleLiteral(this.value);
-
-  @override
-  String toString() => "DoubleLiteral(${value})";
 }
 
 class Defined extends Expression {
@@ -312,9 +296,6 @@ class VariableReference extends Expression {
 
   VariableReference(this.identifier);
   VariableReference.forString(String name) : this(new Identifier(name));
-
-  @override
-  String toString() => "VariableReference(${identifier})";
 }
 
 class VariableDeclaration extends Statement {
@@ -345,9 +326,6 @@ class ListDefinition extends Expression {
 
   ListDefinition(this.elements);
 
-  @override
-  String toString() => "ListDefinition(${elements.join(", ")})";
-
   bool get isEmpty => elements.isEmpty;
   bool get isNotEmpty => elements.isNotEmpty;
   int get length => elements.length;
@@ -359,9 +337,6 @@ class BracketAccess extends Expression {
 
   BracketAccess(this.reference, this.index);
 
-  @override
-  String toString() => "BracketAccess(receiver: ${reference}, index: ${index})";
-
   bool get isNumberIndex => index is NumberLiteral;
 }
 
@@ -369,9 +344,6 @@ class FeatureDeclaration extends Declaration {
   final StringLiteral feature;
 
   FeatureDeclaration(this.feature);
-
-  @override
-  String toString() => "FeatureDeclaration(${feature})";
 }
 
 class ImportDeclaration extends Declaration {
@@ -379,9 +351,6 @@ class ImportDeclaration extends Declaration {
   final String id;
 
   ImportDeclaration(this.location, this.id);
-
-  @override
-  String toString() => "ImportDeclaration(${location})";
 
   Uri asUri() => Uri.parse(location.components.join());
 }
@@ -419,7 +388,4 @@ class Program extends AstNode {
   Map<String, dynamic> meta = {};
 
   Program(this.declarations, this.statements);
-
-  @override
-  String toString() => "Program(\n${statements.map((it) => '  ${it.toString()}').join(",\n")}\n)";
 }
