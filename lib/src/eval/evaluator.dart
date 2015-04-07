@@ -587,7 +587,7 @@ class Evaluator {
         l = n.last;
       }
 
-      var z = await BadgerUtils.getProperty(l, v);
+      var z = await BadgerUtils.getProperty(l is Identifier ? l.name : l, v);
 
       if (z is ReturnValue) {
         z = z.value;

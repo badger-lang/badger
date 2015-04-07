@@ -130,6 +130,13 @@ class ParserLibrary {
     context.proxy("BadgerPrinter", BadgerPrinter);
     context.proxy("BadgerJsonBuilder", BadgerJsonBuilder);
     context.proxy("BadgerJsonParser", BadgerJsonParser);
+    context.proxy("BadgerParserUtils", BadgerParserUtils);
+  }
+}
+
+class BadgerParserUtils {
+  static Program parse(String input) {
+    return new BadgerParser().parse(input).value;
   }
 }
 

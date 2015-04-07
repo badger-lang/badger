@@ -173,8 +173,8 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   variableDeclaration() => super.variableDeclaration().map((it) {
-    var isNullable = it[0][0].endsWith("?");
-    var isImmutable = it[0] != null && it[0][0].startsWith("let");
+    var isNullable = it[0].endsWith("?");
+    var isImmutable = it[0] != null && it[0].startsWith("let");
     return new VariableDeclaration(it[2], it[6], isImmutable, isNullable);
   });
 
