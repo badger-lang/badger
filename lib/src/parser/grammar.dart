@@ -15,9 +15,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     (
       char(";") | char("\n").plus()
     ) &
-    whitespace().star().optional(),
+    whitespace().star().optional() |
+    failure("Expected a semicolon or a newline"),
     includeSeparators: false
-  );
+  ) | failure("Expected statements separated by a semicolon or a newline");
 
   statement() => ref(
     token,
@@ -35,7 +36,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(tryCatchStatement) |
     ref(namespace) |
     ref(classBlock) |
-    ref(expressionStatement)
+    ref(expressionStatement) |
+    failure("Statement Expected")
   );
 
   expressionStatement() => ref(expression);
@@ -232,7 +234,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   expression() =>
     ref(operation) |
-    ref(expressionItem);
+    ref(expressionItem) |
+    failure("Expression Expected");
 
   operation() => ref(
     token,
@@ -256,7 +259,8 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ref(notEqualOperator) |
     ref(bitShiftLeft) |
     ref(bitShiftRight) |
-    ref(negate)
+    ref(negate) |
+    failure("Operation Expected")
   );
 
   callable() =>
