@@ -1,11 +1,5 @@
 import "badger:io"
 
 let cwd = Directory.current()
-
-cwd.walk((file) -> {
-  print(file.path)
-})
-
-cwd.handleEvent((event) -> {
-  print(event)
-})
+let content = cwd.file("pubspec.yaml").read()
+print(content)

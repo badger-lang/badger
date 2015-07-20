@@ -1,5 +1,6 @@
 library badger.parser;
 
+import "dart:math";
 import "dart:convert";
 
 import "package:petitparser/petitparser.dart";

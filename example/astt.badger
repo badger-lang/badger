@@ -1,0 +1,26 @@
+let x = 0
+
+let list = [
+  "Hello",
+  "World",
+  1,
+  2,
+  3,
+  0xDEADBEEF,
+  2.0
+]
+
+for n in list {
+  print(n)
+}
+
+if true {
+  print("True!")
+}
+
+if false {
+  print("Wut?")
+}
+
+print(x)
+print("This is a string: $(x)")

@@ -275,6 +275,12 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   });
 
   @override
+  basicFunctionDefinition() => super.basicFunctionDefinition().map((it) {
+    var argnames = it[2] != null ? it[2].where((it) => it is Identifier).toList() : [];
+    return new FunctionDefinition(it[0], argnames, new Block.forSingle(new ReturnStatement(it[7])));
+  });
+
+  @override
   reference() => super.reference().map((it) {
     return new ReferenceCreation(it[1]);
   });

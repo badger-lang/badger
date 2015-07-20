@@ -223,6 +223,9 @@ class JsAstVisitor extends AstVisitor {
         }
 
         if (i != literal.components.length - 1) {
+          if (i != 0) {
+            buff.write("+");
+          }
           buff.write('"');
         }
       }
@@ -616,7 +619,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
           return true;
         }
       }
-    """, true);
+    """, false);
 
     addTopLevel("λbreaker", """
     "BADGER_BREAK_NOW"
@@ -790,7 +793,9 @@ class JsCompilerTarget extends CompilerTarget<String> {
     var x = buff.toString();
     _includes = _names.where((it) => x.contains(it)).toSet();
 
-    var ti = _topLevel.where((it) => str.contains(it[0]) || it.length == 3 && it[2] == true).toList();
+    var ti = _topLevel.where((it) {
+      return str.contains(it[0]) || it.length == 3 && it[2] == true;
+    }).toList();
     var b = new StringBuffer();
     if (ti.isNotEmpty) {
       b.write(ti.map((it) => it.length == 1 ? it[0] : "var ${it[0]} = " + it[1]).join(";"));

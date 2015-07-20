@@ -22,6 +22,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
 
   statement() => ref(
     token,
+    ref(basicFunctionDefinition) |
     ref(functionDefinition) |
     ref(multipleAssign) |
     ref(accessAssignment) |
@@ -214,6 +215,19 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     ).optional() &
     char(")") &
     ref(block);
+
+  basicFunctionDefinition() => ref(identifier) &
+    char("(") &
+    ref(identifier).separatedBy(
+      whitespace().star() &
+      char(",") &
+      whitespace().star()
+    ).optional() &
+    char(")") &
+    whitespace().star() &
+    string("->") &
+    whitespace().star() &
+    ref(expression);
 
   emptyListDefinition() => string("[]");
 

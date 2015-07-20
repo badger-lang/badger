@@ -58,12 +58,18 @@ class TinyAstCompilerTarget extends CompilerTarget<String> {
     var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
     var ast = new BadgerJsonBuilder(program);
     var result = ast.build();
-    return encoder.convert(BadgerTinyAst.transformMapStrings(result, (x) {
+
+    var lookup = {};
+    var l = BadgerTinyAst.processor(result, (x) {
       if (BadgerTinyAst.MAPPING.containsKey(x)) {
         return BadgerTinyAst.MAPPING[x];
       } else {
         return x;
       }
-    }));
+    }, lookup: lookup);
+
+    return encoder.convert({
+      "@@": lookup
+    }..addAll(l));
   }
 }

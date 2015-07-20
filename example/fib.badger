@@ -1,5 +1,10 @@
-fib(n) {
-  return (n in [0, 1]) ? n : fib(n - 1) + fib(n - 2)
+fib(n) -> (n in [0, 1]) ? n : fib(n - 1) + fib(n - 2)
+
+results = {
+  5: fib(5),
+  10: fib(10),
+  15: fib(15),
+  20: fib(20)
 }
 
-print(fib(5))
+print(results)

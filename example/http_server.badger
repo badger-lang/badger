@@ -2,8 +2,8 @@ import "badger:io"
 
 let server = HttpServer.bind("0.0.0.0", 8080)
 
-print("Server Started on port $(server.port)")
-
 server.createVirtualDirectory("/", {
   "allowDirectoryListing": true
 })
+
+print("Server Started on port $(server.port)")

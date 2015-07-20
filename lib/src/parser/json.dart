@@ -56,20 +56,33 @@ class BadgerJsonBuilder {
     }
   }
 
+  _toEncodable(value) {
+    if (value is Identifier) {
+      return value.toString();
+    }
+    return null;
+  }
+
   Map build([AstNode node]) {
     if (node == null) {
       node = rootNode;
     }
 
-    if (node is Program) {
-      return buildProgram(node);
-    } else if (node is Statement) {
-      return _generateStatement(node);
-    } else if (node is Expression) {
-      return _generateExpression(node);
-    } else {
-      throw new Exception("Unknown AST Node");
+    Map doIt() {
+      if (node is Program) {
+        return buildProgram(node);
+      } else if (node is Statement) {
+        return _generateStatement(node);
+      } else if (node is Expression) {
+        return _generateExpression(node);
+      } else {
+        throw new Exception("Unknown AST Node");
+      }
     }
+
+    var map = doIt();
+
+    return JSON.decode(JSON.encode(map, toEncodable: _toEncodable));
   }
 
   Map buildProgram(Program program) {
@@ -432,7 +445,11 @@ class BadgerTinyAst {
     "catch": "`",
     "try": ",",
     "expression statement": "ß",
-    "class": "∆"
+    "class": "∆",
+    "expression": "€",
+    "entries": "ü",
+    "isImmutable": "«",
+    "variable declaration": "»"
   };
 
   static String demap(String key) {
@@ -444,37 +461,106 @@ class BadgerTinyAst {
   }
 
   static Map expand(Map it) {
-    return transformMapStrings(it, (key) {
+    var ma = new Map.from(it);
+    ma.remove("@@");
+    var result = processor(it, (key) {
       return demap(key);
-    });
+    }, lookup: it["@@"], decoding: true);
+
+    result.remove("@@");
+
+    return result;
   }
 
-  static dynamic transformMapStrings(it, dynamic transformer(x)) {
+  static Map flip(Map map) {
+    var result = {};
+    for (var key in map.keys) {
+      result[map[key]] = key;
+    }
+    print(result);
+    return result;
+  }
+
+  static dynamic processor(it, dynamic transformer(x), {Map<String, dynamic> lookup, bool decoding: false}) {
+    if (lookup == null) {
+      lookup = {};
+    }
+
+    String createLookupKey() {
+      var c = 0;
+      var len = 1;
+      while (true) {
+        c++;
+        if (c == 200) {
+          len += 1;
+          c = 0;
+        }
+        var result = generateBasicId(length: len);
+        if (lookup.containsKey(result) || (decoding ? true : MAPPING.values.contains(result))) {
+          continue;
+        } else {
+          return result;
+        }
+      }
+    }
+
     if (it is Map) {
       var r = {};
-      for (var x in it.keys) {
+      for (var x in it.keys.toList()) {
         var v = it[x];
+
+        if (v == null) {
+          continue;
+        }
+
         if (x == "type" || x == MAPPING["type"]) {
           v = x == "type" ? (MAPPING.containsKey(v) ? MAPPING[v] : v) : demap(v);
+        } else if (v is String) {
+          if (((decoding ? lookup.keys : lookup.values) as Iterable).contains(v)) {
+            if (decoding) {
+              v = lookup[v];
+            } else {
+              var rx = lookup.keys.firstWhere((x) => lookup[x] == v);
+              v = rx;
+            }
+          } else {
+            var rx = createLookupKey();
+            lookup[rx] = v;
+            v = rx;
+          }
         }
-        r[transformer(x)] = transformMapStrings(v, transformer);
+
+        r[transformer(x)] = processor(v, transformer, lookup: lookup, decoding: decoding);
       }
       return r;
     } else if (it is List) {
       var l = [];
       for (var x in it) {
-        l.add(transformMapStrings(x, transformer));
+        l.add(processor(x, transformer, lookup: lookup, decoding: decoding));
       }
       return l;
     } else {
-      return it;
+      var v = it;
+      if (((decoding ? lookup.keys : lookup.values) as Iterable).contains(v)) {
+        if (decoding) {
+          v = lookup[v];
+        } else {
+          var rx = lookup.keys.firstWhere((x) => lookup[x] == v);
+          v = rx;
+        }
+      } else {
+        var rx = createLookupKey();
+        lookup[rx] = v;
+        v = rx;
+      }
+      return v;
     }
   }
 }
 
 class BadgerJsonParser {
   Program build(Map input) {
-    if (!input.containsKey("statements") && input.containsKey("g")) {
+    if (!input.containsKey("statements") && input.containsKey("@@")) {
       input = BadgerTinyAst.expand(input);
     }
 
@@ -647,3 +733,88 @@ class BadgerJsonParser {
     return new StringLiteral(c);
   }
 }
+
+const List<String> ALPHABET = const [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "o",
+  "p",
+  "q",
+  "r",
+  "s",
+  "t",
+  "u",
+  "v",
+  "w",
+  "x",
+  "y",
+  "z"
+];
+
+Random _random = new Random();
+
+String generateBasicId({int length: 30}) {
+  var r = new Random(_random.nextInt(5000));
+  var buffer = new StringBuffer();
+  for (int i = 1; i <= length; i++) {
+    var n = r.nextInt(50);
+    if (n >= 0 && n <= 32) {
+      String letter = ALPHABET[r.nextInt(ALPHABET.length)];
+      buffer.write(r.nextBool() ? letter.toLowerCase() : letter);
+    } else if (n > 32 && n <= 43) {
+      buffer.write(_NUMBERS[r.nextInt(_NUMBERS.length)]);
+    } else if (n > 43) {
+      buffer.write(_SPECIALS[r.nextInt(_SPECIALS.length)]);
+    }
+  }
+  return buffer.toString();
+}
+
+String generateToken({int length: 50}) {
+  var r = new Random(_random.nextInt(5000));
+  var buffer = new StringBuffer();
+  for (int i = 1; i <= length; i++) {
+    if (r.nextBool()) {
+      String letter = ALPHABET[r.nextInt(ALPHABET.length)];
+      buffer.write(r.nextBool() ? letter.toLowerCase() : letter);
+    } else {
+      buffer.write(_NUMBERS[r.nextInt(_NUMBERS.length)]);
+    }
+  }
+  return buffer.toString();
+}
+
+const List<int> _NUMBERS = const [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9
+];
+
+const List<String> _SPECIALS = const [
+  "@",
+  "=",
+  "_",
+  "+",
+  "-",
+  "!",
+  "."
+];
