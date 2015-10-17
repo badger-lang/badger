@@ -363,7 +363,7 @@ class Context extends BadgerObject {
   }
 
   dynamic invoke(String name, List<dynamic> args) {
-    if (!hasFunction(name)) {
+    if (!hasFunction(name) && !hasType(name)) {
       throw new Exception("Method ${name} is not defined.");
     }
 

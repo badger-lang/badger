@@ -1,6 +1,7 @@
 import "badger:io"
 
-var http = make(HttpClient)
-var response = http.get("http://www.google.com")
+let http = HttpClient()
+let response = http.get("http://www.google.com")
 
-print(response.statusCode)
+print("Status Code: $(response.statusCode)")
+print("Body Size: $(response.body.length)")

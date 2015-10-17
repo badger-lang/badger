@@ -377,6 +377,12 @@ class JsAstVisitor extends AstVisitor {
       }
     }
     i++;
+    if (buff.toString().endsWith(".")) {
+      var str = buff.toString();
+      str = str.substring(0, str.length - 1);
+      buff.clear();
+      buff.write(str);
+    }
   }
 
   @override
@@ -623,7 +629,7 @@ class JsCompilerTarget extends CompilerTarget<String> {
 
     addTopLevel("λbreaker", """
     "BADGER_BREAK_NOW"
-    """, true);
+    """, false);
 
     addHelper("λload", """
       function(λ, m) {

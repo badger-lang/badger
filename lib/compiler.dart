@@ -4,7 +4,7 @@ import "dart:async";
 import "dart:convert";
 
 import "package:analyzer/analyzer.dart" as analyzer;
-import "package:analyzer/src/services/formatter_impl.dart" as dartFormatter;
+import "package:dart_style/dart_style.dart" as dartFormatter;
 
 import "package:badger/common.dart";
 import "package:badger/parser.dart";

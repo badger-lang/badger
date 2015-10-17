@@ -26,6 +26,12 @@ class CoreLibrary {
     context.proxy("EventBus", EventBus);
     context.proxy("inheritContext", inheritContext);
     context.proxy("Runtime", BadgerRuntime);
+    context.proxy("int", (input) {
+      if (input is String) {
+        return int.parse(input);
+      }
+      return input;
+    });
   }
 
   static dynamic eval(String content) async {

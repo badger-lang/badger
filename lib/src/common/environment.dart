@@ -67,7 +67,10 @@ abstract class BaseEnvironment extends Environment {
   }
 
   buildEvalJSON(Context ctx) async {
-    return await new Evaluator(await parseJSON(JSON.encode(await generateJSON())), _e != null ? _e : this).evaluate(ctx);
+    return await new Evaluator(
+        await parseJSON(JSON.encode(await generateJSON())),
+        _e != null ? _e : this
+    ).evaluate(ctx);
   }
 
   Program _parse(String content) {

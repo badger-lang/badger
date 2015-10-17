@@ -29,10 +29,8 @@ const List<String> ALPHABET = const [
   "z"
 ];
 
-Random _random = new Random();
-
 String generateBasicId({int length: 30}) {
-  var r = new Random(_random.nextInt(5000));
+  var r = new Random();
   var buffer = new StringBuffer();
   for (int i = 1; i <= length; i++) {
     var n = r.nextInt(50);
@@ -49,7 +47,7 @@ String generateBasicId({int length: 30}) {
 }
 
 String generateToken({int length: 50}) {
-  var r = new Random(_random.nextInt(5000));
+  var r = new Random();
   var buffer = new StringBuffer();
   for (int i = 1; i <= length; i++) {
     if (r.nextBool()) {

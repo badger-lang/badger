@@ -48,11 +48,9 @@ class DartCompilerTarget extends CompilerTarget<String> {
     writeFooter(buff);
 
     var out = buff.toString();
-
     if (options["pretty"] == true) {
-      out = new dartFormatter.CodeFormatterImpl(
-        new dartFormatter.FormatterOptions()
-      ).format(dartFormatter.CodeKind.COMPILATION_UNIT, out).source;
+      var formatter = new dartFormatter.DartFormatter();
+      return formatter.format(out);
     } else {
       out = analyzer.parseCompilationUnit(out).toSource();
     }
@@ -168,6 +166,20 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitAccess(Access access) {
+    visitExpression(access.reference);
+    var i = 0;
+
+    if (access.parts.isNotEmpty) {
+      buff.write(".");
+    }
+
+    for (var x in access.parts) {
+      if (i != access.parts.length - 1) {
+        buff.write(".");
+      }
+      visit(x);
+      i++;
+    }
   }
 
   @override
@@ -292,7 +304,7 @@ class DartAstVisitor extends AstVisitor {
 
   @override
   void visitMethodCall(MethodCall call) {
-    if (call.reference is String) {
+    if (call.reference is String || call.reference is Identifier) {
       buff.write("${call.reference}(");
     } else {
       visitExpression(call.reference);

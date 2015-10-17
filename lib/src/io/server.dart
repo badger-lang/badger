@@ -5,7 +5,7 @@ class BadgerHttpServer {
   Stream<BadgerHttpServerRequest> _requests;
 
   BadgerHttpServer(this.server) {
-    _requests = server.asBroadcastStream().map((HttpRequest request) {
+    _requests = server.map((HttpRequest request) {
       return new BadgerHttpServerRequest(request);
     });
   }
