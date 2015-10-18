@@ -40,7 +40,7 @@ class ImportMapEnvironment extends Environment {
 }
 
 abstract class BaseEnvironment extends Environment {
-  final BadgerParser _parser = new BadgerParser();
+  BadgerParser _parser = new BadgerParser();
   Environment _e;
 
   Future compile(CompilerTarget target) async {
@@ -85,7 +85,7 @@ abstract class BaseEnvironment extends Environment {
       }
 
       return new BadgerJsonParser().build(json);
-    } on FormatException catch (e) {
+    } on FormatException {
     }
 
     _e = this;

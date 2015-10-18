@@ -55,7 +55,7 @@ class FileEnvironment extends IOEnvironment {
       } else {
         throw new Exception("Unsupported Import URI Scheme: ${uri.scheme}");
       }
-    } on FormatException catch (e) {
+    } on FormatException {
     }
 
     String p;

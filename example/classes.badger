@@ -1,0 +1,8 @@
+class Example {
+  execute() {
+    print("Hello World")
+  }
+}
+
+let x = Example()
+x.execute()

@@ -399,7 +399,11 @@ class Context extends BadgerObject {
     return elements.containsKey(name) || (parent != null && parent.hasType(name));
   }
 
-  dynamic setVariable(String name, dynamic value, [bool checkExists = false]) {
+  dynamic setVariable(name, dynamic value, [bool checkExists = false]) {
+    if (name is Identifier) {
+      name = name.toString();
+    }
+
     if (checkExists && hasVariable(name)) {
       throw new Exception("Unable to set ${name}, it is already defined.");
     }
@@ -426,12 +430,12 @@ class Context extends BadgerObject {
   }
 
    dynamic run(void c()) {
-    return Zone.ROOT.fork(zoneValues: {
-      "context": this
+    return Zone.current.fork(zoneValues: {
+      "badger.context": this
     }).run(c);
    }
 
-  static Context get current => Zone.current["context"];
+  static Context get current => Zone.current["badger.context"];
 
   Context getNamespace(String name) {
     if (hasNamespace(name)) {
@@ -465,12 +469,6 @@ class Context extends BadgerObject {
   dynamic getProperty(String name) {
     if (hasVariable(name)) {
       return getVariable(name);
-    } else if (hasFunction(name)) {
-      return getFunction(name);
-    } else if (hasNamespace(name)) {
-      return getNamespace(name);
-    } else if (hasType(name)) {
-      return getType(name);
     } else if (["inherit", "merge"].contains(name)) {
       var x = reflect(this).getField(new Symbol(name)).reflectee;
 
@@ -494,7 +492,7 @@ class Context extends BadgerObject {
   dynamic createChild(void handler()) {
     var ctx = fork();
     return Zone.current.fork(zoneValues: {
-      "context": ctx
+      "badger.context": ctx
     }).run(() {
       return handler();
     });

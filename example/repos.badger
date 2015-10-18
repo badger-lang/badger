@@ -2,7 +2,7 @@ import "badger:io"
 
 print("DirectCode Repositories:")
 
-let url = "https://api.github.com/users/DirectMyFile/repos?type=owner&sort=full_name&direction=asc"
+let url = "https://api.github.com/users/DirectMyFile/repos?type=owner&sort=stars&direction=asc"
 
 let http = make(HttpClient)
 let response = http.get(url)
@@ -12,9 +12,7 @@ json = json.where((a) -> {
   let stars = a.stargazers_count
   let include = stars > 0
   return include
-})
-
-json = json.sort((a, b) -> {
+}).sort((a, b) -> {
   let x = a.stargazers_count
   let y = b.stargazers_count
 
