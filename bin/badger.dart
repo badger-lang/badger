@@ -10,15 +10,17 @@ import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
 import "package:crypto/crypto.dart";
 
-Directory getHomeDirectory([String child]) => new Directory(
-  Platform.environment["HOME"] + (
-    child != null ? "${Platform.pathSeparator}${child}" : ""
-  )
-);
+Directory getHomeDirectory([String child]) => new Directory((Platform.isWindows
+        ? Platform.environment["UserProfile"]
+        : Platform.environment["HOME"]) +
+    (child != null ? "${Platform.pathSeparator}${child}" : ""));
 
 CacheManager cache;
 
-File getHomeFile(String path) => new File(Platform.environment["HOME"] + "${Platform.pathSeparator}${path}");
+File getHomeFile(String path) => new File((Platform.isWindows
+        ? Platform.environment["UserProfile"]
+        : Platform.environment["HOME"]) +
+    "${Platform.pathSeparator}${path}");
 
 main(List<String> args) async {
   await loadPreferences();
@@ -40,7 +42,7 @@ main(List<String> args) async {
       help: "Compiles Badger Code");
 
   argp.addOption("define",
-    abbr: "D", help: "Specifies an Runtime Property", allowMultiple: true);
+      abbr: "D", help: "Specifies an Runtime Property", allowMultiple: true);
 
   argp.addOption("compiler-opt",
       abbr: "O", help: "Specifies a Compiler Option", allowMultiple: true);
@@ -84,7 +86,8 @@ main(List<String> args) async {
   context.setVariable("args", argz);
 
   if (prefs.enableCache) {
-    await cache.storeInCache(await env.readScriptContent(), JSON.encode(await env.generateJSON()));
+    await cache.storeInCache(
+        await env.readScriptContent(), JSON.encode(await env.generateJSON()));
   }
 
   if (opts["compile"] != null) {
@@ -194,8 +197,7 @@ loadExternalCompilers() async {
     externalCompilers.add(new ExternalCompiler()
       ..name = name
       ..command = config["command"]
-      ..shouldProvideAst = config.containsKey("ast") ? config["ast"] : false
-    );
+      ..shouldProvideAst = config.containsKey("ast") ? config["ast"] : false);
   }
 }
 
@@ -244,9 +246,8 @@ loadPreferences() async {
 
   if (!(await file.exists())) {
     await file.create(recursive: true);
-    await file.writeAsString(new JsonEncoder.withIndent("  ").convert({
-      "enable_cache": false
-    }));
+    await file.writeAsString(
+        new JsonEncoder.withIndent("  ").convert({"enable_cache": false}));
   }
 
   var content = await file.readAsString();
