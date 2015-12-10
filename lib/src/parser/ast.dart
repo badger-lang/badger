@@ -56,7 +56,8 @@ class Block extends AstNode {
 
   Block(this.statements);
   Block.forSingle(Statement statement) : this([statement]);
-  Block.forSingleExpression(Expression expr) : this.forSingle(new ExpressionStatement(expr));
+  Block.forSingleExpression(Expression expr) :
+      this.forSingle(new ExpressionStatement(expr));
 }
 
 class BooleanLiteral extends Expression {

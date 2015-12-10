@@ -8,6 +8,8 @@ import "package:args/args.dart";
 import "package:badger/io.dart";
 import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
+import "package:badger/common.dart";
+
 import "package:crypto/crypto.dart";
 
 Directory getHomeDirectory([String child]) => new Directory((Platform.isWindows
@@ -47,12 +49,18 @@ main(List<String> args) async {
   argp.addOption("compiler-opt",
       abbr: "O", help: "Specifies a Compiler Option", allowMultiple: true);
 
+  argp.addFlag("verbose", abbr: "v", help: "Verbose Output");
+
   var opts = argp.parse(args);
 
   if (opts.rest.isEmpty) {
     print("Usage: badger [options] <script> [args]");
     print(argp.usage);
     exit(1);
+  }
+
+  if (opts["verbose"]) {
+    setupConsoleLogging("ALL");
   }
 
   var p = opts.rest[0];

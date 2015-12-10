@@ -1,13 +1,8 @@
-class Test {
-  print("Test Created")
+```
+λ.require = require;
+λ.eval = eval;
+λ.console = console;
+```
 
-  greet() {
-    print("Hello World")
-  }
-}
-
-class TestB(a, b) {
-  print("$(a): $(b)")
-}
-
-TestB(1, 2)
+let fs = require("fs")
+console.log(fs)

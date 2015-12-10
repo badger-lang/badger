@@ -8,7 +8,7 @@ class BadgerGrammarDefinition extends GrammarDefinition {
     whitespace().star().optional() &
     ref(statements) &
     whitespace().star().optional()
-  ).end();
+  );
 
   statements() => ref(statement).separatedBy(
     whitespace().starLazy(char(";") | char("\n")).optional() &
@@ -496,6 +496,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
   HIDDEN() => ref(singleLineComment);
 
   Parser token(input) {
+    if (tokenCache[input] != null) {
+      return tokenCache[input];
+    }
+
     if (input is String) {
       input = input.length == 1 ? char(input) : string(input);
     } else if (input is Function) {
@@ -506,8 +510,10 @@ class BadgerGrammarDefinition extends GrammarDefinition {
       throw new StateError("Invalid token parser: ${input}");
     }
 
-    return input.token().trim(ref(HIDDEN));
+    return tokenCache[input] = input.token().trim(ref(HIDDEN));
   }
+
+  static Map<dynamic, Parser> tokenCache = {};
 }
 
 class BadgerGrammar extends GrammarParser {

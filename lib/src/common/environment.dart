@@ -1,8 +1,11 @@
 part of badger.common;
 
 abstract class Environment {
-  Future import(String location, Evaluator evaluator, Context context, Program source);
+  Future import(String location, Evaluator evaluator, Context context,
+    Program source);
+
   Future<Program> resolveProgram(String location);
+
   Future<Map<String, dynamic>> getProperties();
 }
 
@@ -13,7 +16,11 @@ class ImportMapEnvironment extends Environment {
   ImportMapEnvironment(this.programs, [this._c]);
 
   @override
-  Future import(String location, Evaluator evaluator, Context context, Program source) async {
+  Future import(
+    String location,
+    Evaluator evaluator,
+    Context context,
+    Program source) async {
     if (_c != null && !programs.containsKey(location)) {
       return _c.import(location, evaluator, context, source);
     }
@@ -49,7 +56,8 @@ abstract class BaseEnvironment extends Environment {
 
   eval(Context context) async {
     var program = _parse(await readScriptContent());
-    return await new Evaluator(program, _e != null ? _e : this).evaluate(context);
+    return await new Evaluator(program, _e != null ? _e : this).evaluate(
+      context);
   }
 
   Future<Program> parse([String content]) async {
@@ -63,13 +71,14 @@ abstract class BaseEnvironment extends Environment {
   }
 
   Future<Program> parseJSON([String content]) async {
-    return new BadgerJsonParser().build(JSON.decode(content != null ? content : await readScriptContent()));
+    var json = JSON.decode(content != null ? content : await readScriptContent());
+    return new BadgerJsonParser().build(json);
   }
 
   buildEvalJSON(Context ctx) async {
     return await new Evaluator(
-        await parseJSON(JSON.encode(await generateJSON())),
-        _e != null ? _e : this
+      await parseJSON(JSON.encode(await generateJSON())),
+      _e != null ? _e : this
     ).evaluate(ctx);
   }
 
@@ -80,17 +89,19 @@ abstract class BaseEnvironment extends Environment {
       if (json.containsKey("_")) {
         var p = new BadgerSnapshotParser(json);
         var m = p.parse();
-        _e = new ImportMapEnvironment(m, this)..properties = properties;
+        _e = new ImportMapEnvironment(m, this)
+          ..properties = properties;
         return (_e as ImportMapEnvironment).programs["_"];
       }
 
       return new BadgerJsonParser().build(json);
-    } on FormatException {
-    }
+    } on FormatException {}
 
     _e = this;
 
-    return _parser.parse(content).value;
+    return _parser
+      .parse(content)
+      .value;
   }
 
   @override

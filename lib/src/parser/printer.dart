@@ -16,6 +16,23 @@ class BadgerPrinter extends AstVisitor {
   }
 
   @override
+  void visitProgram(Program program) {
+    for (var declaration in program.declarations) {
+      visitDeclaration(declaration);
+    }
+
+    if (program.statements.isNotEmpty) {
+      buff.writeln();
+
+      if (pretty) {
+        buff.writeln();
+      }
+    }
+
+    visitStatements(program.statements);
+  }
+
+  @override
   void visitAccess(Access access) {
     visitExpression(access.reference);
     buff.write(".");

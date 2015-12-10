@@ -818,7 +818,8 @@ class JsCompilerTarget extends CompilerTarget<String> {
     return b.toString();
   }
 
-  final RegExp _WHITESPACE = new RegExp(r'''\s{2,}(?=([^"]*("|')[^"']*("|'))*[^"']*$)''');
+  static final RegExp _WHITESPACE =
+    new RegExp(r'''\s{2,}(?=([^"]*("|')[^"']*("|'))*[^"']*$)''');
 
   String minify(String input) {
     input = input.trim();

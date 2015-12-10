@@ -123,7 +123,8 @@ class BadgerModifier {
   Statement modifyIfStatement(IfStatement statement) {
     var expr = modifyExpression(statement.condition);
     var ifStatements = statement.block.statements.map(modifyStatement).where((it) => it != null).toList();
-    var elseStatements = statement.elseBlock != null ? statement.elseBlock.statements.map(modifyStatement).where((it) => it != null).toList() : null;
+    var elseStatements = statement.elseBlock != null ? statement.elseBlock.statements
+      .map(modifyStatement).where((it) => it != null).toList() : null;
 
     return new IfStatement(expr, new Block(ifStatements), elseStatements != null ? new Block(elseStatements) : null);
   }

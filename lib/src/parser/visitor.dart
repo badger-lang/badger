@@ -55,8 +55,12 @@ abstract class AstVisitor extends AstVisitorBase {
       visitStatement(node);
     } else if (node is Expression) {
       visitExpression(node);
+    } else if (node is Declaration) {
+      visitDeclaration(node);
+    } else if (node is Block) {
+      visitStatements(node.statements);
     } else {
-      throw new Exception("Unknown AST Node");
+      throw new Exception("Unknown AST Node: ${node.runtimeType}");
     }
   }
 

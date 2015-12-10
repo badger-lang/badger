@@ -25,6 +25,8 @@ class Evaluator {
   }
 
   evaluateProgram(Program program, Context ctx) async {
+    logger.fine("Evaluating Program: ${program}");
+
     if (simplify) {
       program = new BadgerSimplifier().modifyProgram(program);
     }
@@ -81,6 +83,8 @@ class Evaluator {
   }
 
   _evaluateBlock(List<dynamic> statements, [bool allowBreak = false]) async {
+    logger.fine("Evaluating Block: ${statements}");
+
     var retval = VOID;
 
     for (var statement in statements) {
@@ -119,6 +123,8 @@ class Evaluator {
   }
 
   _evaluateStatement(Statement statement, [bool allowBreak = false]) async {
+    logger.fine("Evaluating Statement: ${statement}");
+
     if (statement is ExpressionStatement) {
       return await _resolveValue(statement.expression);
     } else if (statement is FlatAssignment) {
@@ -359,6 +365,7 @@ class Evaluator {
   }
 
   _resolveValue(Expression expr) async {
+    logger.fine("Resolving Value of ${expr}");
     var v = await __resolveValue(expr);
 
     if (v is ReturnValue) {
