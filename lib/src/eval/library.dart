@@ -34,12 +34,15 @@ class CoreLibrary {
     });
   }
 
-  static dynamic eval(String content) async {
+  static dynamic eval(String content, [Context ctx]) async {
     var parser = new BadgerParser();
     var program = parser.parse(content).value;
     var env = new ImportMapEnvironment({});
     var evaluator = new Evaluator(program, env);
-    return await evaluator.evaluate(Context.current);
+    if (ctx == null) {
+      ctx = Context.current;
+    }
+    return await evaluator.evaluate(ctx);
   }
 
   static void inheritContext(Context ctx) {

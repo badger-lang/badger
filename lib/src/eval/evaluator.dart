@@ -25,7 +25,10 @@ class Evaluator {
   }
 
   evaluateProgram(Program program, Context ctx) async {
-    logger.fine("Evaluating Program: ${program}");
+    logger.fine(
+      "Evaluating Program (${program.declarations.length} declarations"
+      ", ${program.statements.length} statements)"
+    );
 
     if (simplify) {
       program = new BadgerSimplifier().modifyProgram(program);
