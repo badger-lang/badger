@@ -1,6 +1,6 @@
 name: badger
 description: Experimental Programming Language
-version: 0.1.0
+version: 0.2.0
 dependencies:
   analyzer: ">=0.24.0 <0.27.0"
   args: ">=0.12.0 <0.14.0"
