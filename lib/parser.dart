@@ -3,6 +3,8 @@ library badger.parser;
 import "dart:math";
 import "dart:convert";
 
+import "package:badger/common.dart";
+
 import "package:petitparser/petitparser.dart";
 import "package:json_diff/json_diff.dart";
 

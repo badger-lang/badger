@@ -10,6 +10,8 @@ import "package:badger/compiler.dart";
 import "package:badger/eval.dart";
 import "package:badger/common.dart";
 
+import "package:stack_trace/stack_trace.dart";
+
 import "package:crypto/crypto.dart";
 
 Directory getHomeDirectory([String child]) => new Directory((Platform.isWindows
@@ -50,6 +52,10 @@ main(List<String> args) async {
       abbr: "O", help: "Specifies a Compiler Option", allowMultiple: true);
 
   argp.addFlag("verbose", abbr: "v", help: "Verbose Output");
+  argp.addFlag(
+    "enable-async-stacktrace",
+    help: "Enables Asynchronous Stacktraces"
+  );
 
   var opts = argp.parse(args);
 
@@ -155,7 +161,13 @@ main(List<String> args) async {
     }
   }
 
-  await env.eval(context);
+  if (opts["enable-async-stacktrace"]) {
+    await Chain.capture(() async {
+      await env.eval(context);
+    });
+  } else {
+    await env.eval(context);
+  }
 
   if (opts["test"] && !(context.meta["tests.ran"] == true)) {
     await context.run(() async {
@@ -311,9 +323,7 @@ class CacheManager {
 }
 
 String createHash(String c) {
-  var h = new SHA256();
-  h.add(c.codeUnits);
-  return CryptoUtils.bytesToHex(h.close());
+  return sha256.convert(UTF8.encode(c)).toString();
 }
 
 class Preferences {

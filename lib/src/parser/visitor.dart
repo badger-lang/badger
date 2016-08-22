@@ -126,7 +126,7 @@ abstract class AstVisitor extends AstVisitorBase {
     } else if (statement is VariableReference) {
       visitVariableReference(statement);
     } else {
-      throw new Exception("Unknown Statement Type: ${statement}");
+      throw new Exception("Unknown Statement Type: ${statement} (${statement.runtimeType})");
     }
   }
 
@@ -175,7 +175,7 @@ abstract class AstVisitor extends AstVisitorBase {
     } else if (expression is NullLiteral) {
       visitNullLiteral(expression);
     } else {
-      throw new Exception("Unknown Expression Type: ${expression}");
+      throw new Exception("Unknown Expression Type: ${expression} (${expression.runtimeType})");
     }
   }
 

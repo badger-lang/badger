@@ -11,18 +11,21 @@ class AstCompilerTarget extends CompilerTarget<String> {
  * Compiles a program into JSON that includes compiled versions of all the imports as well.
  */
 class SnapshotCompilerTarget extends CompilerTarget<String> {
-  final Environment env;
+  final Common.Environment env;
 
   SnapshotCompilerTarget(this.env);
 
   @override
   Future<String> compile(Program program) async {
-    var encoder = getBooleanOption("pretty") ? new JsonEncoder.withIndent("  ") : JSON.encoder;
+    var encoder = getBooleanOption("pretty") ?
+      const JsonEncoder.withIndent("  ") :
+      JSON.encoder;
     var simplify = getBooleanOption("simplify");
     var out = {};
     var locations = [];
 
-    for (ImportDeclaration import in program.declarations.where((it) => it is ImportDeclaration)) {
+    for (ImportDeclaration import in program.declarations
+      .where((it) => it is ImportDeclaration)) {
       locations.add(import.location.components.join());
     }
 
@@ -41,7 +44,10 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
       out[location] = m;
     }
 
-    var a = await (new TinyAstCompilerTarget()..options["simplify"] = simplify).compile(program);
+    var a = await (
+      new TinyAstCompilerTarget()
+        ..options["simplify"] = simplify
+    ).compile(program);
 
     out["_"] = JSON.decode(a);
 
@@ -55,7 +61,9 @@ class SnapshotCompilerTarget extends CompilerTarget<String> {
 class TinyAstCompilerTarget extends CompilerTarget<String> {
   @override
   Future<String> compile(Program program) async {
-    var encoder = options["pretty"] == true ? new JsonEncoder.withIndent("  ") : JSON.encoder;
+    var encoder = options["pretty"] == true ?
+      const JsonEncoder.withIndent("  ") :
+      JSON.encoder;
     var ast = new BadgerJsonBuilder(program);
     var result = ast.build();
 

@@ -39,7 +39,7 @@ class BadgerSocket {
 
   Future<String> readString([int timeout, onTimeout()]) {
     if (_utf == null) {
-      _utf = _input.transform(UTF8.decoder).asBroadcastStream();
+      _utf = _input.transform(const Utf8Decoder()).asBroadcastStream();
     }
 
     if (timeout != null) {
@@ -51,11 +51,11 @@ class BadgerSocket {
 
   Future<String> readLine([int timeout, onTimeout()]) {
     if (_utf == null) {
-      _utf = _input.transform(UTF8.decoder).asBroadcastStream();
+      _utf = _input.transform(const Utf8Decoder()).asBroadcastStream();
     }
 
     if (_lines == null) {
-      _lines = _utf.transform(new LineSplitter()).asBroadcastStream();
+      _lines = _utf.transform(const LineSplitter()).asBroadcastStream();
     }
 
     if (timeout != null) {
@@ -77,7 +77,7 @@ class BadgerSocket {
 
   HandlerSubscription handleString(handler(String string)) {
     if (_utf == null) {
-      _utf = _input.transform(UTF8.decoder).asBroadcastStream();
+      _utf = _input.transform(const Utf8Decoder()).asBroadcastStream();
     }
 
     return new HandlerSubscription(_utf.listen(handler));
@@ -85,11 +85,11 @@ class BadgerSocket {
 
   HandlerSubscription handleLine(handler(String line)) {
     if (_utf == null) {
-      _utf = _input.transform(UTF8.decoder).asBroadcastStream();
+      _utf = _input.transform(const Utf8Decoder()).asBroadcastStream();
     }
 
     if (_lines == null) {
-      _lines = _utf.transform(new LineSplitter()).asBroadcastStream();
+      _lines = _utf.transform(const LineSplitter()).asBroadcastStream();
     }
 
     return new HandlerSubscription(_lines.listen(handler));

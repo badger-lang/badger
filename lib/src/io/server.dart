@@ -94,7 +94,8 @@ class BadgerHttpServerRequest {
     return _body;
   }
 
-  Future<dynamic> get bodyJson async => JSON.decode((await getBody()).body);
+  Future<dynamic> get bodyJson async =>
+    const JsonDecoder().convert((await getBody()).body);
   Future<String> get bodyContent async => (await getBody()).body;
   Future<Map<String, String>> get bodyForm async => (await getBody()).body;
 

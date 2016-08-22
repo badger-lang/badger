@@ -103,11 +103,11 @@ class BadgerStdin {
 
   Future<String> readLine([int timeout, onTimeout()]) async {
     if (_utf == null) {
-      _utf = _stream.transform(UTF8.decoder);
+      _utf = _stream.transform(const Utf8Decoder());
     }
 
     if (_lines == null) {
-      _lines = _stream.transform(new LineSplitter());
+      _lines = _stream.transform(const LineSplitter());
     }
 
     var f  = _lines.first;
@@ -119,7 +119,7 @@ class BadgerStdin {
 
   Future<String> readString([int timeout, onTimeout()]) async {
     if (_utf == null) {
-      _utf = _stream.transform(UTF8.decoder);
+      _utf = _stream.transform(const Utf8Decoder());
     }
 
     var f  = _utf.first;
@@ -141,7 +141,7 @@ class BadgerStdin {
 
   HandlerSubscription handleString(handler(String str)) {
     if (_utf == null) {
-      _utf = _stream.transform(UTF8.decoder);
+      _utf = _stream.transform(const Utf8Decoder());
     }
 
     return new HandlerSubscription(_utf.listen(handler));
@@ -149,7 +149,7 @@ class BadgerStdin {
 
   HandlerSubscription handleLine(handler(String line)) {
     if (_utf == null) {
-      _utf = _stream.transform(UTF8.decoder);
+      _utf = _stream.transform(const Utf8Decoder());
     }
 
     if (_lines == null) {

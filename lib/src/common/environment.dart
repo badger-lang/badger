@@ -61,7 +61,8 @@ abstract class BaseEnvironment extends Environment {
   }
 
   Future<Program> parse([String content]) async {
-    return _parse(content != null ? content : await readScriptContent());
+    var c = content != null ? content : await readScriptContent();
+    return _parse(c);
   }
 
   Future<String> readScriptContent();
@@ -99,9 +100,18 @@ abstract class BaseEnvironment extends Environment {
 
     _e = this;
 
-    return _parser
+    var watch = new Stopwatch();
+    watch.start();
+
+    var result = _parser
       .parse(content)
       .value;
+
+    watch.stop();
+
+    logger.finest("Parsed in ${watch.elapsedMicroseconds} microseconds");
+
+    return result;
   }
 
   @override

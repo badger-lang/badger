@@ -1,29 +1,15 @@
 import "package:badger/parser.dart";
 import "package:petitparser/debug.dart";
 
-const String input = """
-import "badger:io"
-
-stdout.write("> ")
-
-stdin.handleLine((line) -> {
-  if line == ":exit" {
-    exit(0)
-  }
-
-  try {
-    eval(line)
-  } catch (e) {
-    print(e)
-  }
-
-  stdout.write("> ")
-})
+const String input = r"""
+print()
 """;
 
 void main() {
-  var parser = new BadgerParser();
-  //parser = profile(parser);
+  var parser = new BadgerGrammar();
+  parser = trace(parser, (msg) {
+    print(msg.toString().trim());
+  });
 
   var result = parser.parse(input);
   print(result.value);

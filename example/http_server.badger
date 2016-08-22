@@ -4,7 +4,11 @@ let port = int(args[0])
 let server = HttpServer.bind("0.0.0.0", port)
 
 server.handleRequest((request, response) -> {
-  response.close("Hello World")
+  if request.path == "/hello" {
+    response.close("Hello World")
+  } else {
+    response.close("Not Found, try /hello")
+  }
 })
 
 print("Server Started on port $(server.port)")

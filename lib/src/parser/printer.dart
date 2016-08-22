@@ -40,6 +40,8 @@ class BadgerPrinter extends AstVisitor {
     for (var x in access.parts) {
       if (x is String) {
         buff.write(x);
+      } else if (x is Identifier) {
+        buff.write(x.name);
       } else {
         visitExpression(x);
       }
@@ -196,11 +198,17 @@ class BadgerPrinter extends AstVisitor {
 
     if (statement.elseBlock != null) {
       buff.increment();
+      if (pretty) {
+        buff.write(" ");
+      }
       buff.write(keyword("else"));
       if (pretty) {
         buff.write(" ");
       }
       buff.write("{");
+      if (pretty) {
+        buff.writeln();
+      }
       visitStatements(statement.elseBlock.statements);
       buff.decrement();
       if (pretty) {

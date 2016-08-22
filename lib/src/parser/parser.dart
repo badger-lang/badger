@@ -3,23 +3,36 @@ part of badger.parser;
 class BadgerParserDefinition extends BadgerGrammarDefinition {
   @override
   start() => super.start().map((it) {
+    logger.finest("Parsing 'start'");
+
+    List<Declaration> declarations = it[1] == null ? [] : it[1].where(
+      (it) => it is Declaration
+    ).toList();
     List<Statement> statements = it[3] == null ? [] : it[3];
 
     return new Program(
-      it[1] == null ? [] : it[1].where((it) => it is Declaration).toList(),
+      declarations,
       statements
     );
   });
 
   @override
+  statements() => super.statements().map((List it) {
+    logger.finest("Parsing 'statements'");
+    return it;
+  });
+
+  @override
   operation() => super.operation().map((it) {
+    logger.finest("Parsing 'operation'");
     var e = it.value;
     e.token = it;
     return e;
   });
 
   @override
-  expressionItem() => super.expressionItem().map((it) {
+  expressionItem() => super.expressionItem().map((Token it) {
+    logger.finest("Parsing 'expressionItem'");
     var e = it.value;
     e.token = it;
     return e;
@@ -27,16 +40,19 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   expressionStatement() => super.expressionStatement().map((it) {
+    logger.finest("Parsing 'expressionStatement'");
     return new ExpressionStatement(it);
   });
 
   @override
   methodCall() => super.methodCall().map((it) {
+    logger.finest("Parsing 'methodCall'");
     return new MethodCall(it[0], it[2] == null ? [] : it[2]);
   });
 
   @override
   stringLiteral() => super.stringLiteral().map((it) {
+    logger.finest("Parsing 'stringLiteral'");
     return new StringLiteral(it[1]);
   });
 
@@ -175,7 +191,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
   variableDeclaration() => super.variableDeclaration().map((it) {
     var isNullable = it[0].endsWith("?");
     var isImmutable = it[0] != null && it[0].startsWith("let");
-    return new VariableDeclaration(it[2], it[6], isImmutable, isNullable);
+    return new VariableDeclaration(it[2], it[4], isImmutable, isNullable);
   });
 
   @override
@@ -198,7 +214,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   access() => super.access().map((it) {
-    var ids = it[2].where((it) => it != ".").toList();
+    var ids = it[2].where((it) => createString(it) != ".").toList();
     return new Access(it[0], ids);
   });
 
@@ -259,8 +275,10 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   anonymousFunction() => super.anonymousFunction().map((it) {
-    var x = it[1] != null ? it[1].where((it) => it is Identifier).toList() : [];
-    return new AnonymousFunction(x, it[5]);
+    var argumentNames = it[1] != null ?
+      it[1].where((e) => e is Identifier).toList(): [];
+
+    return new AnonymousFunction(argumentNames, it[5]);
   });
 
   @override
@@ -282,6 +300,7 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   reference() => super.reference().map((it) {
+    logger.finest("Parsing 'reference'");
     return new ReferenceCreation(it[1]);
   });
 
@@ -292,14 +311,28 @@ class BadgerParserDefinition extends BadgerGrammarDefinition {
 
   @override
   block() => super.block().map((it) {
+    logger.finest("Parsing 'block'");
     return new Block(it[3] == null ? [] : it[3]);
   });
 
   @override
-  identifier() => super.identifier().map((it) {
-    var e = it.value;
-    return new Identifier(e.join())..token = it;
+  identifier() => super.identifier().map((Token it) {
+    logger.finest("Parsing 'identifier'");
+    var e = createString(it.value);
+    return new Identifier(e)..token = it;
   });
+
+  String createString(input) {
+    if (input is String) {
+      return input;
+    } else if (input is List) {
+      return input.join();
+    } else if (input is Token) {
+      return input.value.toString();
+    } else {
+      return input.toString();
+    }
+  }
 }
 
 class BadgerParser extends GrammarParser {
