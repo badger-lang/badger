@@ -589,7 +589,7 @@ class BadgerJsonParser {
           new Identifier(it["identifier"]), _buildExpression(it["value"]));
     } else if (type == "function definition") {
       return new FunctionDefinition(
-          new Identifier(it["name"]),
+          new Identifier(it["identifier"]),
           it["args"].map((x) => new Identifier(x)).toList(),
           new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "while") {
@@ -603,11 +603,19 @@ class BadgerJsonParser {
               ? []
               : it["elseBlock"].map(_buildStatement).toList()));
     } else if (type == "for in") {
-      return new ForInStatement(it["identifier"], _buildExpression(it["value"]),
-          new Block(it["block"].map(_buildStatement).toList()));
+      return new ForInStatement(
+        new Identifier(it["identifier"]),
+        _buildExpression(it["value"]),
+        new Block(it["block"].map(_buildStatement).toList())
+      );
     } else if (type == "multiple assignment") {
-      return new MultiAssignment(it["ids"], _buildExpression(it["value"]),
-          it["immutable"], it["isInitialDefine"], it["isNullable"]);
+      return new MultiAssignment(it["ids"].map(
+        (String x) => new Identifier(x)),
+        _buildExpression(it["value"]),
+        it["immutable"],
+        it["isInitialDefine"],
+        it["isNullable"]
+      );
     } else if (type == "class") {
       return new ClassBlock(
           new Identifier(it["name"]),

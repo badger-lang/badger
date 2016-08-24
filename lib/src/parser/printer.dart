@@ -153,7 +153,7 @@ class BadgerPrinter extends AstVisitor {
   @override
   void visitFunctionDefinition(FunctionDefinition definition) {
     var sep = pretty ? ", " : ",";
-    buff.write("${definition.name}(${definition.args.join(sep)})");
+    buff.write("${definition.name.name}(${definition.args.join(sep)})");
     if (pretty) {
       buff.write(" {");
     } else {
