@@ -460,7 +460,7 @@ class Evaluator {
           } else {
             value = await BadgerUtils.getProperty(p.name, value);
           }
-        } else {
+        } else if (p is MethodCall) {
           MethodCall c = p;
           value = await _callMethod(c, value);
         }

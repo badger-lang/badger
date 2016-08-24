@@ -35,9 +35,7 @@ class BadgerSnapshotParser {
       map[name] = c;
       return map;
     } else {
-      return {
-        (name): new BadgerJsonParser().build(it)
-      };
+      return {(name): new BadgerJsonParser().build(it)};
     }
   }
 }
@@ -185,7 +183,9 @@ class BadgerJsonBuilder {
         "type": "if",
         "condition": _generateExpression(statement.condition),
         "block": _generateStatements(statement.block.statements),
-        "else": statement.elseBlock != null ? _generateStatements(statement.elseBlock.statements) : null
+        "elseBlock": statement.elseBlock != null
+            ? _generateStatements(statement.elseBlock.statements)
+            : null
       };
     } else if (statement is ForInStatement) {
       return {
@@ -211,7 +211,9 @@ class BadgerJsonBuilder {
     } else if (statement is ReturnStatement) {
       return {
         "type": "return",
-        "value": statement.expression != null ? _generateExpression(statement.expression) : null
+        "value": statement.expression != null
+            ? _generateExpression(statement.expression)
+            : null
       };
     } else if (statement is MultiAssignment) {
       return {
@@ -230,15 +232,14 @@ class BadgerJsonBuilder {
         "catch": _generateStatements(statement.catchBlock.statements)
       };
     } else if (statement is BreakStatement) {
-      return {
-        "type": "break"
-      };
+      return {"type": "break"};
     } else {
       throw new Exception("Unknown Statement: ${statement}");
     }
   }
 
-  List<Map> _generateExpressions(List<Expression> expressions) => expressions.map(_generateExpression).toList();
+  List<Map> _generateExpressions(List<Expression> expressions) =>
+      expressions.map(_generateExpression).toList();
 
   Map _generateExpression(Expression expression) {
     if (expression is StringLiteral) {
@@ -247,31 +248,21 @@ class BadgerJsonBuilder {
         "components": _generateStringLiteralComponents(expression.components)
       };
     } else if (expression is IntegerLiteral) {
-      return {
-        "type": "integer literal",
-        "value": expression.value
-      };
+      return {"type": "integer literal", "value": expression.value};
     } else if (expression is DoubleLiteral) {
-      return {
-        "type": "double literal",
-        "value": expression.value
-      };
+      return {"type": "double literal", "value": expression.value};
     } else if (expression is HexadecimalLiteral) {
-      return {
-        "type": "hexadecimal literal",
-        "value": expression.value
-      };
+      return {"type": "hexadecimal literal", "value": expression.value};
     } else if (expression is MethodCall) {
       return {
         "type": "method call",
-        "reference": expression.reference is Identifier ? expression.reference.name : _generateExpression(expression.reference),
+        "reference": expression.reference is Identifier
+            ? expression.reference.name
+            : _generateExpression(expression.reference),
         "args": _generateExpressions(expression.args)
       };
     } else if (expression is Defined) {
-      return {
-        "type": "defined",
-        "identifier": expression.identifier.name
-      };
+      return {"type": "defined", "identifier": expression.identifier.name};
     } else if (expression is Parentheses) {
       return {
         "type": "parentheses",
@@ -290,9 +281,7 @@ class BadgerJsonBuilder {
         "value": _generateExpression(expression.expression)
       };
     } else if (expression is NullLiteral) {
-      return {
-        "type": "null"
-      };
+      return {"type": "null"};
     } else if (expression is ListDefinition) {
       return {
         "type": "list definition",
@@ -304,7 +293,9 @@ class BadgerJsonBuilder {
         "left": _generateExpression(expression.left),
         "right": _generateExpression(expression.right),
         "exclusive": expression.exclusive,
-        "step": expression.step != null ? _generateExpression(expression.step) : null
+        "step": expression.step != null
+            ? _generateExpression(expression.step)
+            : null
       };
     } else if (expression is VariableReference) {
       return {
@@ -350,18 +341,14 @@ class BadgerJsonBuilder {
       return {
         "type": "access",
         "reference": _generateExpression(expression.reference),
-        "parts": expression.parts.map((it) => it is Expression ? _generateExpression(it) : it).toList()
+        "parts": expression.parts
+            .map((it) => it is Expression ? _generateExpression(it) : it)
+            .toList()
       };
     } else if (expression is BooleanLiteral) {
-      return {
-        "type": "boolean literal",
-        "value": expression.value
-      };
+      return {"type": "boolean literal", "value": expression.value};
     } else if (expression is NativeCode) {
-      return {
-        "type": "native code",
-        "code": expression.code
-      };
+      return {"type": "native code", "code": expression.code};
     } else {
       throw new Exception("Failed to generate expression for ${expression}");
     }
@@ -481,7 +468,8 @@ class BadgerTinyAst {
     return result;
   }
 
-  static dynamic processor(it, dynamic transformer(x), {Map<String, dynamic> lookup, bool decoding: false}) {
+  static dynamic processor(it, dynamic transformer(x),
+      {Map<String, dynamic> lookup, bool decoding: false}) {
     if (lookup == null) {
       lookup = {};
     }
@@ -496,7 +484,8 @@ class BadgerTinyAst {
           c = 0;
         }
         var result = generateBasicId(length: len);
-        if (lookup.containsKey(result) || (decoding ? true : MAPPING.values.contains(result))) {
+        if (lookup.containsKey(result) ||
+            (decoding ? true : MAPPING.values.contains(result))) {
           continue;
         } else {
           return result;
@@ -514,9 +503,12 @@ class BadgerTinyAst {
         }
 
         if (x == "type" || x == MAPPING["type"]) {
-          v = x == "type" ? (MAPPING.containsKey(v) ? MAPPING[v] : v) : demap(v);
+          v = x == "type"
+              ? (MAPPING.containsKey(v) ? MAPPING[v] : v)
+              : demap(v);
         } else if (v is String) {
-          if (((decoding ? lookup.keys : lookup.values) as Iterable).contains(v)) {
+          if (((decoding ? lookup.keys : lookup.values) as Iterable)
+              .contains(v)) {
             if (decoding) {
               v = lookup[v];
             } else {
@@ -530,7 +522,8 @@ class BadgerTinyAst {
           }
         }
 
-        r[transformer(x)] = processor(v, transformer, lookup: lookup, decoding: decoding);
+        r[transformer(x)] =
+            processor(v, transformer, lookup: lookup, decoding: decoding);
       }
       return r;
     } else if (it is List) {
@@ -576,7 +569,8 @@ class BadgerJsonParser {
     if (type == "feature declaration") {
       return new FeatureDeclaration(_buildStringLiteral(it["feature"]));
     } else if (type == "import declaration") {
-      return new ImportDeclaration(_buildStringLiteral(it["location"]), it["identifier"]);
+      return new ImportDeclaration(
+          _buildStringLiteral(it["location"]), it["identifier"]);
     } else {
       throw new Exception("Invalid Declaration");
     }
@@ -588,58 +582,54 @@ class BadgerJsonParser {
     if (type == "method call") {
       return _buildMethodCall(it);
     } else if (type == "variable declaration") {
-      return new VariableDeclaration(
-        new Identifier(it["identifier"]),
-        _buildExpression(it["value"]),
-        it["isImmutable"],
-        it["isNullable"]
-      );
+      return new VariableDeclaration(new Identifier(it["identifier"]),
+          _buildExpression(it["value"]), it["isImmutable"], it["isNullable"]);
     } else if (type == "flat assignment") {
       return new FlatAssignment(
-        new Identifier(it["identifier"]),
-        _buildExpression(it["value"])
-      );
+          new Identifier(it["identifier"]), _buildExpression(it["value"]));
     } else if (type == "function definition") {
-      return new FunctionDefinition(it["identifier"], it["args"].map((x) => new Identifier(x)).toList(), new Block(it["block"].map(_buildStatement).toList()));
+      return new FunctionDefinition(
+          new Identifier(it["name"]),
+          it["args"].map((x) => new Identifier(x)).toList(),
+          new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "while") {
-      return new WhileStatement(_buildExpression(it["condition"]), new Block(it["block"].map(_buildStatement).toList()));
+      return new WhileStatement(_buildExpression(it["condition"]),
+          new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "if") {
       return new IfStatement(
-        _buildExpression(it["condition"]),
-        new Block(it["block"].map(_buildStatement).toList()),
-        new Block(it["elseBlock"] == null ? [] : it["elseBlock"].map(_buildStatement).toList())
-      );
+          _buildExpression(it["condition"]),
+          new Block(it["block"].map(_buildStatement).toList()),
+          new Block(it["elseBlock"] == null
+              ? []
+              : it["elseBlock"].map(_buildStatement).toList()));
     } else if (type == "for in") {
-      return new ForInStatement(
-        it["identifier"],
-        _buildExpression(it["value"]),
-        new Block(it["block"].map(_buildStatement).toList())
-      );
+      return new ForInStatement(it["identifier"], _buildExpression(it["value"]),
+          new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "multiple assignment") {
-      return new MultiAssignment(it["ids"], _buildExpression(it["value"]), it["immutable"], it["isInitialDefine"], it["isNullable"]);
+      return new MultiAssignment(it["ids"], _buildExpression(it["value"]),
+          it["immutable"], it["isInitialDefine"], it["isNullable"]);
     } else if (type == "class") {
       return new ClassBlock(
-        new Identifier(it["name"]),
-        it["args"].map((x) => new Identifier(x)).toList(),
-        new Identifier(it["extension"]),
-        new Block(it["block"].map(_buildStatement).toList())
-      );
+          new Identifier(it["name"]),
+          it["args"].map((x) => new Identifier(x)).toList(),
+          new Identifier(it["extension"]),
+          new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "namespace") {
-      return new NamespaceBlock(new Identifier(it["name"]), new Block(it["block"].map(_buildStatement).toList()));
+      return new NamespaceBlock(new Identifier(it["name"]),
+          new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "return") {
       return new ReturnStatement(
-        it["value"] == null ? null : _buildExpression(it["value"])
-      );
+          it["value"] == null ? null : _buildExpression(it["value"]));
     } else if (type == "try") {
       return new TryCatchStatement(
-        new Block(it["block"].map(_buildStatement).toList()),
-        it["identifier"],
-        new Block(it["catch"].map(_buildStatement).toList())
-      );
+          new Block(it["block"].map(_buildStatement).toList()),
+          it["identifier"],
+          new Block(it["catch"].map(_buildStatement).toList()));
     } else if (type == "break") {
       return new BreakStatement();
     } else if (type == "switch") {
-      return new SwitchStatement(_buildExpression(it["expression"]), it["cases"].map(_buildStatement).toList());
+      return new SwitchStatement(_buildExpression(it["expression"]),
+          it["cases"].map(_buildStatement).toList());
     } else if (type == "expression statement") {
       return new ExpressionStatement(_buildExpression(it["expression"]));
     } else {
@@ -653,7 +643,7 @@ class BadgerJsonParser {
     if (type == "string literal") {
       return _buildStringLiteral(it["components"]);
     } else if (type == "variable reference") {
-      return new VariableReference(it["identifier"]);
+      return new VariableReference(new Identifier(it["identifier"]));
     } else if (type == "method call") {
       return _buildMethodCall(it);
     } else if (type == "integer literal") {
@@ -661,44 +651,51 @@ class BadgerJsonParser {
     } else if (type == "double literal") {
       return new DoubleLiteral(it["value"]);
     } else if (type == "operator") {
-      return new Operation(_buildExpression(it["left"]), _buildExpression(it["right"]), it["op"]);
+      return new Operation(_buildExpression(it["left"]),
+          _buildExpression(it["right"]), it["op"]);
     } else if (type == "negate") {
       return new Negate(_buildExpression(it["value"]));
     } else if (type == "null") {
       return new NullLiteral();
     } else if (type == "range literal") {
       return new RangeLiteral(
-        _buildExpression(it["left"]),
-        _buildExpression(it["right"]),
-        it["exclusive"],
-        it["step"] != null ? _buildExpression(it["step"]) : null
-      );
+          _buildExpression(it["left"]),
+          _buildExpression(it["right"]),
+          it["exclusive"],
+          it["step"] != null ? _buildExpression(it["step"]) : null);
     } else if (type == "hexadecimal literal") {
       return new HexadecimalLiteral(it["value"]);
     } else if (type == "boolean literal") {
       return new BooleanLiteral(it["value"]);
     } else if (type == "ternary") {
-      return new TernaryOperator(
-        _buildExpression(it["condition"]),
-        _buildExpression(it["whenTrue"]),
-        _buildExpression(it["whenFalse"])
-      );
+      return new TernaryOperator(_buildExpression(it["condition"]),
+          _buildExpression(it["whenTrue"]), _buildExpression(it["whenFalse"]));
     } else if (type == "reference") {
       return new ReferenceCreation(_buildExpression(it["value"]));
     } else if (type == "parentheses") {
       return new Parentheses(_buildExpression(it["expression"]));
     } else if (type == "access") {
-      return new Access(_buildExpression(it["reference"]), it["parts"].map((it) => it is Map ? _buildExpression(it) : it).toList());
+      return new Access(
+          _buildExpression(it["reference"]),
+          it["parts"]
+              .map((it) => it is Map ?
+                _buildExpression(it) :
+                new Identifier(it.toString()))
+              .toList());
     } else if (type == "map definition") {
       return new MapDefinition(it["entries"].map(_buildExpression).toList());
     } else if (type == "map entry") {
-      return new MapEntry(_buildExpression(it["key"]), _buildExpression(it["value"]));
+      return new MapEntry(
+          _buildExpression(it["key"]), _buildExpression(it["value"]));
     } else if (type == "list definition") {
       return new ListDefinition(it["elements"].map(_buildExpression).toList());
     } else if (type == "bracket access") {
-      return new BracketAccess(_buildExpression(it["reference"]), _buildExpression(it["index"]));
+      return new BracketAccess(
+          _buildExpression(it["reference"]), _buildExpression(it["index"]));
     } else if (type == "anonymous function") {
-      return new AnonymousFunction(it["args"].map((x) => new Identifier(x)).toList(), new Block(it["block"].map(_buildStatement).toList()));
+      return new AnonymousFunction(
+          it["args"].map((x) => new Identifier(x)).toList(),
+          new Block(it["block"].map(_buildStatement).toList()));
     } else if (type == "native code") {
       return new NativeCode(it["code"]);
     } else if (type == "defined") {
@@ -796,25 +793,6 @@ String generateToken({int length: 50}) {
   return buffer.toString();
 }
 
-const List<int> _NUMBERS = const [
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9
-];
+const List<int> _NUMBERS = const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-const List<String> _SPECIALS = const [
-  "@",
-  "=",
-  "_",
-  "+",
-  "-",
-  "!",
-  "."
-];
+const List<String> _SPECIALS = const ["@", "=", "_", "+", "-", "!", "."];

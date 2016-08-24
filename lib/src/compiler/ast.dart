@@ -11,7 +11,7 @@ class AstCompilerTarget extends CompilerTarget<String> {
  * Compiles a program into JSON that includes compiled versions of all the imports as well.
  */
 class SnapshotCompilerTarget extends CompilerTarget<String> {
-  final Environment env;
+  final Common.Environment env;
 
   SnapshotCompilerTarget(this.env);
 

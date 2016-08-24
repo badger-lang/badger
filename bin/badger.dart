@@ -255,7 +255,7 @@ loadPreferences() async {
   if (!(await file.exists())) {
     await file.create(recursive: true);
     await file.writeAsString(
-        new JsonEncoder.withIndent("  ").convert({"enable_cache": false}));
+        const JsonEncoder.withIndent("  ").convert({"enable_cache": false}));
   }
 
   var content = await file.readAsString();
@@ -311,9 +311,7 @@ class CacheManager {
 }
 
 String createHash(String c) {
-  var h = new SHA256();
-  h.add(c.codeUnits);
-  return CryptoUtils.bytesToHex(h.close());
+  return sha256.convert(UTF8.encode(c)).toString();
 }
 
 class Preferences {

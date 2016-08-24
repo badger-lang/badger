@@ -1,3 +1,5 @@
-if true {
+if false {
   print("This Badger Environment is not sane!")
+} else {
+  print("This Badger Environment is sane!")
 }

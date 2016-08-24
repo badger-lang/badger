@@ -22,6 +22,11 @@ class IOLibrary {
     context.proxy("getExitCode", () => exitCode);
     context.proxy("getProcessId", () => pid);
     context.proxy("Channel", Channel);
+    context.proxy("fetchHttpUrl", fetchHttpUrl);
+  }
+
+  static Future<BadgerHttpResponse> fetchHttpUrl(String url, [Map<String, dynamic> headers]) {
+    return new BadgerHttpClient().get(url, headers);
   }
 }
 
